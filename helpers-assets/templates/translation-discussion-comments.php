@@ -5,21 +5,20 @@
 ?>
 <div class="discussion-wrapper">
 	<?php if ( $number = count( $comments ) ) : ?>
-		<h6><?php printf( _n( '%s Comment', '%s Comments', $number ), number_format_i18n( $number ) ); ?>
-		<?php if ( $locale_slug ) : ?>
-			(<?php echo esc_html( $locale_slug ); ?>)
-			<?php
-			$countLocaleComments = 0;
-			foreach ( $comments as $comment ) {
-				$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
-				if ( $locale_slug == $comment_locale ) {
-					$countLocaleComments++;
-				}
-			}
-			?>
-						
+		<?php if ( ! $locale_slug ) : ?>
+			<h6><?php printf( _n( '%s Comment', '%s Comments', $number ), number_format_i18n( $number ) ); ?>
+		<?php else : ?>
 			<span class="comments-selector">
-				<a href="#" class="active-link" data-selector="all">Show all (<?php echo esc_html( $number ); ?>)</a> | <a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $countLocaleComments ); ?>)</a>
+				<?php
+				$separator = '';
+				foreach ( $languages as $selector => $title ) {
+					echo esc_html( $separator );
+					?>
+					<a href="#" class="<?php echo ( $selector == $locale_slug ) ? 'active-link' : ''; ?>" data-selector="<?php echo esc_attr( $link ); ?>"><?php echo esc_html( $title ); ?></a>
+					<?php
+					$separator = ' | ';
+				}
+				?>
 			</span>
 		<?php endif; ?>
 		</h6>
@@ -43,12 +42,12 @@
 	add_action(
 		'comment_form_logged_in_after',
 		function () use ( $locale_slug ) {
-			$language_question       = '';
+			$language_question = '';
 
 			if ( $locale_slug ) {
 				$gp_locale = GP_Locales::by_slug( $locale_slug );
 				if ( $gp_locale ) {
-					$language_question       = '<option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . '</option>';
+					$language_question = '<option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . '</option>';
 				}
 			}
 
