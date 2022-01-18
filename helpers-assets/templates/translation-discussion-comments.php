@@ -10,13 +10,15 @@
 		<?php else : ?>
 			<span class="comments-selector">
 				<?php
-				$separator = '';
-				foreach ( $languages as $selector => $title ) {
-					echo esc_html( $separator );
-					?>
-					<a href="#" class="<?php echo ( $selector == $locale_slug ) ? 'active-link' : ''; ?>" data-selector="<?php echo esc_attr( $link ); ?>"><?php echo esc_html( $title ); ?></a>
-					<?php
-					$separator = ' | ';
+				if ( $languages ) {
+					$separator = '';
+					foreach ( $languages as $selector => $title ) {
+						echo esc_html( $separator );
+						?>
+						<a href="#" class="<?php echo ( $selector == $locale_slug ) ? 'active-link' : ''; ?>" data-selector="<?php echo esc_attr( $link ); ?>"><?php echo esc_html( $title ); ?></a>
+						<?php
+						$separator = ' | ';
+					}
 				}
 				?>
 			</span>
