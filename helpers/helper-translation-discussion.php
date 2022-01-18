@@ -212,9 +212,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				}
 			}
 		}
-	
+		$gp_locale = GP_Locales::by_slug( $locale_slug );
+		$locale_name = ( $gp_locale ) ? $gp_locale->english_name : 'Current locale';
+
 		return array(
-			$locale_slug => 'Current locale (' . $no_of_locale_comments . ')',
+			$locale_slug => $locale_name . ' (' . $no_of_locale_comments . ')',
 			'all'        => 'Other locales (' . $plus_sign . $no_of_english_comments . ')',
 		);
 	}
