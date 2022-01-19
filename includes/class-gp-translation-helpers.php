@@ -30,9 +30,9 @@ class GP_Translation_Helpers {
 
 				$translation_helper = $this->helpers['discussion'];
 				$comments           = $route_translation_helpers->get_translation_comments( $translation_helper, $translation->original_id );
-				$num_of_coments     = count( $comments );
+				$num_of_comments     = count( $comments );
 
-				$more_links['discussion'] = '<a href="' . esc_url( $permalink ) . '">Discussion (' . $num_of_coments . ')</a>';
+				$more_links['discussion'] = '<a href="' . esc_url( $permalink ) . '">Discussion (' . $num_of_comments . ')</a>';
 
 				return $more_links;
 
