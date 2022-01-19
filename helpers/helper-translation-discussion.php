@@ -190,14 +190,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'translation_id'     => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'        => $this->data['locale_slug'],
 				'original_permalink' => $this->data['permalink'],
-				'languages'          => $this->generateCommentFilterLinks( $comments, $this->data['locale_slug'] ),
+				'languages'          => $this->generate_comment_filter_links( $comments, $this->data['locale_slug'] ),
 			),
 			$this->assets_dir . 'templates'
 		);
 		return $output;
 	}
 
-	public function generateCommentFilterLinks( $comments, $locale_slug ) {
+	public function generate_comment_filter_links( $comments, $locale_slug ) {
 		$no_of_locale_comments  = 0;
 		$no_of_english_comments = 0;
 		$plus_sign              = '';
