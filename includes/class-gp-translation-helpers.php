@@ -29,17 +29,9 @@ class GP_Translation_Helpers {
 				$permalink                 = $route_translation_helpers->get_permalink( $project->path, $translation->original_id, $translation_set->slug, $translation_set->locale );
 
 				$translation_helper = $this->helpers['discussion'];
+				$comments           = $route_translation_helpers->get_translation_comments( $translation_helper, $translation->original_id );
+				$num_of_coments     = count( $comments );
 
-				$post_id                  = $translation_helper::get_shadow_post( $translation->original_id );
-				$comments                 = get_comments(
-					array(
-						'post_id'            => $post_id,
-						'status'             => 'approve',
-						'type'               => 'comment',
-						'include_unapproved' => array( get_current_user_id() ),
-					)
-				);
-				$num_of_coments           = count( $comments );
 				$more_links['discussion'] = '<a href="' . esc_url( $permalink ) . '">Discussion (' . $num_of_coments . ')</a>';
 
 				return $more_links;
