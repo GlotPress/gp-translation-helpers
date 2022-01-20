@@ -198,27 +198,30 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	public function generate_comment_filter_links( $comments, $locale_slug ) {
-		$no_of_locale_comments  = 0;
-		$no_of_english_comments = 0;
-		$plus_sign              = '';
-		if ( $comments ) {
-			foreach ( $comments as $comment ) {
-				$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
-				if ( $locale_slug == $comment_locale ) {
-					$no_of_locale_comments++;
-				} else {
-					$no_of_english_comments++;
-					$plus_sign = '+';
-				}
-			}
+		if ( ! $comments ) {
+			return array();
 		}
-		$gp_locale = GP_Locales::by_slug( $locale_slug );
-		$locale_name = ( $gp_locale ) ? $gp_locale->english_name : 'Current locale';
-
-		return array(
-			$locale_slug => $locale_name . ' (' . $no_of_locale_comments . ')',
-			'all'        => 'Other locales (' . $plus_sign . $no_of_english_comments . ')',
+		// Go through all $comments and map their values to the callback of this function.
+		$comment_locales = array_map(
+			function( $comment ) {
+				return get_comment_meta( $comment->comment_ID, 'locale', true );
+			},
+			$comments
 		);
+		// Produce an array of the form $locale => count( entries of array with $locale ).
+		$comment_count = array_count_values( $comment_locales );
+		// Extract the locale count and ensure that it was set.
+		$locale_count  = isset( $comment_count[ $locale_slug ] ) ? $comment_count[ $locale_slug ] : 0;
+		$other_count   = array_sum( $comment_count ) - $locale_count;
+		$gp_locale     = GP_Locales::by_slug( $locale_slug );
+		$locale_name   = $gp_locale ? $gp_locale->english_name : 'Current locale';
+		$comment_links = array(
+			$locale_slug => $locale_name . ' (' . $locale_count . ')',
+		);
+		if ( $other_count ) {
+			$comment_links['all'] = 'Other locales (+' . $other_count . ')';
+		}
+		return $comment_links;
 	}
 
 	public function empty_content() {
