@@ -301,14 +301,6 @@ function gth_discussion_callback( $comment, $args, $depth ) {
 		<footer>
 			<div class="comment-author vcard">
 				<?php
-				if ( $comment->comment_parent ) {
-					printf(
-						'<a href="%1$s">%2$s</a>',
-						esc_url( get_comment_link( $comment->comment_parent ) ),
-						sprintf( __( 'in reply to %s' ), get_comment_author( $comment->comment_parent ) )
-					);
-				}
-
 				add_filter(
 					'comment_reply_link',
 					function( $link, $args, $comment, $post ) {
