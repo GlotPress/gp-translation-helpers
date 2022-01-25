@@ -15,7 +15,7 @@
 					foreach ( $languages as $selector => $title ) {
 						echo esc_html( $separator );
 						?>
-						<a href="#" class="<?php echo ( $selector == $locale_slug ) ? 'active-link' : ''; ?>" data-selector="<?php echo esc_attr( $link ); ?>"><?php echo esc_html( $title ); ?></a>
+						<a href="#" class="<?php echo ( $selector == $locale_slug ) ? 'active-link' : ''; ?>" data-selector="<?php echo esc_attr( $selector ); ?>"><?php echo esc_html( $title ); ?></a>
 						<?php
 						$separator = ' | ';
 					}
