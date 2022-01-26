@@ -276,7 +276,7 @@ function gth_discussion_callback( $comment, $args, $depth ) {
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 	?>
-<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>">
+<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ) . ' ' . ( ( $comment_locale !== $current_locale ) ? 'hidden-comment' : '' ); ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 		<div class="comment-avatar">
 			<?php echo get_avatar( $comment, 25 ); ?>

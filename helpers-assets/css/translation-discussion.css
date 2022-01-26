@@ -81,3 +81,6 @@ article.comment time {
 .comment-content {
 	text-align: start;
 }
+.hidden-comment{
+	display: none;
+}

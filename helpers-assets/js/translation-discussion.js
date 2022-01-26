@@ -3,15 +3,16 @@ jQuery( function( $ ) {
 		e.preventDefault();
 		$('.comments-selector a').removeClass('active-link');
 		$(this).addClass('active-link');
-
-		var $comments = jQuery(e.target).parents('h6').next('.discussion-list');
+		$localeComments = $('li:not(.hidden-comment)');
+		$otherComments = $('li.hidden-comment');
 		var selector = $(e.target).data('selector');
+		
 		if ( 'all' === selector  ) {
-			$comments.children().show();
+			$otherComments.show();
+			$localeComments.hide();
 		} else {
-			$comments.children().hide();
-			$comments.children( '.comment-locale-' + selector ).show();
-			$comments.children( '.comment-locale-' + selector ).next('ul').show();
+			$otherComments.hide();
+			$localeComments.show();
 		}
 		return false;
 	} );
