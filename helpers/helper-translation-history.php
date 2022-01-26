@@ -124,7 +124,7 @@ class Helper_History extends GP_Translation_Helper {
 					esc_attr( $translation->status ),
 					esc_attr( $translation->date_modified ?? $translation->date_added ),
 					esc_html( $date_and_time[0] ),
-					$output_translation,
+					'<a href="' . $this->get_translation_permalink() . '">' . $output_translation . '</a>',
 					$user ? esc_html( $user->user_login ) : '&mdash;',
 					$user_last_modified ? esc_html( $user_last_modified->user_login ) : '&mdash;'
 				);
@@ -142,5 +142,19 @@ class Helper_History extends GP_Translation_Helper {
 	 */
 	public function empty_content(): string {
 		return esc_html__( 'No translation history for this string.' );
+	}
+
+	public function get_translation_permalink() {
+		$translation_permalink = gp_url_project_locale(
+			$this->data['project'],
+			$this->data['locale_slug'],
+			$this->data['translation_set_slug'],
+			array(
+				'filters[status]'         => 'either',
+				'filters[original_id]'    => $this->data['original_id'],
+				'filters[translation_id]' => $this->data['translation_id'],
+			)
+		);
+		return $translation_permalink;
 	}
 }
