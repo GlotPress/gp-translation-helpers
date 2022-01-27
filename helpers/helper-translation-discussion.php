@@ -609,7 +609,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 						$comment_translation_id
 					);
 				?>
-				<em>Translation: <?php echo gp_link( $translation_permalink, $translation->translation_0 ); ?></em>
+				<em>Translation: <?php echo $translation_permalink ? gp_link( $translation_permalink, $translation->translation_0 ) : esc_html( $translation->translation_0 ); ?></em>
 			<?php endif; ?>
 			<div class="clear"></div>
 			<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">

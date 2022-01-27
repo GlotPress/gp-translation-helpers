@@ -323,6 +323,10 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	public static function get_translation_permalink( $project, $locale_slug, $translation_set_slug, $original_id, $translation_id ) {
+		if ( ! $project || ! $locale_slug || ! $translation_set_slug || ! $original_id || ! $translation_id ) {
+			return false;
+		}
+
 		$translation_permalink = gp_url_project_locale(
 			$project,
 			$locale_slug,
