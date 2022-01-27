@@ -321,4 +321,18 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 		return home_url( gp_url_project( $permalink ) );
 	}
+
+	public static function get_translation_permalink( $project, $locale_slug, $translation_set_slug, $original_id, $translation_id ) {
+		$translation_permalink = gp_url_project_locale(
+			$project,
+			$locale_slug,
+			$translation_set_slug,
+			array(
+				'filters[status]'         => 'either',
+				'filters[original_id]'    => $original_id,
+				'filters[translation_id]' => $translation_id,
+			)
+		);
+		return $translation_permalink;
+	}
 }
