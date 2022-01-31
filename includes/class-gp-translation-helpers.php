@@ -40,7 +40,7 @@ class GP_Translation_Helpers {
 	 */
 	public static function init() {
 		self::get_instance();
-		}
+	}
 
 	public function register_reject_feedback_js( $template ) {
 
@@ -48,10 +48,10 @@ class GP_Translation_Helpers {
 			return;
 		}
 
+		add_thickbox();
+
 		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ) );
-
 		gp_enqueue_script( 'gp-reject-feedback-js' );
-
 	}
 
 	/**
@@ -219,6 +219,11 @@ class GP_Translation_Helpers {
 			'helper-translation-discussion.php',
 			'helper-other-locales.php',
 			'helper-translation-history.php',
+<<<<<<< HEAD
+=======
+			// 'helper-translation-memory.php',
+			'helper-user-info.php',
+>>>>>>> 7e8c095 (Add thickbox)
 		);
 
 		foreach ( $helpers_files as $helper ) {
@@ -250,12 +255,21 @@ class GP_Translation_Helpers {
 	 */
 	public function translation_helpers( GP_Translation $translation, GP_Translation_Set $translation_set ) {
 		$args = array(
+<<<<<<< HEAD
 			'project_id'           => $translation->project_id,
 			'locale_slug'          => $translation_set->locale,
 			'translation_set_slug' => $translation_set->slug,
 			'original_id'          => $translation->original_id,
 			'translation_id'       => $translation->id,
 			'translation'          => $translation,
+=======
+			'project_id'           => $t->project_id,
+			'locale_slug'          => $translation_set->locale,
+			'translation_set_slug' => $translation_set->slug,
+			'original_id'          => $t->original_id,
+			'translation_id'       => $t->id,
+			'translation'          => $t,
+>>>>>>> 7e8c095 (Add thickbox)
 		);
 
 		$sections = array();
