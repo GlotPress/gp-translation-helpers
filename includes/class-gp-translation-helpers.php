@@ -40,7 +40,7 @@ class GP_Translation_Helpers {
 	 */
 	public static function init() {
 		self::get_instance();
-		}
+	}
 
 	public function register_reject_feedback_js( $template ) {
 
@@ -48,10 +48,10 @@ class GP_Translation_Helpers {
 			return;
 		}
 
+		add_thickbox();
+
 		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ) );
-
 		gp_enqueue_script( 'gp-reject-feedback-js' );
-
 	}
 
 	/**
