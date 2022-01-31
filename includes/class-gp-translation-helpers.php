@@ -40,6 +40,18 @@ class GP_Translation_Helpers {
 	 */
 	public static function init() {
 		self::get_instance();
+		}
+
+	public function register_reject_feedback_js( $template ) {
+
+		if ( 'translations' !== $template ) {
+			return;
+		}
+
+		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ) );
+
+		gp_enqueue_script( 'gp-reject-feedback-js' );
+
 	}
 
 	/**
@@ -65,7 +77,14 @@ class GP_Translation_Helpers {
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'register_routes' ), 5 );
 		add_action( 'gp_before_request', array( $this, 'before_request' ), 10, 2 );
+		add_action( 'gp_pre_tmpl_load', array( $this, 'register_reject_feedback_js' ), 10, 2 );
+		add_action( 'wp_ajax_reject_with_feedback', array( $this, 'reject_with_feedback' ) );
 
+		add_thickbox();
+
+		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ) );
+		gp_enqueue_style( 'gp-discussion-css' );
+		
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 
