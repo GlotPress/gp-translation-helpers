@@ -20,7 +20,6 @@
 			'</div>';
 
 			$( "body" ).append( reject_feedback_form );
-
 		}
 	);
 
