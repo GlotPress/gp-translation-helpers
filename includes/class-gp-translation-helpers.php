@@ -80,7 +80,17 @@ class GP_Translation_Helpers {
 		add_action( 'gp_pre_tmpl_load', array( $this, 'register_reject_feedback_js' ), 10, 2 );
 		add_action( 'wp_ajax_reject_with_feedback', array( $this, 'reject_with_feedback' ) );
 
+<<<<<<< HEAD
 		add_thickbox();
+=======
+		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ) );
+		gp_enqueue_style( 'gp-discussion-css' );
+
+		add_filter(
+			'gp_translation_row_template_more_links',
+			function( $more_links, $project, $locale, $translation_set, $translation ) {
+				$permalink = GP_Route_Translation_Helpers::get_permalink( $project->path, $translation->original_id, $translation_set->slug, $translation_set->locale );
+>>>>>>> 09c1b5e (Add reject feedback form)
 
 		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ) );
 		gp_enqueue_style( 'gp-discussion-css' );
