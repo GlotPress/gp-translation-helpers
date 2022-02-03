@@ -379,7 +379,7 @@ class GP_Translation_Helpers {
 		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
 		$original_id    = $_POST['data']['original_id'];
 		$translation_id = $_POST['data']['translation_id'];
-		$reject_reason  = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : '';
+		$reject_reason  = isset( $_POST['data']['reason'] ) ? sanitize_text_field( $_POST['data']['reason'] ) : '';
 		$reject_comment = sanitize_text_field( $_POST['data']['comment'] );
 
 		if ( ! $locale_slug || ! $translation_id || ( ! $reject_reason && ! $reject_comment ) ) {
