@@ -42,35 +42,6 @@ class GP_Translation_Helpers {
 		self::get_instance();
 	}
 
-	public function register_reject_feedback_js( $template, $translation_set ) {
-
-		if ( 'translations' !== $template ) {
-			return;
-		}
-
-		add_thickbox();
-
-		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ) );
-		gp_enqueue_script( 'gp-reject-feedback-js' );
-
-		wp_localize_script(
-			'gp-reject-feedback-js',
-			'$gp_reject_feedback_settings',
-			array(
-				'url'         => admin_url( 'admin-ajax.php' ),
-				'nonce'       => wp_create_nonce( 'gp_reject_feedback' ),
-				'locale_slug' => $translation_set['locale_slug'],
-			)
-		);
-	}
-
-	/**
-	 * Gets the self instance.
-	 *
-	 * @since 0.0.1
-	 *
-	 * @return GP_Translation_Helpers
-	 */
 	public static function get_instance() {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
