@@ -383,15 +383,26 @@ class GP_Translation_Helpers {
 		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
 		$original_id    = $_POST['data']['original_id'];
 		$translation_id = $_POST['data']['translation_id'];
-		$reject_reason  = isset( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : '';
+		$reject_reason  = isset( $_POST['data']['reason'] ) ? sanitize_text_field( $_POST['data']['reason'] ) : '';
 		$reject_comment = sanitize_text_field( $_POST['data']['comment'] );
 
-		if ( ! $locale_slug || ! $translation_id ) {
+		if ( ! $locale_slug || ! $translation_id || ( ! $reject_reason && ! $reject_comment ) ) {
 			return;
 		}
-		$translation = GP::$translation->get( $translation_id );
-		$translation->set_status( 'rejected' );
 
+		$post_id = Helper_Translation_Discussion::get_shadow_post( $original_id );
+		return wp_insert_comment(
+			array(
+				'comment_content' => $reject_comment,
+				'comment_post_ID' => $post_id,
+				'user_id'         => get_current_user_id(),
+				'comment_meta'    => array(
+					'reject_reason'  => $reject_reason,
+					'translation_id' => $translation_id,
+					'locale'         => $locale_slug,
+				),
+			)
+		);
 		die();
 	}
 
