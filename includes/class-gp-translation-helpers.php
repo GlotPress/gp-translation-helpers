@@ -90,17 +90,7 @@ class GP_Translation_Helpers {
 		add_action( 'gp_pre_tmpl_load', array( $this, 'register_reject_feedback_js' ), 10, 2 );
 		add_action( 'wp_ajax_reject_with_feedback', array( $this, 'reject_with_feedback' ) );
 
-<<<<<<< HEAD
 		add_thickbox();
-=======
-		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ) );
-		gp_enqueue_style( 'gp-discussion-css' );
-
-		add_filter(
-			'gp_translation_row_template_more_links',
-			function( $more_links, $project, $locale, $translation_set, $translation ) {
-				$permalink = GP_Route_Translation_Helpers::get_permalink( $project->path, $translation->original_id, $translation_set->slug, $translation_set->locale );
->>>>>>> 09c1b5e (Add reject feedback form)
 
 		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ) );
 		gp_enqueue_style( 'gp-discussion-css' );
@@ -239,11 +229,6 @@ class GP_Translation_Helpers {
 			'helper-translation-discussion.php',
 			'helper-other-locales.php',
 			'helper-translation-history.php',
-<<<<<<< HEAD
-=======
-			// 'helper-translation-memory.php',
-			'helper-user-info.php',
->>>>>>> 7e8c095 (Add thickbox)
 		);
 
 		foreach ( $helpers_files as $helper ) {
@@ -275,21 +260,12 @@ class GP_Translation_Helpers {
 	 */
 	public function translation_helpers( GP_Translation $translation, GP_Translation_Set $translation_set ) {
 		$args = array(
-<<<<<<< HEAD
 			'project_id'           => $translation->project_id,
 			'locale_slug'          => $translation_set->locale,
 			'translation_set_slug' => $translation_set->slug,
 			'original_id'          => $translation->original_id,
 			'translation_id'       => $translation->id,
 			'translation'          => $translation,
-=======
-			'project_id'           => $t->project_id,
-			'locale_slug'          => $translation_set->locale,
-			'translation_set_slug' => $translation_set->slug,
-			'original_id'          => $t->original_id,
-			'translation_id'       => $t->id,
-			'translation'          => $t,
->>>>>>> 7e8c095 (Add thickbox)
 		);
 
 		$sections = array();
@@ -373,37 +349,6 @@ class GP_Translation_Helpers {
 			?>
 		</script>
 		<?php
-	}
-
-	public function reject_with_feedback() {
-		if ( ! check_ajax_referer( 'gp_reject_feedback', 'nonce' ) ) {
-			return;
-		}
-
-		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
-		$original_id    = $_POST['data']['original_id'];
-		$translation_id = $_POST['data']['translation_id'];
-		$reject_reason  = isset( $_POST['data']['reason'] ) ? sanitize_text_field( $_POST['data']['reason'] ) : '';
-		$reject_comment = sanitize_text_field( $_POST['data']['comment'] );
-
-		if ( ! $locale_slug || ! $translation_id || ( ! $reject_reason && ! $reject_comment ) ) {
-			return;
-		}
-
-		$post_id = Helper_Translation_Discussion::get_shadow_post( $original_id );
-		return wp_insert_comment(
-			array(
-				'comment_content' => $reject_comment,
-				'comment_post_ID' => $post_id,
-				'user_id'         => get_current_user_id(),
-				'comment_meta'    => array(
-					'reject_reason'  => $reject_reason,
-					'translation_id' => $translation_id,
-					'locale'         => $locale_slug,
-				),
-			)
-		);
-		die();
 	}
 
 }
