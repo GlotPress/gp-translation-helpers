@@ -495,8 +495,13 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
+	$is_a_rejection_feedback = false;
+	$reject_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	if( ! empty( $reject_reason ) && ( $current_locale && $current_locale === $comment_locale ) ){
+		$is_a_rejection_feedback = true;
+	}
 	?>
-	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>">
+	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_a_rejection_feedback ? esc_attr( 'true' ) : 'false'; ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 	<div class="comment-avatar">
 	<?php echo get_avatar( $comment, 25 ); ?>
