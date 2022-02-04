@@ -501,7 +501,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 		$is_a_rejection_feedback = true;
 	}
 	?>
-	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_a_rejection_feedback ? esc_attr( 'true' ) : 'false'; ?>">
+	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_a_rejection_feedback ? 'true' : 'false'; ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 	<div class="comment-avatar">
 	<?php echo get_avatar( $comment, 25 ); ?>
