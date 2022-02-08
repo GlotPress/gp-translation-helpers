@@ -123,10 +123,10 @@ h6 {
 	transform: scale(1.5);
 }
 .modal-comment {
-	margin-top: 8px;
+	margin-top: 27px;
 }
 .modal-comment textarea {
-	width: 100%;
+	width: 97%;
 	height: 170px;
 }
 .modal-btn {
@@ -144,3 +144,19 @@ h6 {
 	padding: 0 13px;
 	border-radius: 3px;
 }
+.modal-reason-title{
+	margin-top: 12px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#TB_title {
+	background: #fcfcfc;
+	border-bottom: 1px solid #ddd;
+	height: 29px;
+	padding: 13px 0;
+}
+div#TB_ajaxWindowTitle {
+	font-size: 1.3em;
+}
+	
