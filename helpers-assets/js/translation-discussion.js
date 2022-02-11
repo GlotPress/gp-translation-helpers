@@ -7,10 +7,10 @@ jQuery( function( $ ) {
 		var selector = $( e.target ).data( 'selector' ); // eslint-disable-line vars-on-top
 		if ( 'all' === selector ) {
 			$comments.children().show();
-		} else if ( 'rejection-feedback' === selector  ) {
+		} else if ( 'rejection-feedback' === selector ) {
 			$comments.children().hide();
 			$comments.children( '[data-rejection-feedback="true"]' ).show();
-		}  else {
+		} else {
 			$comments.children().hide();
 			$comments.children( '.comment-locale-' + selector ).show();
 			$comments.children( '.comment-locale-' + selector ).next( 'ul' ).show();

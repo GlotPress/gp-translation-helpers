@@ -63,9 +63,9 @@ class GP_Translation_Helpers {
 
 		add_thickbox();
 
-		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ) );
+		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), '0.0.1' );
 		gp_enqueue_style( 'gp-discussion-css' );
-		
+
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 
@@ -328,7 +328,7 @@ class GP_Translation_Helpers {
 			return;
 		}
 
-		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ) );
+		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery' ), '0.0.1' );
 		gp_enqueue_script( 'gp-reject-feedback-js' );
 
 		wp_localize_script(
