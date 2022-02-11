@@ -9,6 +9,9 @@
   ],
   "homepage": "https://glotpress.blog/",
   "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.2"
+  },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
     "wp-coding-standards/wpcs": "^2.2",
@@ -19,5 +22,10 @@
   "scripts": {
     "format": "@php ./vendor/bin/phpcbf --report=summary,source",
     "lint": "@php ./vendor/bin/phpcs --report=summary,source"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   }
 }

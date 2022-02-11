@@ -24,7 +24,7 @@
 										<summary>Comments all
 										<?php foreach ( $locales_with_comments as $locale_with_comments ) : ?>
 											<a class="<?php echo esc_attr( $locale_with_comments == $locale_slug ? 'active-locale-link' : '' ); ?>" href="<?php echo esc_attr( $args['original_permalink'] . $locale_with_comments . '/default1' ); ?>">
-												| <?php echo $locale_with_comments; ?>
+												| <?php echo esc_html( $locale_with_comments ); ?>
 											</a>
 										<?php endforeach; ?>
 										</summary>
@@ -38,11 +38,14 @@
 										<summary>All Languages</summary>
 										<?php if ( $translations_by_locale ) : ?>
 											<ul class="suggestions-list">
-											<?php foreach ( $translations_by_locale as $locale => $translation ) : ?>
+											<?php
+											foreach ( $translations_by_locale as $_locale => $translation ) :
+												?>
+
 												<li>
 													<div class="translation-suggestion with-tooltip" tabindex="0" role="button" aria-pressed="false" aria-label="Copy translation">
 														<span class="translation-suggestion__translation">
-															<?php echo strtoupper( $locale ) . ' - ' . esc_html( $translation ); ?>
+															<?php echo esc_html( strtoupper( $_locale ) ) . ' - ' . esc_html( $translation ); ?>
 														</span>
 													</div>
 												</li>
@@ -66,11 +69,11 @@
 								<div class="meta">
 									<dl>
 										<dt>Status:</dt>
-										<dd><?php echo $no_of_translations . ' of ' . count( $all_translation_sets ) . ' languages translated'; ?></dd>
+										<dd><?php echo esc_html( $no_of_translations ) . ' of ' . esc_html( count( $all_translation_sets ) ) . ' languages translated'; ?></dd>
 									</dl>
 									<dl>
 										<dt>Priority of the original:</dt>
-										<dd><?php echo $priority; ?></dd>
+										<dd><?php echo esc_html( $priority ); ?></dd>
 									</dl>
 									<div class="source-details">
 										<details class="source-details__references">

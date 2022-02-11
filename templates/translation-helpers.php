@@ -5,7 +5,7 @@
 			$is_first_class = 'current';
 			foreach ( $sections as $section ) {
 				// TODO: printf.
-				echo "<li class='{$is_first_class}' data-tab='{$section['id']}'>" . esc_html( $section['title'] ) . '<span class="count"></span></li>'; // WPCS: XSS OK.
+				echo "<li class='{$is_first_class}' data-tab='{$section['id']}'>" . esc_html( $section['title'] ) . '<span class="count"></span></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				$is_first_class = '';
 			}
 			?>
@@ -18,9 +18,9 @@
 		if ( $section['has_async_content'] ) {
 			echo '<div class="async-content"></div>';
 		}
-		echo $section['content'];
+		echo esc_html( $section['content'] );
 		echo '</div>';
 		$is_first_class = '';
 	}
-		?>
+	?>
 </td>

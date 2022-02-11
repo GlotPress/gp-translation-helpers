@@ -1,22 +1,39 @@
 <?php
-
 /**
- * Class GP_Translation_Helper
+ * Base class, extended by all other helpers
  *
- * Base class, extended by all other Helpers.
+ * @package gp-translation-helpers
+ * @since 0.0.1
  */
 class GP_Translation_Helper {
 
+	/**
+	 * The folder where the assets are stored.
+	 *
+	 * @since 0.0.1
+	 * @var string
+	 */
 	public $assets_dir;
+
+	/**
+	 * The data coming from the route.
+	 *
+	 * @since 0.0.1
+	 * @var array
+	 */
 	public $data;
 
 	/**
 	 * GP_Translation_Helper constructor.
 	 *
 	 * Will throw a LogicException if the title property is not set.
+	 *
+	 * @since 0.0.1
+	 *
+	 * @throws LogicException If the class has not a must-have property.
 	 */
-	public final function __construct() {
-		$this->assets_dir = dirname( dirname( __FILE__ ) ) . '/helpers-assets/' ;
+	final public function __construct() {
+		$this->assets_dir = dirname( dirname( __FILE__ ) ) . '/helpers-assets/';
 
 		$required_properties = array(
 			'title',
@@ -35,49 +52,64 @@ class GP_Translation_Helper {
 
 	/**
 	 * Sets the data coming from the route.
-	 * i.e original_id, path, tec
-	 * @param array $args
+	 *
+	 * Sets values like project_id, locale_slug, set_slug, original_id, translation_id, etc.
+	 *
+	 * @since 0.0.1
+	 *
+	 * @param array $args   Data coming from the route.
 	 */
-	public function set_data( $args ) {
+	public function set_data( array $args ) {
 		$this->data = $args;
 	}
 
 	/**
-	 * Get the priority of a helper. Defaults to 1 if not set.
+	 * Gets the priority of a helper. Defaults to 1 if not set.
+	 *
+	 * @since 0.0.1
+	 *
 	 * @return int
 	 */
-	public function get_priority() {
-		return isset( $this->priority ) ? $this->priority : 1;
+	public function get_priority(): int {
+		return $this->priority ?? 1;
 	}
 
 	/**
-	 * Does a helper also loads content asynchronously?
+	 * Indicates whether the helper loads asynchronous content or not.
+	 *
 	 * Defaults to false, but uses the class property if set.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return bool
 	 */
-	public function has_async_content() {
-		return isset( $this->has_async_content ) ? $this->has_async_content : false;
+	public function has_async_content(): bool {
+		return $this->has_async_content ?? false;
 	}
 
 	/**
-	 * Get the class name for the helper div.
+	 * Gets the class name for the helper div.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return string
 	 */
-	public function get_div_classname() {
+	public function get_div_classname(): string {
 		if ( isset( $this->classname ) ) {
 			return $this->classname;
 		}
 
-		return sanitize_html_class( str_replace( '_' , '-', strtolower( get_class( $this ) ) ), 'default-translation-helper' );
+		return sanitize_html_class( str_replace( '_', '-', strtolower( get_class( $this ) ) ), 'default-translation-helper' );
 	}
 
 	/**
-	 * Get the html id for the div
+	 * Gets the HTML id for the div.
+	 *
+	 * @since 0.0.1
+	 *
 	 * @return string
 	 */
-	public function get_div_id() {
+	public function get_div_id(): string {
 		$div_id = $this->get_div_classname() . '-' . $this->data['original_id'];
 
 		if ( isset( $this->data['translation_id'] ) ) {
@@ -90,16 +122,22 @@ class GP_Translation_Helper {
 	}
 
 	/**
-	 * Return the title of the helper
+	 * Returns the title of the helper.
+	 *
+	 * @since 0.0.1
+	 *
 	 * @return string
 	 */
-	public function get_title() {
+	public function get_title(): string {
 		return $this->title;
 	}
 
 	/**
-	 * Should the helper be active?
+	 * Indicates whether the helper should be active or not.
+	 *
 	 * Overwrite in the inheriting class to make this vary depending on class args.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return bool
 	 */
@@ -108,9 +146,11 @@ class GP_Translation_Helper {
 	}
 
 	/**
-	 * Set the count of items returned by the helper.
+	 * Sets the count of items returned by the helper.
 	 *
-	 * @param mixed $list
+	 * @since 0.0.1
+	 *
+	 * @param mixed $list   Elements to count.
 	 */
 	public function set_count( $list ) {
 		if ( is_array( $list ) ) {
@@ -121,31 +161,39 @@ class GP_Translation_Helper {
 	}
 
 	/**
-	 * Get the number of items returned by the helper.
+	 * Gets the number of items returned by the helper.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return int
 	 */
-	public function get_count() {
-		return isset( $this->count ) ? $this->count : 0;
+	public function get_count(): int {
+		return $this->count ?? 0;
 	}
 
 	/**
-	 * Content/string to return when a helper has no results.
+	 * Gets the content/string to return when a helper has no results.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return string
 	 */
 	public function empty_content() {
-		return 'No results found.';
+		return __( 'No results found.' );
 	}
 
 	/**
 	 * Default callback to render items returned by the helper.
 	 *
-	 * @param array $items
+	 * Gets an unordered list of the items that will be rendered by the helper.
+	 *
+	 * @since 0.0.1
+	 *
+	 * @param array $items  Elements to be grouped in an unordered list.
 	 *
 	 * @return string
 	 */
-	public function async_output_callback( $items ) {
+	public function async_output_callback( array $items ) {
 		$output = '<ul>';
 		foreach ( $items as $item ) {
 			$output .= '<li>' . $item . '</li>';
@@ -155,11 +203,13 @@ class GP_Translation_Helper {
 	}
 
 	/**
-	 * Get content that is returned asynchronously.
+	 * Gets content that is returned asynchronously.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return string
 	 */
-	public function get_async_output() {
+	public function get_async_output(): string {
 		$items = $this->get_async_content();
 		$this->set_count( $items );
 
@@ -167,21 +217,24 @@ class GP_Translation_Helper {
 			return $this->empty_content();
 		}
 
-		$output = $this->async_output_callback( $items );
-		return $output;
+		return $this->async_output_callback( $items );
 	}
 
 	/**
-	 * Get the (non-async) output for the helper.
+	 * Gets the (non-async) output for the helper.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return string
 	 */
-	public function get_output() {
+	public function get_output(): string {
 		return '<div class="loading">Loading&hellip;</div>';
 	}
 
 	/**
-	 * Get additional css required by the helper
+	 * Gets additional CSS required by the helper.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return bool|string
 	 */
@@ -190,7 +243,9 @@ class GP_Translation_Helper {
 	}
 
 	/**
-	 * Get additional js required by the helper
+	 * Gets additional JavaScript required by the helper.
+	 *
+	 * @since 0.0.1
 	 *
 	 * @return bool|string
 	 */

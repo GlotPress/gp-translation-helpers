@@ -17,6 +17,7 @@
 	comment_form(
 		$args = array(
 			'title_reply'         => __( 'Discuss this string' ),
+			/* translators: username */
 			'title_reply_to'      => __( 'Reply to %s' ),
 			'title_reply_before'  => '<h6 id="reply-title" class="discuss-title">',
 			'title_reply_after'   => '</h6>',
