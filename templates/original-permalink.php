@@ -85,7 +85,7 @@ gp_head();
 					   ( '' == $e->translation_3 ) && ( '' == $e->translation_4 ) &&
 					   ( '' == $e->translation_5 ) ) :
 				?>
-				<strong><?php echo $translation_permalink ? gp_link( $translation_permalink, $e->translation_0 ) : esc_html( $e->translation_0 ); ?></strong>
+				<strong><?php echo isset( $translation_permalink ) ? gp_link( $translation_permalink, $e->translation_0 ) : esc_html( $e->translation_0 ); ?></strong>
 			<?php else : ?>
 				<ul id="translation-list">
 					<?php for ( $i = 0; $i <= 5; $i++ ) : ?>
