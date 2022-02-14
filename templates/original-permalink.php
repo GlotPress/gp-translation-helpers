@@ -56,7 +56,7 @@ gp_head();
 			$original_id,
 			$translation->id
 		);
-		?>
+	?>
 		<?php echo esc_html( ucfirst( $translation->status ) ); ?> translation:
 		<?php
 		if ( ( '' == $translation->translation_1 ) && ( '' == $translation->translation_2 ) &&
