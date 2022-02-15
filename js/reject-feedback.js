@@ -2,7 +2,7 @@
 	// eslint-disable-next-line no-undef
 	$( document ).ready(
 		function() {
-			var feedbackForm = '<details><summary>This is always shown</summary>' +
+			var feedbackForm = '<details><summary>Give feedback</summary>' +
 			'<div id="reject-feedback-form">' +
 			'<form>' +
 			'<h3 class="modal-reason-title">Reason</h3>' +
