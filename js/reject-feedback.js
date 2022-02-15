@@ -2,8 +2,8 @@
 	// eslint-disable-next-line no-undef
 	$( document ).ready(
 		function() {
-			var rejectFeedbackForm =
-			'<div id="reject-feedback-form" style="display:none;">' +
+			var feedbackForm = '<details><summary>This is always shown</summary>' +
+			'<div id="reject-feedback-form">' +
 			'<form>' +
 			'<h3 class="modal-reason-title">Reason</h3>' +
 			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="style" /><label>Style Guide </label></div>' +
@@ -16,11 +16,11 @@
 				'<label>Comment </label>' +
 				'<textarea name="reject_comment"></textarea>' +
 			'</div>' +
-			'<button class="modal-btn" id="gp_reject_btn">Reject</button>' +
 			'</form>' +
-			'</div>';
+			'</div>' +
+			'</details>';
 
-			$( 'body' ).append( rejectFeedbackForm );
+			$( '.meta' ).prepend( feedbackForm );
 		}
 	);
 
@@ -35,54 +35,41 @@
 		var rejectReason = [];
 		var rejectData = {};
 		var data = {};
-		// Show thickbox modal
+
+		$( 'input[name="reject_reason"]:checked' ).each(
+			function() {
+				rejectReason.push( this.value );
+			}
+		);
+
+		comment = $( 'textarea[name="reject_comment"]' ).val();
+
 		// eslint-disable-next-line no-undef
-		tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
+		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
+		rejectData.reason = rejectReason;
+		rejectData.comment = comment;
+		rejectData.original_id = $gp.editor.current.original_id;
+		rejectData.translation_id = $gp.editor.current.translation_id;
 
-		$( 'body' ).off().on(
-			'click',
-			'#gp_reject_btn',
-			function( e ) {
-				e.preventDefault();
-				e.stopImmediatePropagation();
+		data = {
+			action: 'reject_with_feedback',
+			data: rejectData,
+			// eslint-disable-next-line no-undef
+			_ajax_nonce: $gp_reject_feedback_settings.nonce,
+		};
 
-				$( 'input[name="reject_reason"]:checked' ).each(
-					function() {
-						rejectReason.push( this.value );
-					}
-				);
-
-				comment = $( 'textarea[name="reject_comment"]' ).val();
-
+		$.ajax(
+			{
+				type: 'POST',
 				// eslint-disable-next-line no-undef
-				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
-				rejectData.reason = rejectReason;
-				rejectData.comment = comment;
-				rejectData.original_id = $gp.editor.current.original_id;
-				rejectData.translation_id = $gp.editor.current.translation_id;
-
-				data = {
-					action: 'reject_with_feedback',
-					data: rejectData,
-					// eslint-disable-next-line no-undef
-					_ajax_nonce: $gp_reject_feedback_settings.nonce,
-				};
-
-				$.ajax(
-					{
-						type: 'POST',
-						// eslint-disable-next-line no-undef
-						url: $gp_reject_feedback_settings.url,
-						data: data,
-					}
-				).done(
-					function() {
-						$gp.editor.set_status( button, status );
-						$( 'input[name="reject_reason"]' ).prop( 'checked', false );
-						$( 'textarea[name="reject_comment"]' ).val( '' );
-						$( '#TB_closeWindowButton' ).click();
-					}
-				);
+				url: $gp_reject_feedback_settings.url,
+				data: data,
+			}
+		).done(
+			function() {
+				$gp.editor.set_status( button, status );
+				$( 'input[name="reject_reason"]' ).prop( 'checked', false );
+				$( 'textarea[name="reject_comment"]' ).val( '' );
 			}
 		);
 	}
