@@ -65,6 +65,7 @@ class GP_Translation_Helpers {
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'register_routes' ), 5 );
 		add_action( 'gp_before_request', array( $this, 'before_request' ), 10, 2 );
+		add_action( 'rest_after_insert_comment', array( 'GP_Notifications', 'new_comment' ), 10, 3 );
 
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );

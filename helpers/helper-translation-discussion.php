@@ -477,7 +477,7 @@ function gth_discussion_get_original_id_from_post( int $post_id ) {
 }
 
 	/**
-	 * Callback for the wp_list_comments() function in the helper-translation-discussion.php template.
+	 * Callback for the wp_list_comments() function in the translation-discussion-comments.php template.
 	 *
 	 * @since 0.0.1
 	 *
