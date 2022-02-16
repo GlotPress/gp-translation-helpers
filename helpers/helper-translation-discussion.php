@@ -292,7 +292,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 					array(
 						'post_type'      => self::POST_TYPE,
 						'tax_input'      => array(
-							self::LINK_TAXONOMY => array( $original_id ),
+							self::LINK_TAXONOMY => array( strval( $original_id ) ),
 						),
 						'post_status'    => self::POST_STATUS,
 						'post_author'    => 0,
