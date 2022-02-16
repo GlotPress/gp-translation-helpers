@@ -159,4 +159,32 @@ h6 {
 div#TB_ajaxWindowTitle {
 	font-size: 1.3em;
 }
-	
+.meta summary.feedback-summary{
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 7px 0;
+}
+.feedback-reason-list{
+	list-style-type: none;
+	display: inline-block;
+}
+.feedback-reason-list li{
+	width: 50%;
+	float: left;
+	padding-top: 4px;
+}
+.feedback-reason-list li label{
+	margin-left: 7px;
+	font-size: 1.1em;
+}
+.feedback-reason-list li input[type="checkbox"] {
+	transform: scale(1.5);
+}
+.feedback-comment label, .feedback-reason-title {
+	font-size: 1.1em;
+	font-weight: bold;
+}
+.feedback-comment textarea {
+	height: 110px;
+	font-size: 1.1em;
+}

@@ -2,19 +2,20 @@
 	// eslint-disable-next-line no-undef
 	$( document ).ready(
 		function() {
-			var feedbackForm = '<details><summary>Give feedback</summary>' +
-			'<div id="reject-feedback-form">' +
+			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
+			'<div id="feedback-form">' +
 			'<form>' +
-			'<h3 class="modal-reason-title">Reason</h3>' +
-			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="style" /><label>Style Guide </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="grammar" /><label>Grammar </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="branding" /><label>Branding </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="glossary" /><label>Glossary </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="punctuation" /><label>Punctuation </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="reject_reason" value="typo" /><label>Typo </label></div>' +
-			'<div class="modal-comment">' +
+			'<h3 class="feedback-reason-title">Reason</h3>' +
+			'<ul class="feedback-reason-list">' +
+			'<li><input type="checkbox" name="feedback_reason" value="style" /><label>Style Guide </label></li>' +
+			'<li><input type="checkbox" name="feedback_reason" value="grammar" /><label>Grammar </label></li>' +
+			'<li><input type="checkbox" name="feedback_reason" value="branding" /><label>Branding </label></li>' +
+			'<li><input type="checkbox" name="feedback_reason" value="glossary" /><label>Glossary </label></li>' +
+			'<li><input type="checkbox" name="feedback_reason" value="punctuation" /><label>Punctuation </label></li>' +
+			'<li><input type="checkbox" name="feedback_reason" value="typo" /><label>Typo </label></li></ul>' +
+			'<div class="feedback-comment">' +
 				'<label>Comment </label>' +
-				'<textarea name="reject_comment"></textarea>' +
+				'<textarea name="feedback_comment"></textarea>' +
 			'</div>' +
 			'</form>' +
 			'</div>' +
@@ -36,13 +37,13 @@
 		var rejectData = {};
 		var data = {};
 
-		$( 'input[name="reject_reason"]:checked' ).each(
+		$( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
 				rejectReason.push( this.value );
 			}
 		);
 
-		comment = $( 'textarea[name="reject_comment"]' ).val();
+		comment = $( 'textarea[name="feedback_comment"]' ).val();
 
 		// eslint-disable-next-line no-undef
 		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
@@ -68,8 +69,8 @@
 		).done(
 			function() {
 				$gp.editor.set_status( button, status );
-				$( 'input[name="reject_reason"]' ).prop( 'checked', false );
-				$( 'textarea[name="reject_comment"]' ).val( '' );
+				$( 'input[name="feedback_reason"]' ).prop( 'checked', false );
+				$( 'textarea[name="feedback_comment"]' ).val( '' );
 			}
 		);
 	}
