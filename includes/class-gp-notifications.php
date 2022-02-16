@@ -99,7 +99,6 @@ class GP_Notifications {
 	 */
 	public static function send_emails( WP_Comment $comment, ?array $comment_meta, ?array $emails ) {
 		foreach ( $emails as $email ) {
-			echo PHP_EOL . 'Sending email to ' . esc_html( $email ) . PHP_EOL;
 			$subject = esc_html__( 'New comment in a translation discussion' );
 			$body    = self::get_email_body( $comment, $comment_meta );
 			$headers = array(
