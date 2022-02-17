@@ -21,6 +21,9 @@
 			'</div>' +
 			'</details>';
 
+			// Remove click event added to <summary> by wporg-gp-customizations plugin
+			$( $gp.editor.table ).off( 'click', 'summary' );
+
 			$( '.meta' ).prepend( feedbackForm );
 		}
 	);
