@@ -149,4 +149,47 @@ class GP_Notifications {
 
 		return $output;
 	}
+
+	/**
+	 * Get the general translation editors (GTE) emails for the given locale.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $locale Locale slug.
+	 *
+	 * @return array
+	 */
+	public function get_gte_emails( string $locale ): array {
+		$emails = array();
+		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) {
+			return $emails;
+		}
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		$result    = get_sites(
+			array(
+				'locale'     => $gp_locale->wp_locale,
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'path'       => '/',
+				'fields'     => 'ids',
+				'number'     => '1',
+			)
+		);
+		$site_id   = array_shift( $result );
+		if ( ! $site_id ) {
+			return $emails;
+		}
+
+		$users = get_users(
+			array(
+				'blog_id'     => $site_id,
+				'role'        => 'general_translation_editor',
+				'count_total' => false,
+			)
+		);
+		foreach ( $users as $user ) {
+			$emails[] = $user->data->user_email;
+		}
+
+		return $emails;
+	}
 }
