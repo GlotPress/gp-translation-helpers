@@ -216,10 +216,9 @@ class GP_Notifications {
 		$main_projects = $wpdb->get_results(
 			$wpdb->prepare(
 				"
-			SELECT
-				`id`
+			SELECT id
 			FROM {$wpdb->gp_projects}
-			WHERE `parent_project_id` IS NULL"
+			WHERE parent_project_id IS NULL"
 			),
 			ARRAY_N
 		);
@@ -227,7 +226,7 @@ class GP_Notifications {
 
 		$translation = GP::$translation->get( $translation_id );
 		$original    = GP::$original->get( $translation->original_id );
-		$project_id  = $original->project_id; // 217;// 17;//216;//
+		$project_id  = $original->project_id;
 		$project     = GP::$project->get( $project_id );
 
 		// If the parent project is not a main project, get the parent project. We need to do this
