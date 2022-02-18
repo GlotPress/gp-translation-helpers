@@ -13,13 +13,13 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param $comment
+	 * @param WP_Comment $comment
 	 * @param $request
 	 * @param $creating
 	 *
 	 * @return void
 	 */
-	public static function new_comment( $comment, $request, $creating ) {
+	public static function new_comment( WP_Comment $comment, $request, $creating ) {
 		if ( ( '1' === $comment->comment_approved ) || ( 'approve' === $comment->comment_approved ) ) {
 			$comment_meta = get_comment_meta( $comment->comment_ID );
 			if ( ( '0' !== $comment->comment_parent ) ) {
@@ -151,7 +151,7 @@ class GP_Notifications {
 	}
 
 	/**
-	 * Get the general translation editors (GTE) emails for the given locale.
+	 * Gets the general translation editors (GTE) emails for the given locale.
 	 *
 	 * @since 0.0.2
 	 *
@@ -160,12 +160,12 @@ class GP_Notifications {
 	 * @return array
 	 */
 	public function get_gte_emails( string $locale ): array {
-		$emails = array();
-		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) {
+		$emails    = array();
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
 			return $emails;
 		}
-		$gp_locale = GP_Locales::by_field( 'slug', $locale );
-		$result    = get_sites(
+		$result  = get_sites(
 			array(
 				'locale'     => $gp_locale->wp_locale,
 				'network_id' => WPORG_GLOBAL_NETWORK_ID,
@@ -174,7 +174,7 @@ class GP_Notifications {
 				'number'     => '1',
 			)
 		);
-		$site_id   = array_shift( $result );
+		$site_id = array_shift( $result );
 		if ( ! $site_id ) {
 			return $emails;
 		}
@@ -192,4 +192,71 @@ class GP_Notifications {
 
 		return $emails;
 	}
+
+	/**
+	 * Gets the project translation editors (PTE) emails for the given translation_id (from a project) and locale.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int    $translation_id The id for the translation showed when the comment was made.
+	 * @param string $locale         The locale. E.g. 'zh-tw'.
+	 *
+	 * @return array
+	 */
+	public static function get_pte_emails_by_project_and_locale( $translation_id, $locale ): array {
+		global $wpdb;
+		$emails = array();
+
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
+			return $emails;
+		}
+
+		// Get the main projects, without parent projects
+		$main_projects = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+			SELECT
+				`id`
+			FROM {$wpdb->gp_projects}
+			WHERE `parent_project_id` IS NULL"
+			),
+			ARRAY_N
+		);
+		$main_projects = array_merge( ...$main_projects );
+
+		$translation = GP::$translation->get( $translation_id );
+		$original    = GP::$original->get( $translation->original_id );
+		$project_id  = $original->project_id; // 217;// 17;//216;//
+		$project     = GP::$project->get( $project_id );
+
+		// If the parent project is not a main project, get the parent project. We need to do this
+		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
+		// assigned to the second level
+		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! ( in_array( $project->parent_project_id, $main_projects ) ) ) ) {
+			$project = GP::$project->get( $project->parent_project_id );
+		}
+
+		// todo: remove the deleted users in the SQL query
+		$translation_editors = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+			SELECT
+				{$wpdb->wporg_translation_editors}.user_id, 
+			    {$wpdb->wporg_translation_editors}.locale
+			FROM {$wpdb->wporg_translation_editors}
+			WHERE {$wpdb->wporg_translation_editors}.project_id = %d AND
+			      {$wpdb->wporg_translation_editors}.locale = %s 
+		",
+				$project->id,
+				$locale
+			),
+			OBJECT
+		);
+		foreach ( $translation_editors as $pte ) {
+			$emails[] = WP_User::get_data_by( 'id', $pte->user_id )->user_email;
+		}
+		return $emails;
+	}
+
 }
