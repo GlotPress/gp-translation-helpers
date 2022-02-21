@@ -204,10 +204,42 @@ class GP_Notifications {
 	 * @return array
 	 */
 	public static function get_pte_emails_by_project_and_locale( $translation_id, $locale ): array {
+		return self::get_pte_clpte_emails_by_project_and_locale( $translation_id, $locale );
+	}
+
+	/**
+	 * Gets the cross language project translation editors (CLPTE) emails for the given translation_id (from a project).
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int $translation_id The id for the translation showed when the comment was made.
+	 *
+	 * @return array
+	 */
+	public static function get_clpte_emails_by_project_and_locale( $translation_id ): array {
+		return self::get_pte_clpte_emails_by_project_and_locale( $translation_id, 'all-locales' );
+	}
+
+	/**
+	 * Gets the PTE/CLPTE emails for the given translation_id (from a project) and locale.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int    $translation_id The id for the translation showed when the comment was made.
+	 * @param string $locale         The locale. E.g. 'zh-tw'.
+	 *
+	 * @return array
+	 */
+	private static function get_pte_clpte_emails_by_project_and_locale( int $translation_id, string $locale ): array {
 		global $wpdb;
 		$emails = array();
 
-		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		if ( 'all-locales' === $locale ) {
+			$gp_locale = 'all-locales';
+		} else {
+			$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		}
+
 		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
 			return $emails;
 		}
