@@ -21,10 +21,42 @@
 			'</div>' +
 			'</details>';
 
+			var modalFeedbackForm =
+			'<div id="reject-feedback-form" style="display:none;">' +
+			'<form>' +
+			'<h3>Reason</h3>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Style Guide </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Grammar </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Branding </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Glossary </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Punctuation </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Typo </label></div>' +
+			'<div class="modal-comment">' +
+					'<label>Comment </label>' +
+					'<textarea></textarea>' +
+			'</div>' +
+			'<button id="modal-reject-btn" class="modal-btn">Reject</button>' +
+			'</form>' +
+			'</div>';
+
+			$( 'body' ).append( modalFeedbackForm );
+
 			// Remove click event added to <summary> by wporg-gp-customizations plugin
 			$( $gp.editor.table ).off( 'click', 'summary' );
 
-			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
+			$( '.meta' ).prepend( feedbackForm );
+			$( 'form.filters-toolbar.bulk-actions' ).submit( function( e ) {
+				var rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
+					return $( this ).parents( 'tr.preview' ).attr( 'row' );
+				} ).get().join( ',' );
+				$( 'input[name="bulk[row-ids]"]', $( this ) ).val( rowIds );
+				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
+					e.preventDefault();
+					e.stopImmediatePropagation();
+					// eslint-disable-next-line no-undef
+					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
+				}
+			} );
 		}
 	);
 
