@@ -212,29 +212,7 @@ class GP_Notifications {
 			return $emails;
 		}
 
-		// Get the main projects, without parent projects
-		$main_projects = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-			SELECT id
-			FROM {$wpdb->gp_projects}
-			WHERE parent_project_id IS NULL"
-			),
-			ARRAY_N
-		);
-		$main_projects = array_merge( ...$main_projects );
-
-		$translation = GP::$translation->get( $translation_id );
-		$original    = GP::$original->get( $translation->original_id );
-		$project_id  = $original->project_id;
-		$project     = GP::$project->get( $project_id );
-
-		// If the parent project is not a main project, get the parent project. We need to do this
-		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
-		// assigned to the second level
-		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! ( in_array( $project->parent_project_id, $main_projects ) ) ) ) {
-			$project = GP::$project->get( $project->parent_project_id );
-		}
+		$project = self::get_project_to_translate( $translation_id );
 
 		// todo: remove the deleted users in the SQL query
 		$translation_editors = $wpdb->get_results(
@@ -258,4 +236,99 @@ class GP_Notifications {
 		return $emails;
 	}
 
+	/**
+	 * Gets the emails for the commiters of a theme or a plugin.
+	 *
+	 * Themes: only one email.
+	 * Plugins: all the plugin commiters.
+	 *
+	 * @param int $translation_id The id for the translation showed when the comment was made.
+	 *
+	 * @return array
+	 */
+	public static function get_author_emails( int $translation_id ): array {
+		global $wpdb;
+
+		$emails  = array();
+		$project = self::get_project_to_translate( $translation_id );
+		if ( 'wp-themes' === substr( $project->path, 0, 9 ) ) {
+			$author   = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT post_author 
+                            FROM wporg_35_posts 
+                            WHERE 
+                                post_type = 'repopackage' AND 
+                                post_name = %s
+                            ",
+					$project->slug
+				),
+				OBJECT
+			);
+			$author   = get_user_by( 'id', $author->post_author );
+			$emails[] = $author->data->user_email;
+		}
+		if ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) {
+			$committers = $wpdb->get_col(
+				$wpdb->prepare(
+					'SELECT user FROM plugin_2_svn_access WHERE path = %s',
+					'/' . $project->slug
+				)
+			);
+			foreach ( $committers as $user_login ) {
+				$emails[] = get_user_by( 'login', $user_login )->user_email;
+			}
+		}
+		return $emails;
+	}
+
+	/**
+	 * Gets the project the translated string belongs to.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int $translation_id   The id for the translation showed when the comment was made.
+	 *
+	 * @return GP_Project           The project the translated string belongs to.
+	 */
+	private static function get_project_to_translate( int $translation_id ): GP_Project {
+		global $wpdb;
+
+		$main_projects = self::get_main_projects();
+
+		$translation = GP::$translation->get( $translation_id );
+		$original    = GP::$original->get( $translation->original_id );
+		$project_id  = $original->project_id;
+		$project     = GP::$project->get( $project_id );
+
+		// If the parent project is not a main project, get the parent project. We need to do this
+		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
+		// assigned to the second level
+		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! ( in_array( $project->parent_project_id, $main_projects ) ) ) ) {
+			$project = GP::$project->get( $project->parent_project_id );
+		}
+		return $project;
+	}
+
+	/**
+	 * Gets the id of the main projects without parent projects.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return array    The id of the main projects.
+	 */
+	private static function get_main_projects():array {
+		global $wpdb;
+
+		$main_projects = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+			SELECT id
+			FROM {$wpdb->gp_projects}
+			WHERE parent_project_id IS NULL"
+			),
+			ARRAY_N
+		);
+
+		return array_merge( ...$main_projects );
+	}
 }
