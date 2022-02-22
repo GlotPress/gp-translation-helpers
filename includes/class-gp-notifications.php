@@ -26,6 +26,21 @@ class GP_Notifications {
 				$parent_comments  = self::get_parent_comments( $comment->comment_parent );
 				$emails_to_notify = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
 				self::send_emails( $comment, $comment_meta, $emails_to_notify );
+			} else {
+				if ( array_key_exists( 'comment_topic', $comment_meta ) ) {
+					switch ( $comment_meta['comment_topic'] ) {
+						case 'typo':
+						case 'context': // Notify to the developer(s)
+							self::send_emails_to_developers( $comment, $comment_meta );
+							break;
+						case 'question': // Notify to the GTE, PTE and CLPTE
+							self::send_emails_to_validators( $comment, $comment_meta );
+							break;
+						case 'unknown':  // todo: decide what to do.
+							break;
+
+					}
+				}
 			}
 		}
 	}
@@ -39,6 +54,43 @@ class GP_Notifications {
 	 */
 	public static function comment_change_status() {
 
+	}
+
+	/**
+	 * Sends an email to the project developers.
+	 *
+	 * Currently, only works with themes and plugins.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment
+	 * @param array      $comment_meta
+	 *
+	 * @return void
+	 */
+	public static function send_emails_to_developers( WP_Comment $comment, array $comment_meta ) {
+		$translation_id = $comment_meta['translation_id'][0];
+		$emails         = self::get_author_emails( $translation_id );
+		self::send_emails( $comment, $comment_meta, $emails );
+	}
+
+	/**
+	 * Sends an email to the all the project validators: GTE, PTE and CLPTE.
+	 *
+	 * @param WP_Comment $comment
+	 * @param array      $comment_meta
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return void
+	 */
+	public static function send_emails_to_validators( WP_Comment $comment, array $comment_meta ) {
+		$translation_id = $comment_meta['translation_id'][0];
+		$locale         = $comment_meta['locale'][0];
+		$emails         = self::get_gte_emails( $locale );
+		$emails         = array_merge( $emails, self::get_pte_emails_by_project_and_locale( $translation_id, $locale ) );
+		$emails         = array_merge( $emails, self::get_clpte_emails_by_project( $translation_id ) );
+		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
 	/**
@@ -95,9 +147,12 @@ class GP_Notifications {
 	 * @param array|null $comment_meta
 	 * @param array|null $emails
 	 *
-	 * @return void
+	 * @return bool
 	 */
-	public static function send_emails( WP_Comment $comment, ?array $comment_meta, ?array $emails ) {
+	public static function send_emails( ?WP_Comment $comment, ?array $comment_meta, ?array $emails ) {
+		if ( ( null === $comment ) || ( null === $comment_meta ) ) {
+			return false;
+		}
 		foreach ( $emails as $email ) {
 			$subject = esc_html__( 'New comment in a translation discussion' );
 			$body    = self::get_email_body( $comment, $comment_meta );
@@ -108,6 +163,7 @@ class GP_Notifications {
 
 			wp_mail( $email, $subject, $body, $headers );
 		}
+		return true;
 	}
 
 	/**
@@ -159,7 +215,7 @@ class GP_Notifications {
 	 *
 	 * @return array
 	 */
-	public function get_gte_emails( string $locale ): array {
+	public static function get_gte_emails( string $locale ): array {
 		$emails    = array();
 		$gp_locale = GP_Locales::by_field( 'slug', $locale );
 		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
