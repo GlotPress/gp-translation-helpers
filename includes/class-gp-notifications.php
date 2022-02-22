@@ -216,7 +216,7 @@ class GP_Notifications {
 	 *
 	 * @return array
 	 */
-	public static function get_clpte_emails_by_project_and_locale( $translation_id ): array {
+	public static function get_clpte_emails_by_project( $translation_id ): array {
 		return self::get_pte_clpte_emails_by_project_and_locale( $translation_id, 'all-locales' );
 	}
 
