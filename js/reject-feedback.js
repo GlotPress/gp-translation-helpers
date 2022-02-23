@@ -2,6 +2,7 @@
 	// eslint-disable-next-line no-undef
 	$( document ).ready(
 		function() {
+			var rowIds = '';
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
 			'<form>' +
@@ -25,15 +26,15 @@
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
 			'<h3>Reason</h3>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Style Guide </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Grammar </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Branding </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Glossary </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Punctuation </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" /><label>Typo </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="style" /><label>Style Guide </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="grammar" /><label>Grammar </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="branding" /><label>Branding </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="glossary" /><label>Glossary </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="punctuation" /><label>Punctuation </label></div>' +
+			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="typo" /><label>Typo </label></div>' +
 			'<div class="modal-comment">' +
 					'<label>Comment </label>' +
-					'<textarea></textarea>' +
+					'<textarea name="modal_feedback_comment"></textarea>' +
 			'</div>' +
 			'<button id="modal-reject-btn" class="modal-btn">Reject</button>' +
 			'</form>' +
@@ -45,17 +46,22 @@
 			$( $gp.editor.table ).off( 'click', 'summary' );
 
 			$( '.meta' ).prepend( feedbackForm );
-			$( 'form.filters-toolbar.bulk-actions' ).submit( function( e ) {
-				var rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
+
+			$( '#bulk-actions-toolbar-top .button' ).click( function( e ) {
+				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					return $( this ).parents( 'tr.preview' ).attr( 'row' );
 				} ).get().join( ',' );
-				$( 'input[name="bulk[row-ids]"]', $( this ) ).val( rowIds );
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					// eslint-disable-next-line no-undef
 					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
 				}
+			} );
+
+			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
+				e.preventDefault();
+				modalRejectWithFeedBack( rowIds );
 			} );
 		}
 	);
@@ -66,6 +72,56 @@
 		rejectWithFeedback( button, status );
 	};
 
+	function modalRejectWithFeedBack( rowIds ) {
+		var rowIdsArray = rowIds.split( ',' );
+
+		var originalIds = rowIdsArray.map( function( rowId ) {
+			return $gp.editor.original_id_from_row_id( rowId );
+		} );
+		var translationIds = rowIdsArray.map( function( rowId ) {
+			return $gp.editor.translation_id_from_row_id( rowId );
+		} );
+
+		// $( 'form.filters-toolbar.bulk-actions' ).submit();
+		var comment = '';
+		var rejectReason = [];
+		var rejectData = {};
+		var data = {};
+
+		$( 'input[name="modal_feedback_reason"]:checked' ).each(
+			function() {
+				rejectReason.push( this.value );
+			}
+		);
+
+		comment = $( 'textarea[name="modal_feedback_comment"]' ).val();
+		// eslint-disable-next-line no-undef
+		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
+		rejectData.reason = rejectReason;
+		rejectData.comment = comment;
+		rejectData.original_id = originalIds;
+		rejectData.translation_id = translationIds;
+
+		data = {
+			action: 'reject_with_feedback',
+			data: rejectData,
+			// eslint-disable-next-line no-undef
+			_ajax_nonce: $gp_reject_feedback_settings.nonce,
+		};
+
+		$.ajax(
+			{
+				type: 'POST',
+				// eslint-disable-next-line no-undef
+				url: $gp_reject_feedback_settings.url,
+				data: data,
+			}
+		).done(
+			function() {
+				$( 'form.filters-toolbar.bulk-actions' ).submit();
+			}
+		);
+	}
 	function rejectWithFeedback( button, status ) {
 		var comment = '';
 		var rejectReason = [];
