@@ -346,14 +346,16 @@ class GP_Translation_Helpers {
 		if ( ! check_ajax_referer( 'gp_reject_feedback', 'nonce' ) ) {
 			return;
 		}
+		$helper_discussion = new Helper_Translation_Discussion();
+		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
+		$translation_id    = $helper_discussion->sanitize_translation_id( intval( $_POST['data']['translation_id'] ) );
+		$original_id       = $_POST['data']['original_id'];
+		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : '';
+		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
 
-		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
-		$original_id    = $_POST['data']['original_id'];
-		$translation_id = $_POST['data']['translation_id'];
-		$reject_reason  = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : '';
-		$reject_comment = sanitize_text_field( $_POST['data']['comment'] );
+		$is_valid_original = GP::$original->get( $original_id );
 
-		if ( ! $locale_slug || ! $translation_id || ( ! $reject_reason && ! $reject_comment ) ) {
+		if ( ! $locale_slug || ! $translation_id || ! $is_valid_original || ( ! $reject_reason && ! $reject_comment ) ) {
 			return;
 		}
 
@@ -370,7 +372,6 @@ class GP_Translation_Helpers {
 				),
 			)
 		);
-		die();
 	}
 
 }
