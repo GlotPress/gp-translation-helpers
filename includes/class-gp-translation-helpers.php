@@ -352,15 +352,43 @@ class GP_Translation_Helpers {
 		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
 		$reject_reason     = array_map( 'sanitize_text_field', $reject_reason );
 		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
+		$is_bulk_reject = sanitize_text_field( $_POST['data']['is_bulk_reject'] );
 
 		$is_valid_original = GP::$original->get( $original_id );
 
 		if ( ! $locale_slug || ! $translation_id || ! $is_valid_original || ( ! $reject_reason && ! $reject_comment ) ) {
 			wp_send_json_error();
 		}
+		if ( $is_bulk_reject && is_array( $original_id ) && ! empty( $original_id ) ) {
+			$bulk_original_ids    = $original_id;
+			$bulk_translation_ids = $translation_id;
 
-		$post_id = Helper_Translation_Discussion::get_shadow_post( $original_id );
-		$comment = wp_insert_comment(
+			// Get original_id and translation_id of first string in the array
+			$original_id    = array_shift( $bulk_original_ids );
+			$translation_id = array_shift( $bulk_translation_ids );
+			$post_id        = Helper_Translation_Discussion::get_shadow_post( $original_id );
+
+			// Post comment on discussion page for the first string
+			$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug );
+
+			if ( ! empty( $bulk_original_ids ) ) {
+				// For other strings post link to the comment.
+				$reject_comment = get_comment_link( $save_feedback );
+				foreach ( $bulk_original_ids as $index => $single_original_id ) {
+					$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
+					$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $bulk_translation_ids[ $index ], $locale_slug );
+				}
+				die();
+			}
+		}
+		$post_id       = Helper_Translation_Discussion::get_shadow_post( $original_id );
+		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug );
+
+		die();
+	}
+
+	private function insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug ) {
+		return wp_insert_comment(
 			array(
 				'comment_content' => $reject_comment,
 				'comment_post_ID' => $post_id,

@@ -61,7 +61,7 @@
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
 				e.preventDefault();
-				modalRejectWithFeedBack( rowIds );
+				bulkRejectWithFeedBack( rowIds );
 			} );
 		}
 	);
@@ -72,7 +72,7 @@
 		rejectWithFeedback( button, status );
 	};
 
-	function modalRejectWithFeedBack( rowIds ) {
+	function bulkRejectWithFeedBack( rowIds ) {
 		var rowIdsArray = rowIds.split( ',' );
 
 		var originalIds = rowIdsArray.map( function( rowId ) {
@@ -101,6 +101,7 @@
 		rejectData.comment = comment;
 		rejectData.original_id = originalIds;
 		rejectData.translation_id = translationIds;
+		rejectData.is_bulk_reject = true;
 
 		data = {
 			action: 'reject_with_feedback',
@@ -122,6 +123,7 @@
 			}
 		);
 	}
+
 	function rejectWithFeedback( button, status ) {
 		var comment = '';
 		var rejectReason = [];
@@ -149,6 +151,7 @@
 		rejectData.comment = comment;
 		rejectData.original_id = $gp.editor.current.original_id;
 		rejectData.translation_id = $gp.editor.current.translation_id;
+		rejectData.is_bulk_reject = false;
 
 		data = {
 			action: 'reject_with_feedback',
