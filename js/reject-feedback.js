@@ -46,7 +46,7 @@
 			}
 		);
 
-		comment = $( 'textarea[name="feedback_comment"]' ).val();
+		comment = button.closest( '.meta' ).find( 'textarea[name="feedback_comment"]' ).val();
 
 		// eslint-disable-next-line no-undef
 		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
