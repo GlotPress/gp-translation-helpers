@@ -60,76 +60,44 @@
 			} );
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
+				var rowIdsArray = rowIds.split( ',' );
+
+				var originalIds = rowIdsArray.map( function( rowId ) {
+					return $gp.editor.original_id_from_row_id( rowId );
+				} );
+				var translationIds = rowIdsArray.map( function( rowId ) {
+					return $gp.editor.translation_id_from_row_id( rowId );
+				} );
+
+				var comment = '';
+				var rejectReason = [];
+				var rejectData = {};
+
+				$( 'input[name="modal_feedback_reason"]:checked' ).each(
+					function() {
+						rejectReason.push( this.value );
+					}
+				);
+
+				comment = $( 'textarea[name="modal_feedback_comment"]' ).val();
+				// eslint-disable-next-line no-undef
+				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
+				rejectData.reason = rejectReason;
+				rejectData.comment = comment;
+				rejectData.original_id = originalIds;
+				rejectData.translation_id = translationIds;
+				rejectData.is_bulk_reject = true;
+				rejectWithFeedback( rejectData );
 				e.preventDefault();
-				bulkRejectWithFeedBack( rowIds );
 			} );
 		}
 	);
 
 	$gp.editor.hooks.set_status_rejected = function() {
 		var button = $( this );
-		var status = 'rejected';
-		rejectWithFeedback( button, status );
-	};
-
-	function bulkRejectWithFeedBack( rowIds ) {
-		var rowIdsArray = rowIds.split( ',' );
-
-		var originalIds = rowIdsArray.map( function( rowId ) {
-			return $gp.editor.original_id_from_row_id( rowId );
-		} );
-		var translationIds = rowIdsArray.map( function( rowId ) {
-			return $gp.editor.translation_id_from_row_id( rowId );
-		} );
-
-		// $( 'form.filters-toolbar.bulk-actions' ).submit();
-		var comment = '';
-		var rejectReason = [];
 		var rejectData = {};
-		var data = {};
-
-		$( 'input[name="modal_feedback_reason"]:checked' ).each(
-			function() {
-				rejectReason.push( this.value );
-			}
-		);
-
-		comment = $( 'textarea[name="modal_feedback_comment"]' ).val();
-		// eslint-disable-next-line no-undef
-		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
-		rejectData.reason = rejectReason;
-		rejectData.comment = comment;
-		rejectData.original_id = originalIds;
-		rejectData.translation_id = translationIds;
-		rejectData.is_bulk_reject = true;
-
-		data = {
-			action: 'reject_with_feedback',
-			data: rejectData,
-			// eslint-disable-next-line no-undef
-			_ajax_nonce: $gp_reject_feedback_settings.nonce,
-		};
-
-		$.ajax(
-			{
-				type: 'POST',
-				// eslint-disable-next-line no-undef
-				url: $gp_reject_feedback_settings.url,
-				data: data,
-			}
-		).done(
-			function() {
-				$( 'form.filters-toolbar.bulk-actions' ).submit();
-			}
-		);
-	}
-
-	function rejectWithFeedback( button, status ) {
-		var comment = '';
 		var rejectReason = [];
-		var rejectData = {};
-		var data = {};
-		var div = button.closest( 'div.meta' );
+		var comment = $( 'textarea[name="feedback_comment"]' ).val();
 
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
@@ -153,6 +121,12 @@
 		rejectData.translation_id = $gp.editor.current.translation_id;
 		rejectData.is_bulk_reject = false;
 
+		rejectWithFeedback( rejectData, button );
+	};
+
+	function rejectWithFeedback( rejectData, button ) {
+		var data = {};
+
 		data = {
 			action: 'reject_with_feedback',
 			data: rejectData,
@@ -169,9 +143,13 @@
 			}
 		).done(
 			function() {
-				$gp.editor.set_status( button, status );
-				div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
-				div.find( 'textarea[name="feedback_comment"]' ).val( '' );
+				if ( rejectData.is_bulk_reject ) {
+					$( 'form.filters-toolbar.bulk-actions' ).submit();
+				} else {
+					$gp.editor.set_status( button, 'rejected' );
+					$( 'input[name="feedback_reason"]' ).prop( 'checked', false );
+					$( 'textarea[name="feedback_comment"]' ).val( '' );
+				}
 			}
 		);
 	}
