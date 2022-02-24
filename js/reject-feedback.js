@@ -39,14 +39,15 @@
 		var rejectReason = [];
 		var rejectData = {};
 		var data = {};
+		var div = button.closest( 'div.meta' );
 
-		$( 'input[name="feedback_reason"]:checked' ).each(
+		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
 				rejectReason.push( this.value );
 			}
 		);
 
-		comment = button.closest( '.meta' ).find( 'textarea[name="feedback_comment"]' ).val();
+		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
 		// eslint-disable-next-line no-undef
 		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
@@ -72,8 +73,8 @@
 		).done(
 			function() {
 				$gp.editor.set_status( button, status );
-				$( 'input[name="feedback_reason"]' ).prop( 'checked', false );
-				$( 'textarea[name="feedback_comment"]' ).val( '' );
+				div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
+				div.find( 'textarea[name="feedback_comment"]' ).val( '' );
 			}
 		);
 	}
