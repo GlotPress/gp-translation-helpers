@@ -343,9 +343,8 @@ class GP_Translation_Helpers {
 	}
 
 	public function reject_with_feedback() {
-		if ( ! check_ajax_referer( 'gp_reject_feedback', 'nonce' ) ) {
-			return;
-		}
+		check_ajax_referer( 'gp_reject_feedback', 'nonce' );
+
 		$helper_discussion = new Helper_Translation_Discussion();
 		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
 		$translation_id    = $helper_discussion->sanitize_translation_id( intval( $_POST['data']['translation_id'] ) );
@@ -356,15 +355,14 @@ class GP_Translation_Helpers {
 		$is_valid_original = GP::$original->get( $original_id );
 
 		if ( ! $locale_slug || ! $translation_id || ! $is_valid_original || ( ! $reject_reason && ! $reject_comment ) ) {
-			return;
+			wp_send_json_error();
 		}
 
 		$post_id = Helper_Translation_Discussion::get_shadow_post( $original_id );
-		return wp_insert_comment(
+		$comment = wp_insert_comment(
 			array(
 				'comment_content' => $reject_comment,
 				'comment_post_ID' => $post_id,
-				'user_id'         => get_current_user_id(),
 				'comment_meta'    => array(
 					'reject_reason'  => $reject_reason,
 					'translation_id' => $translation_id,
@@ -372,6 +370,8 @@ class GP_Translation_Helpers {
 				),
 			)
 		);
+
+		wp_send_json_success();
 	}
 
 }

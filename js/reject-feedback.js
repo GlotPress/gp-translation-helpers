@@ -49,6 +49,11 @@
 
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
+		if ( ! comment.trim().length && ! rejectReason.length ) {
+			// No need to send the feedback.
+			return;
+		}
+
 		// eslint-disable-next-line no-undef
 		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
 		rejectData.reason = rejectReason;
