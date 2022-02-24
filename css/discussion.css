@@ -68,7 +68,7 @@ article.comment time {
 	text-align: start;
 }
 .comment-form-comment label{
-    display: block;
+	display: block;
 }
 h6 {
 	font-size: 1em;
@@ -109,4 +109,87 @@ h6 {
 	background: #135e96;
 	border-color: #135e96;
 	color: #fff;
+}
+.modal-item {
+	display: inline-block;
+	width: 30%;
+	margin-top: 7px;
+}
+.modal-item label {
+	display: inherit;
+	margin-left: 8px;
+}
+.modal-item input[type="checkbox"] {
+	transform: scale(1.5);
+}
+.modal-comment {
+	margin-top: 27px;
+}
+.modal-comment textarea {
+	width: 97%;
+	height: 170px;
+}
+.modal-btn {
+	float: right;
+	font-size: 15px;
+	height: 35px;
+	line-height: 1;
+	background: #0085ba;
+	border-color: #0073aa #006799 #006799;
+	box-shadow: 0 1px 0 #006799;
+	color: #fff;
+	text-decoration: none;
+	text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
+	margin-top: 10px;
+	padding: 0 13px;
+	border-radius: 3px;
+}
+.modal-reason-title{
+	margin-top: 12px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#TB_title {
+	background: #fcfcfc;
+	border-bottom: 1px solid #ddd;
+	height: 29px;
+	padding: 13px 0;
+}
+div#TB_ajaxWindowTitle {
+	font-size: 1.3em;
+}
+.meta summary.feedback-summary{
+	font-size: 1.2em;
+	font-weight: bold;
+	padding: 7px 0;
+}
+.gp-content ul.feedback-reason-list {
+	list-style-type: none;
+	display: inline-block;
+	padding-left: .5em;
+}
+.feedback-reason-list li {
+	width: 50%;
+	float: left;
+	padding-top: 4px;
+}
+.feedback-reason-list li label {
+	font-size: 1.1em;
+	cursor: pointer;
+}
+.feedback-reason-list li input[type="checkbox"] {
+	margin-right: 5px;
+}
+.feedback-comment label, .gp-content h3.feedback-reason-title {
+	font-size: 1.1em;
+	font-weight: bold;
+	margin: 0;
+}
+.feedback-comment textarea {
+	height: 110px;
+	font-size: 1.1em;
+}
+.status-actions details {
+	margin-bottom: 5px;
 }
