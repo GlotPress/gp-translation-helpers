@@ -51,6 +51,7 @@
 
 		if ( ! comment.trim().length && ! rejectReason.length ) {
 			// No need to send the feedback.
+			$gp.editor.set_status( button, status );
 			return;
 		}
 
