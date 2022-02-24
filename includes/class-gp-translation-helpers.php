@@ -328,7 +328,7 @@ class GP_Translation_Helpers {
 			return;
 		}
 
-		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery' ), '0.0.1' );
+		wp_register_script( 'gp-reject-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor' ), '0.0.1' );
 		gp_enqueue_script( 'gp-reject-feedback-js' );
 
 		wp_localize_script(
