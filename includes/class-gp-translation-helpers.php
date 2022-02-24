@@ -387,6 +387,19 @@ class GP_Translation_Helpers {
 		die();
 	}
 
+	/**
+	 * Inserts rejection feedback as WordPress comment
+	 *
+	 * @since 0.0.1
+	 *
+	 *  @param string $reject_comment Feedback entered by reviewer
+	 *  @param int    $post_id ID of the post where the comment will be added
+	 *  @param array  $reject_reason Reason(s) for rejection
+	 *  @param string $translation_id ID of the rejected translation
+	 *  @param string $locale_slug Locale of the rejected translation
+	 *
+	 * @return false|int
+	 */
 	private function insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug ) {
 		return wp_insert_comment(
 			array(
