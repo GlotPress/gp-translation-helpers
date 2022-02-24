@@ -45,7 +45,7 @@
 			// Remove click event added to <summary> by wporg-gp-customizations plugin
 			$( $gp.editor.table ).off( 'click', 'summary' );
 
-			$( '.meta' ).prepend( feedbackForm );
+			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
 
 			$( '#bulk-actions-toolbar-top .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
@@ -72,14 +72,15 @@
 				var comment = '';
 				var rejectReason = [];
 				var rejectData = {};
+				var form = $( this ).closest( 'form' );
 
-				$( 'input[name="modal_feedback_reason"]:checked' ).each(
+				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
 						rejectReason.push( this.value );
 					}
 				);
 
-				comment = $( 'textarea[name="modal_feedback_comment"]' ).val();
+				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 				// eslint-disable-next-line no-undef
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
 				rejectData.reason = rejectReason;
@@ -97,7 +98,7 @@
 		var button = $( this );
 		var rejectData = {};
 		var rejectReason = [];
-		var comment = $( 'textarea[name="feedback_comment"]' ).val();
+		var comment = '';
 		var div = button.closest( 'div.meta' );
 
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
@@ -127,6 +128,10 @@
 
 	function rejectWithFeedback( rejectData, button ) {
 		var data = {};
+		var div = {};
+		if ( button ) {
+			div = button.closest( 'div.meta' );
+		}
 
 		data = {
 			action: 'reject_with_feedback',
@@ -148,8 +153,8 @@
 					$( 'form.filters-toolbar.bulk-actions' ).submit();
 				} else {
 					$gp.editor.set_status( button, 'rejected' );
-					$( 'input[name="feedback_reason"]' ).prop( 'checked', false );
-					$( 'textarea[name="feedback_comment"]' ).val( '' );
+					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
+					div.find( 'textarea[name="feedback_comment"]' ).val( '' );
 				}
 			}
 		);
