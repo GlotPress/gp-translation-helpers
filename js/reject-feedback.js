@@ -98,6 +98,7 @@
 		var rejectData = {};
 		var rejectReason = [];
 		var comment = $( 'textarea[name="feedback_comment"]' ).val();
+		var div = button.closest( 'div.meta' );
 
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
