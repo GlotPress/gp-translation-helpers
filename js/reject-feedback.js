@@ -7,12 +7,12 @@
 			'<form>' +
 			'<h3 class="feedback-reason-title">Reason</h3>' +
 			'<ul class="feedback-reason-list">' +
-			'<li><input type="checkbox" name="feedback_reason" value="style" /><label>Style Guide </label></li>' +
-			'<li><input type="checkbox" name="feedback_reason" value="grammar" /><label>Grammar </label></li>' +
-			'<li><input type="checkbox" name="feedback_reason" value="branding" /><label>Branding </label></li>' +
-			'<li><input type="checkbox" name="feedback_reason" value="glossary" /><label>Glossary </label></li>' +
-			'<li><input type="checkbox" name="feedback_reason" value="punctuation" /><label>Punctuation </label></li>' +
-			'<li><input type="checkbox" name="feedback_reason" value="typo" /><label>Typo </label></li></ul>' +
+			'<li><label><input type="checkbox" name="feedback_reason" value="style" /> Style Guide</label></li>' +
+			'<li><label><input type="checkbox" name="feedback_reason" value="grammar" /> Grammar</label></li>' +
+			'<li><label><input type="checkbox" name="feedback_reason" value="branding" /> Branding</label></li>' +
+			'<li><label><input type="checkbox" name="feedback_reason" value="glossary" /> Glossary</label></li>' +
+			'<li><label><input type="checkbox" name="feedback_reason" value="punctuation" /> Punctuation</label></li>' +
+			'<li><label><input type="checkbox" name="feedback_reason" value="typo" /> Typo</label></li></ul>' +
 			'<div class="feedback-comment">' +
 				'<label>Comment </label>' +
 				'<textarea name="feedback_comment"></textarea>' +

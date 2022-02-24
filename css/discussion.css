@@ -164,27 +164,32 @@ div#TB_ajaxWindowTitle {
 	font-weight: bold;
 	padding: 7px 0;
 }
-.feedback-reason-list{
+.gp-content ul.feedback-reason-list {
 	list-style-type: none;
 	display: inline-block;
+	padding-left: .5em;
 }
-.feedback-reason-list li{
+.feedback-reason-list li {
 	width: 50%;
 	float: left;
 	padding-top: 4px;
 }
-.feedback-reason-list li label{
-	margin-left: 7px;
+.feedback-reason-list li label {
 	font-size: 1.1em;
+	cursor: pointer;
 }
 .feedback-reason-list li input[type="checkbox"] {
-	transform: scale(1.5);
+	margin-right: 5px;
 }
-.feedback-comment label, .feedback-reason-title {
+.feedback-comment label, .gp-content h3.feedback-reason-title {
 	font-size: 1.1em;
 	font-weight: bold;
+	margin: 0;
 }
 .feedback-comment textarea {
 	height: 110px;
 	font-size: 1.1em;
+}
+.status-actions details {
+	margin-bottom: 5px;
 }
