@@ -26,12 +26,12 @@
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
 			'<h3>Reason</h3>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="style" /><label>Style Guide </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="grammar" /><label>Grammar </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="branding" /><label>Branding </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="glossary" /><label>Glossary </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="punctuation" /><label>Punctuation </label></div>' +
-			'<div class="modal-item"><input type="checkbox" name="modal_feedback_reason" value="typo" /><label>Typo </label></div>' +
+			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="style" />Style Guide </div></label>' +
+			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="grammar" />Grammar </div></label>' +
+			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="branding" />Branding </div></label>' +
+			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="glossary" />Glossary </div></label>' +
+			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="punctuation" />Punctuation </div></label>' +
+			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="typo" />Typo </div></label>' +
 			'<div class="modal-comment">' +
 					'<label>Comment </label>' +
 					'<textarea name="modal_feedback_comment"></textarea>' +
