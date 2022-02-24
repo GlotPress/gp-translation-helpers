@@ -65,7 +65,7 @@ $gp.translation_helpers = ( // eslint-disable-line no-undef
 			},
 			reply_comment_form: function( $comment ) {
 				var commentId = $comment.attr( 'data-commentid' );
-				$( '#comment-reply-' + commentId ).toggle();
+				$( '#comment-reply-' + commentId ).toggle().find( 'textarea' ).focus();
 				if ( 'Reply' === $comment.text() ) {
 					$comment.text( 'Cancel Reply' );
 				} else {

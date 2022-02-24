@@ -534,7 +534,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 		<?php if ( $reject_reason ) : ?>
 		<p>
 			<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
-			<?php echo wp_kses( '<span>' . implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?>
+			<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
 		</p>
 		<?php endif; ?>
 	</div>
