@@ -13,7 +13,7 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment
+	 * @param WP_Comment $comment   The comment object.
 	 * @param $request
 	 * @param $creating
 	 *
@@ -22,24 +22,20 @@ class GP_Notifications {
 	public static function new_comment( WP_Comment $comment, $request, $creating ) {
 		if ( ( '1' === $comment->comment_approved ) || ( 'approve' === $comment->comment_approved ) ) {
 			$comment_meta = get_comment_meta( $comment->comment_ID );
-			if ( ( '0' !== $comment->comment_parent ) ) {
-				$parent_comments  = self::get_parent_comments( $comment->comment_parent );
-				$emails_to_notify = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
-				self::send_emails( $comment, $comment_meta, $emails_to_notify );
-			} else {
-				if ( array_key_exists( 'comment_topic', $comment_meta ) ) {
-					switch ( $comment_meta['comment_topic'] ) {
-						case 'typo':
-						case 'context': // Notify to the developer(s)
-							self::send_emails_to_developers( $comment, $comment_meta );
-							break;
-						case 'question': // Notify to the GTE, PTE and CLPTE
-							self::send_emails_to_validators( $comment, $comment_meta );
-							break;
-						case 'unknown':  // todo: decide what to do.
-							break;
-
-					}
+			if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
+				self::send_emails_to_thread_commenters( $comment, $comment_meta );
+			}
+			if ( array_key_exists( 'comment_topic', $comment_meta ) ) {
+				switch ( $comment_meta['comment_topic'] ) {
+					case 'typo':
+					case 'context': // Notify to the developer(s)
+						self::send_emails_to_developers( $comment, $comment_meta );
+						break;
+					case 'question': // Notify to the GTE, PTE and CLPTE
+						self::send_emails_to_validators( $comment, $comment_meta );
+						break;
+					case 'unknown':  // todo: decide what to do.
+						break;
 				}
 			}
 		}
@@ -57,39 +53,62 @@ class GP_Notifications {
 	}
 
 	/**
+	 * Sends an email to the users that have commented on the thread, except to the last author.
+	 *
+	 * Currently, only works with themes and plugins.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment       The comment object.
+	 * @param array      $comment_meta  The meta values for the comment.
+	 *
+	 * @return void
+	 */
+	public static function send_emails_to_thread_commenters( WP_Comment $comment, array $comment_meta ) {
+		$parent_comments  = self::get_parent_comments( $comment->comment_parent );
+		$emails_to_notify = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
+		self::send_emails( $comment, $comment_meta, $emails_to_notify );
+	}
+
+	/**
 	 * Sends an email to the project developers.
 	 *
 	 * Currently, only works with themes and plugins.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment
-	 * @param array      $comment_meta
+	 * @param WP_Comment $comment       The comment object.
+	 * @param array      $comment_meta  The meta values for the comment.
 	 *
 	 * @return void
 	 */
 	public static function send_emails_to_developers( WP_Comment $comment, array $comment_meta ) {
-		$translation_id = $comment_meta['translation_id'][0];
-		$emails         = self::get_author_emails( $translation_id );
+		$emails = self::get_author_emails( $comment, $comment_meta );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
 	/**
 	 * Sends an email to the all the project validators: GTE, PTE and CLPTE.
 	 *
-	 * @param WP_Comment $comment
-	 * @param array      $comment_meta
+	 * @param WP_Comment $comment       The comment object.
+	 * @param array      $comment_meta  The meta values for the comment.
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return void
 	 */
 	public static function send_emails_to_validators( WP_Comment $comment, array $comment_meta ) {
-		$translation_id = $comment_meta['translation_id'][0];
-		$locale         = $comment_meta['locale'][0];
-		$emails         = self::get_gte_emails( $locale );
-		$emails         = array_merge( $emails, self::get_pte_emails_by_project_and_locale( $translation_id, $locale ) );
-		$emails         = array_merge( $emails, self::get_clpte_emails_by_project( $translation_id ) );
+		$translation_id         = $comment_meta['translation_id'][0];
+		$locale                 = $comment_meta['locale'][0];
+		$emails                 = self::get_gte_emails( $locale );
+		$emails                 = array_merge( $emails, self::get_pte_emails_by_project_and_locale( $translation_id, $locale ) );
+		$emails                 = array_merge( $emails, self::get_clpte_emails_by_project( $translation_id ) );
+		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
+		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+		// Set the emails array as empty if one GTE/PTE/CLPTE has a comment in the thread.
+		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
+			$emails = array();
+		}
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -143,8 +162,8 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment
-	 * @param array|null $comment_meta
+	 * @param WP_Comment $comment       The comment object.
+	 * @param array|null $comment_meta  The meta values for the comment.
 	 * @param array|null $emails
 	 *
 	 * @return bool
@@ -171,8 +190,8 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment
-	 * @param array|null $comment_meta
+	 * @param WP_Comment $comment       The comment object.
+	 * @param array|null $comment_meta  The meta values for the comment.
 	 *
 	 * @return string|null
 	 */
@@ -330,15 +349,17 @@ class GP_Notifications {
 	 * Themes: only one email.
 	 * Plugins: all the plugin commiters.
 	 *
-	 * @param int $translation_id The id for the translation showed when the comment was made.
+	 * @param WP_Comment $comment       The comment object.
+	 * @param array      $comment_meta  The meta values for the comment.
 	 *
 	 * @return array
 	 */
-	public static function get_author_emails( int $translation_id ): array {
+	public static function get_author_emails( WP_Comment $comment, array $comment_meta ): array {
 		global $wpdb;
 
-		$emails  = array();
-		$project = self::get_project_to_translate( $translation_id );
+		$emails         = array();
+		$translation_id = $comment_meta['translation_id'][0];
+		$project        = self::get_project_to_translate( $translation_id );
 		if ( 'wp-themes' === substr( $project->path, 0, 9 ) ) {
 			$author   = $wpdb->get_row(
 				$wpdb->prepare(
@@ -365,6 +386,12 @@ class GP_Notifications {
 			foreach ( $committers as $user_login ) {
 				$emails[] = get_user_by( 'login', $user_login )->user_email;
 			}
+		}
+		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
+		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+		// Return an empty array of emails if one author has a comment in the thread.
+		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
+			return array();
 		}
 		return $emails;
 	}
