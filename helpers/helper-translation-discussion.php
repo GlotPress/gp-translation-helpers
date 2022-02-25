@@ -292,7 +292,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 					array(
 						'post_type'      => self::POST_TYPE,
 						'tax_input'      => array(
-							self::LINK_TAXONOMY => array( $original_id ),
+							self::LINK_TAXONOMY => array( strval( $original_id ) ),
 						),
 						'post_status'    => self::POST_STATUS,
 						'post_author'    => 0,
@@ -497,10 +497,15 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
 	$current_locale = $args['locale_slug'];
 
-	$current_translation_id = $args['translation_id'];
-	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
+	$current_translation_id  = $args['translation_id'];
+	$comment_translation_id  = get_comment_meta( $comment->comment_ID, 'translation_id', true );
+	$is_a_rejection_feedback = false;
+	$reject_reason           = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	if ( ! empty( $reject_reason ) && ( $current_locale && $current_locale === $comment_locale ) ) {
+		$is_a_rejection_feedback = true;
+	}
 	?>
-	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>">
+	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_a_rejection_feedback ? 'true' : 'false'; ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 	<div class="comment-avatar">
 	<?php echo get_avatar( $comment, 25 ); ?>
@@ -528,7 +533,15 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	<?php endif; ?>
 	</div>
 	<?php endif; ?>
-	<div class="comment-content" dir="auto"><?php comment_text(); ?></div>
+	<div class="comment-content" dir="auto">
+		<?php comment_text(); ?>
+		<?php if ( $reject_reason ) : ?>
+		<p>
+			<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
+			<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
+		</p>
+		<?php endif; ?>
+	</div>
 	<footer>
 	<div class="comment-author vcard">
 			<?php
@@ -609,7 +622,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 						$comment_translation_id
 					);
 				?>
-				<em>Translation: <?php echo $translation_permalink ? gp_link( $translation_permalink, $translation->translation_0 ) : esc_html( $translation->translation_0 ); ?></em>
+				<em><?php echo $is_a_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ', $translation_permalink ? gp_link( $translation_permalink, $translation->translation_0 ) : esc_html( $translation->translation_0 ); ?></em>
 			<?php endif; ?>
 			<div class="clear"></div>
 			<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">
