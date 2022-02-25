@@ -622,7 +622,16 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 						$comment_translation_id
 					);
 				?>
-				<em><?php echo $is_a_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ', $translation_permalink ? gp_link( $translation_permalink, $translation->translation_0 ) : esc_html( $translation->translation_0 ); ?></em>
+				<em>
+					<?php
+					echo $is_a_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ';
+					if ( $translation_permalink ) {
+						echo wp_kses( gp_link( $translation_permalink, $translation->translation_0 ), array( 'a' => array( 'href' => true ) ) );
+					} else {
+						echo esc_html( $translation->translation_0 );
+					}
+					?>
+				</em>
 			<?php endif; ?>
 			<div class="clear"></div>
 			<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">
