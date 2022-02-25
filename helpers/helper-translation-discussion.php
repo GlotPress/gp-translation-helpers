@@ -355,11 +355,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
-				'comments'           => $comments,
-				'post_id'            => self::get_shadow_post( $this->data['original_id'] ),
-				'translation_id'     => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
-				'locale_slug'        => $this->data['locale_slug'],
-				'original_permalink' => $this->data['permalink'],
+				'comments'             => $comments,
+				'post_id'              => self::get_shadow_post( $this->data['original_id'] ),
+				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
+				'locale_slug'          => $this->data['locale_slug'],
+				'original_permalink'   => $this->data['permalink'],
+				'original_id'          => $this->data['original_id'],
+				'project'              => $this->data['project'],
+				'translation_set_slug' => $this->data['translation_set_slug'],
+
 			),
 			$this->assets_dir . 'templates'
 		);
@@ -608,8 +612,26 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<p><em><?php esc_html_e( 'Your comment is awaiting moderation.' ); ?></em></p>
 			<?php endif; ?>
 			<?php if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) : ?>
-				<?php $translation = GP::$translation->get( $comment_translation_id ); ?>
-				<em><?php echo ( $is_a_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ' ) . esc_translation( $translation->translation_0 ); ?></em>
+				<?php
+					$translation           = GP::$translation->get( $comment_translation_id );
+					$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
+						$args['project'],
+						$args['locale_slug'],
+						$args['translation_set_slug'],
+						$args['original_id'],
+						$comment_translation_id
+					);
+				?>
+				<em>
+					<?php
+					echo $is_a_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ';
+					if ( $translation_permalink ) {
+						echo wp_kses( gp_link( $translation_permalink, $translation->translation_0 ), array( 'a' => array( 'href' => true ) ) );
+					} else {
+						echo esc_html( $translation->translation_0 );
+					}
+					?>
+				</em>
 			<?php endif; ?>
 			<div class="clear"></div>
 			<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">

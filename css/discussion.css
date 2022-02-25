@@ -193,3 +193,8 @@ div#TB_ajaxWindowTitle {
 .status-actions details {
 	margin-bottom: 5px;
 }
+
+.async-content #legend {
+	margin-top: 2em;
+	float: none;
+}
