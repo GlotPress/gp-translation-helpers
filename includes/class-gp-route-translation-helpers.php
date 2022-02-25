@@ -44,12 +44,14 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$this->die_with_404();
 		}
 
-		$args                 = array(
+		$args = array(
 			'project_id'     => $project->id,
 			'locale_slug'    => $locale_slug,
 			'set_slug'       => $translation_set_slug,
 			'original_id'    => $original_id,
 			'translation_id' => $translation_id,
+			'project'        => $project,
+
 		);
 		$translation_set      = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $translation_set_slug, $locale_slug );
 		$original             = GP::$original->get( $original_id );
@@ -254,6 +256,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			'original_id'          => $original_id,
 			'translation_id'       => $translation_id,
 			'permalink'            => $permalink,
+			'project'              => $project,
 		);
 
 		$single_helper = gp_get( 'helper' );
@@ -317,5 +320,23 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$permalink .= '/' . $locale_slug . '/' . $set_slug;
 		}
 		return home_url( gp_url_project( $permalink ) );
+	}
+
+	public static function get_translation_permalink( $project, $locale_slug, $translation_set_slug, $original_id, $translation_id ) {
+		if ( ! $project || ! $locale_slug || ! $translation_set_slug || ! $original_id || ! $translation_id ) {
+			return false;
+		}
+
+		$translation_permalink = gp_url_project_locale(
+			$project,
+			$locale_slug,
+			$translation_set_slug,
+			array(
+				'filters[status]'         => 'either',
+				'filters[original_id]'    => $original_id,
+				'filters[translation_id]' => $translation_id,
+			)
+		);
+		return $translation_permalink;
 	}
 }
