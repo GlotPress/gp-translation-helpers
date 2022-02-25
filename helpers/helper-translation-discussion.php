@@ -165,7 +165,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @return     array  The capabilities they need to have.
 	 */
 	public function map_comment_meta_caps( $caps, $cap, $user_id, $args ) {
-		if ( 'edit_comment_meta' === $cap && in_array( $args[1], array( 'translation_id', 'locale', 'comment_topic' ) ) ) {
+		if ( 'edit_comment_meta' === $cap && isset( $args[1] ) && in_array( $args[1], array( 'translation_id', 'locale', 'comment_topic' ), true ) ) {
 			return array( 'subscriber' );
 		}
 		return $caps;
