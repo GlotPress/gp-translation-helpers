@@ -81,6 +81,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function after_constructor() {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
+		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 	}
 
@@ -151,6 +152,23 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'rewrite'           => false,
 			)
 		);
+	}
+
+	/**
+	 * Give subscribers permission to add our comment metas.
+	 *
+	 * @param      array  $caps     The capabilities they need to have.
+	 * @param      string $cap      The capability we're testing for.
+	 * @param      int    $user_id  The user id.
+	 * @param      array  $args     Other arguments.
+	 *
+	 * @return     array  The capabilities they need to have.
+	 */
+	public function map_comment_meta_caps( $caps, $cap, $user_id, $args ) {
+		if ( 'edit_comment_meta' === $cap && in_array( $args[1], array( 'translation_id', 'locale', 'comment_topic' ) ) ) {
+			return array( 'subscriber' );
+		}
+		return $caps;
 	}
 
 	/**
