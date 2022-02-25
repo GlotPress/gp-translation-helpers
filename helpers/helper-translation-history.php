@@ -93,7 +93,7 @@ class Helper_History extends GP_Translation_Helper {
 	 */
 	public function async_output_callback( array $translations ): string {
 		if ( $translations ) {
-			$output  = '<table id="translation-history-table">';
+			$output  = '<table id="translation-history-table" class="translations">';
 			$output .= '<thead>';
 			$output .= '<tr><th>Date</th><th>Translation</th><th>Added by</th><th>Last modified by</th>';
 			$output .= '</thead>';
@@ -102,8 +102,8 @@ class Helper_History extends GP_Translation_Helper {
 				$date_and_time = is_null( $translation->date_modified ) ? $translation->date_added : $translation->date_modified;
 				$date_and_time = explode( ' ', $date_and_time );
 
-				$user               = get_userdata( $translation->user_id );
-				$user_last_modified = get_userdata( $translation->user_id_last_modified );
+				$user                  = get_userdata( $translation->user_id );
+				$user_last_modified    = get_userdata( $translation->user_id_last_modified );
 				$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
 					$this->data['project'],
 					$this->data['locale_slug'],
