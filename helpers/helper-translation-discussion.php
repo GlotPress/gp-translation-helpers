@@ -446,8 +446,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * Used as sanitize callback in the register_meta for the "comment" object type,
 	 * "locale" meta_key
-     *
-     * The string type (input and output) is because it is the type if $translation_id is empty.
+	 *
+	 * The string type (input and output) is because it is the type if $translation_id is empty.
 	 *
 	 * @since 0.0.2
 	 *
@@ -455,7 +455,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return int|string
 	 */
-    public function sanitize_translation_id( $translation_id ) {
+	public function sanitize_translation_id( $translation_id ) {
 		if ( ! is_numeric( $translation_id ) ) {
 			if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
 				wp_die( 'Invalid translation ID' );
