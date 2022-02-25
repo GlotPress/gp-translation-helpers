@@ -85,6 +85,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 		add_filter( 'comment_reply_link', array( $this, 'comment_reply_link' ), 10, 4 );
+		add_filter( 'wp_ajax_create_shadow_post', array( $this, 'ajax_create_shadow_post' ) );
 	}
 
 	/**
@@ -241,7 +242,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		return $cache[ $post->ID ];
 	}
-
 	/**
 	 * Updates the comment's approval status before it is set.
 	 *
@@ -287,11 +287,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @since 0.0.1
 	 *
-	 * @param int $post_id  The post ID.
+	 * @param $post_id  The post ID.
 	 *
 	 * @return false|string
 	 */
-	public static function get_original_from_post_id( int $post_id ) {
+	public static function get_original_from_post_id( $post_id ) {
+		if ( self::is_temporary_post_id( $post_id ) ) {
+			return self::get_original_id_from_temporary_post_id( $post_id );
+		}
+
 		$terms = wp_get_object_terms( $post_id, self::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
@@ -300,19 +304,69 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return $terms[0]->slug;
 	}
 
+	public static function is_temporary_post_id( $post_id ) {
+		return self::get_original_id_from_temporary_post_id( $post_id ) > 0;
+	}
+
+	public static function get_original_id_from_temporary_post_id( $post_id ) {
+		if ( self::POST_TYPE !== substr( $post_id, 0, strlen( self::POST_TYPE ) ) ) {
+			return null;
+		}
+		$original_id = substr( $post_id, strlen( self::POST_TYPE ) );
+		if ( is_numeric( $original_id ) && $original_id > 0 ) {
+			return intval( $original_id );
+		}
+
+		return null;
+	}
+
+	public static function get_or_create_shadow_post( int $original_id ) {
+		return self::get_shadow_post_id( $original_id, true );
+	}
+
+	public static function maybe_get_temporary_post( $post_id ) {
+		if ( self::is_temporary_post_id( $post_id ) ) {
+			return new Gth_Temporary_Post( $post_id );
+		}
+
+		return get_post( $post_id );
+	}
+
 	/**
 	 * Gets the post id for the comments and stores it in the cache.
 	 *
 	 * @since 0.0.1
 	 *
-	 * @param int $original_id  The original id for the string to translate. E.g. "2440".
+	 * @param int  $original_id  The original id for the string to translate. E.g. "2440".
+	 * @param bool $create       Whether to create a post if it doesn't exist.
 	 *
 	 * @return int|WP_Error
 	 */
-	public static function get_shadow_post( int $original_id ) {
+	/**
+	 * Gets the shadow post id.
+	 *
+	 * @param      int  $original_id  The original identifier
+	 * @param      bool $create       The create
+	 *
+	 * @return     <type>  The shadow post.
+	 */
+	public static function get_shadow_post_id( int $original_id, $create = false ) {
 		$cache_key = self::LINK_TAXONOMY . '_' . $original_id;
 
-		if ( true || false === ( $post_id = wp_cache_get( $cache_key ) ) ) {
+		$post_id = wp_cache_get( $cache_key );
+		if ( false !== $post_id ) {
+			// Something was found in the cache.
+
+			if ( self::is_temporary_post_id( $post_id ) && $create ) {
+				// a fake post_id was stored in the cache but we need to create an entry.
+				// Let's pretend a cache fail, so that we get a chance to create an entry unless one already exists.
+				$post_id = false;
+			}
+		}
+
+		$development = true;
+		if ( $development || false === $post_id ) {
+			$post_id  = null;
 			$gp_posts = get_posts(
 				array(
 					'tax_query'        => array(
@@ -330,8 +384,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			);
 
 			if ( ! empty( $gp_posts ) ) {
-						$post_id = $gp_posts[0]->ID;
-			} else {
+				$post_id = $gp_posts[0]->ID;
+			} elseif ( $create ) {
 				$post_id = wp_insert_post(
 					array(
 						'post_type'      => self::POST_TYPE,
@@ -343,6 +397,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 						'comment_status' => 'open',
 					)
 				);
+			} else {
+				$post_id = self::POST_TYPE . strval( $original_id );
 			}
 		}
 
@@ -358,9 +414,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @return array
 	 */
 	public function get_async_content(): array {
+		$post_id = self::get_shadow_post_id( $this->data['original_id'] );
+		if ( self::is_temporary_post_id( $post_id ) ) {
+			return array();
+		}
+
 		return get_comments(
 			array(
-				'post_id'            => self::get_shadow_post( $this->data['original_id'] ),
+				'post_id'            => $post_id,
 				'status'             => 'approve',
 				'type'               => 'comment',
 				'include_unapproved' => array( get_current_user_id() ),
@@ -416,11 +477,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
+		$post = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
 				'comments'             => $comments,
-				'post_id'              => self::get_shadow_post( $this->data['original_id'] ),
+				'post'                 => $post,
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
 				'original_permalink'   => $this->data['original_permalink'],
@@ -576,6 +639,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			$args['reply_text']
 		);
 		return $args['before'] . $link . $args['after'];
+	}
+
+	public function ajax_create_shadow_post() {
+		check_ajax_referer( 'wp_rest', 'nonce' );
+
+		$original_id = self::get_original_id_from_temporary_post_id( $_POST['data']['post'] );
+		$post_id     = self::get_or_create_shadow_post( $original_id );
+		wp_send_json_success( $post_id );
 	}
 
 	/**
