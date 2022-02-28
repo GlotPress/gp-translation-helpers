@@ -390,11 +390,11 @@ class GP_Translation_Helpers {
 	 *
 	 * @since 0.0.1
 	 *
-	 *  @param string $reject_comment Feedback entered by reviewer
-	 *  @param int    $post_id ID of the post where the comment will be added
-	 *  @param array  $reject_reason Reason(s) for rejection
-	 *  @param string $translation_id ID of the rejected translation
-	 *  @param string $locale_slug Locale of the rejected translation
+	 *  @param string $reject_comment Feedback entered by reviewer.
+	 *  @param int    $post_id ID of the post where the comment will be added.
+	 *  @param array  $reject_reason Reason(s) for rejection.
+	 *  @param string $translation_id ID of the rejected translation.
+	 *  @param string $locale_slug Locale of the rejected translation.
 	 *
 	 * @return false|int
 	 */
