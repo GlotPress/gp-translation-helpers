@@ -322,20 +322,36 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		return home_url( gp_url_project( $permalink ) );
 	}
 
-	public static function get_translation_permalink( $project, $locale_slug, $translation_set_slug, $original_id, $translation_id ) {
-		if ( ! $project || ! $locale_slug || ! $translation_set_slug || ! $original_id || ! $translation_id ) {
+	/**
+	 * Gets the translation permalink.
+	 *
+	 * @param      GP_Project $project               The project.
+	 * @param      string     $locale_slug           The locale slug.
+	 * @param      string     $translation_set_slug  The translation set slug.
+	 * @param      int        $original_id           The original id.
+	 * @param      int        $translation_id        The translation id.
+	 *
+	 * @return     bool    The translation permalink.
+	 */
+	public static function get_translation_permalink( $project, $locale_slug, $translation_set_slug, $original_id, $translation_id = null ) {
+		if ( ! $project || ! $locale_slug || ! $translation_set_slug || ! $original_id ) {
 			return false;
+		}
+
+		$args = array(
+			'filters[original_id]' => $original_id,
+		);
+
+		if ( $translation_id ) {
+			$args['filters[status]']         = 'either';
+			$args['filters[translation_id]'] = $translation_id;
 		}
 
 		$translation_permalink = gp_url_project_locale(
 			$project,
 			$locale_slug,
 			$translation_set_slug,
-			array(
-				'filters[status]'         => 'either',
-				'filters[original_id]'    => $original_id,
-				'filters[translation_id]' => $translation_id,
-			)
+			$args
 		);
 		return $translation_permalink;
 	}
