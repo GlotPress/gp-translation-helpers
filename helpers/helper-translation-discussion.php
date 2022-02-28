@@ -230,7 +230,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		}
 
 		// If our user has already contributed translations, approve comment.
-		$user_current_translations = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->gp_translations WHERE user_id = %s AND status = 'current'", $commentdata['comment_author'] ) );
+		$user_current_translations = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->gp_translations WHERE user_id = %s AND status = 'current'", $commentdata['user_id'] ) );
 		if ( $user_current_translations ) {
 			$approved = true;
 		}
