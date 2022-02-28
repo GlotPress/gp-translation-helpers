@@ -39,8 +39,26 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 * @return void
 	 */
 	public function original_permalink( $project_path, $original_id, $locale_slug = null, $translation_set_slug = null, $translation_id = null ) {
+		$original = GP::$original->get( $original_id );
+		if ( ! $original ) {
+			$this->die_with_404();
+		}
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {
+			$this->die_with_404();
+		}
+
+		if ( $project->id !== $original->project_id ) {
+			$project = GP::$project->get( $original->project_id );
+
+			// Let's use the parameters that we have to create a URL in the right project.
+			$corrected_url = self::get_permalink( $project->path, $original_id, $locale_slug, $translation_set_slug );
+
+			wp_safe_redirect( $corrected_url );
+			exit;
+		}
+
+		if ( ! $original ) {
 			$this->die_with_404();
 		}
 
@@ -53,8 +71,8 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			'project'        => $project,
 
 		);
-		$translation_set      = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $translation_set_slug, $locale_slug );
-		$original             = GP::$original->get( $original_id );
+		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $translation_set_slug, $locale_slug );
+
 		$all_translation_sets = GP::$translation_set->by_project_id( $project->id );
 
 		if ( isset( $this->helpers['discussion'] ) ) {
