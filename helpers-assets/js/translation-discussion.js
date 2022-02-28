@@ -32,6 +32,10 @@ jQuery( function( $ ) {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 
+		if ( ! formdata.meta.translation_id ) {
+			formdata.meta.translation_id = 0;
+		}
+
 		if ( formdata.meta.locale ) {
 			/**
 			 * Set the locale to an empty string if option selected has value 'typo' or 'context'
