@@ -50,7 +50,11 @@ class GP_Route_Translation_Helpers extends GP_Route {
 
 		if ( $project->id !== $original->project_id ) {
 			$project = GP::$project->get( $original->project_id );
-			wp_redirect( self::get_permalink( $project->path, $original_id, $locale_slug, $translation_set_slug, $translation_id ) );
+
+			// Let's use the parameters that we have to create a URL in the right project.
+			$corrected_url = self::get_permalink( $project->path, $original_id, $locale_slug, $translation_set_slug );
+
+			wp_safe_redirect( $corrected_url );
 			exit;
 		}
 
