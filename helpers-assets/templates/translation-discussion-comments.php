@@ -15,12 +15,12 @@
 		<?php if ( $locale_slug ) : ?>
 			(<?php echo esc_html( $locale_slug ); ?>)
 			<?php
-			$countLocaleComments      = 0;
+			$count_locale_comments    = 0;
 			$count_rejection_feedback = 0;
 			foreach ( $comments as $_comment ) {
 				$comment_locale = get_comment_meta( $_comment->comment_ID, 'locale', true );
 				if ( $locale_slug == $comment_locale ) {
-					$countLocaleComments++;
+					$count_locale_comments++;
 
 					$is_rejection_feedback = get_comment_meta( $_comment->comment_ID, 'is_rejection_feedback', true );
 					if ( ! empty( $is_rejection_feedback ) ) {
@@ -32,7 +32,7 @@
 		
 			<span class="comments-selector">
 				<a href="#" class="active-link" data-selector="all">Show all (<?php echo esc_html( $number ); ?>)</a> | 
-				<a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $countLocaleComments ); ?>)</a> | 
+				<a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $count_locale_comments ); ?>)</a> | 
 				<a href="#" data-selector="rejection-feedback">Rejection Feedback (<?php echo esc_html( $count_rejection_feedback ); ?>)</a>
 			</span>
 		<?php endif; ?>
