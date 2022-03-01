@@ -151,6 +151,17 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'rewrite'           => false,
 			)
 		);
+
+		register_meta(
+			'comment',
+			'is_rejection_feedback',
+			array(
+				'description'  => 'Flag to identify comments that are for rejection',
+				'single'       => true,
+				'show_in_rest' => true,
+				'rewrite'      => false,
+			)
+		);
 	}
 
 	/**

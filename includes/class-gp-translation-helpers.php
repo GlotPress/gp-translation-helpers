@@ -364,9 +364,10 @@ class GP_Translation_Helpers {
 				'comment_content' => $reject_comment,
 				'comment_post_ID' => $post_id,
 				'comment_meta'    => array(
-					'reject_reason'  => $reject_reason,
-					'translation_id' => $translation_id,
-					'locale'         => $locale_slug,
+					'reject_reason'         => $reject_reason,
+					'translation_id'        => $translation_id,
+					'locale'                => $locale_slug,
+					'is_rejection_feedback' => true,
 				),
 			)
 		);
