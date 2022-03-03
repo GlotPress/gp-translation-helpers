@@ -21,8 +21,8 @@
 				if ( $locale_slug == $comment_locale ) {
 					$count_locale_comments++;
 
-					$is_rejection_feedback = get_comment_meta( $_comment->comment_ID, 'is_rejection_feedback', true );
-					if ( ! empty( $is_rejection_feedback ) ) {
+					$reject_reason = get_comment_meta( $_comment->comment_ID, 'reject_reason', true );
+					if ( ! empty( $reject_reason ) ) {
 						$count_rejection_feedback++;
 					}
 				}

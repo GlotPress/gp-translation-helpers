@@ -151,17 +151,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'rewrite'           => false,
 			)
 		);
-
-		register_meta(
-			'comment',
-			'is_rejection_feedback',
-			array(
-				'description'  => 'Flag to identify comments that are for rejection',
-				'single'       => true,
-				'show_in_rest' => true,
-				'rewrite'      => false,
-			)
-		);
 	}
 
 	/**
@@ -512,16 +501,15 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
-	$is_rejection_feedback  = get_comment_meta( $comment->comment_ID, 'is_rejection_feedback', true );
-	$is_locale_rejection    = false;
 	$reject_reason          = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	$is_rejection_feedback  = false;
 
-	if ( ! empty( $is_rejection_feedback ) && ( $current_locale && $current_locale === $comment_locale ) ) {
+	if ( ! empty( $reject_reason ) && ( $current_locale && $current_locale === $comment_locale ) ) {
 		// Set to true if rejection feedback belongs to current locale
-		$is_locale_rejection = true;
+		$is_rejection_feedback = true;
 	}
 	?>
-	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_locale_rejection ? 'true' : 'false'; ?>">
+	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_rejection_feedback ? 'true' : 'false'; ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 	<div class="comment-avatar">
 	<?php echo get_avatar( $comment, 25 ); ?>
