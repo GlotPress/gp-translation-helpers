@@ -4,7 +4,6 @@
  */
 ?>
 <div class="discussion-wrapper">
-	<?php // var_dump($comments); ?>
 	<?php if ( $number = count( $comments ) ) : ?>
 
 		<h6>
