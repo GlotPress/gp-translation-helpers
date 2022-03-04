@@ -101,6 +101,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'public'  => false,
 				'show_ui' => false,
 				'rewrite' => false,
+				'capabilities' => array(
+					'assign_terms' => 'read',
+				),
 			)
 		);
 
