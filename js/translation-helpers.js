@@ -51,6 +51,7 @@ $gp.translation_helpers = ( // eslint-disable-line no-undef
 							$( '#' + id ).find( '.loading' ).remove();
 							$( '#' + id ).find( '.async-content' ).html( result.content );
 						} );
+						$( '.helper-translation-discussion' ).find( 'form.comment-form' ).removeAttr( 'novalidate' );
 					}
 				);
 			},

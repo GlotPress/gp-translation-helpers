@@ -86,6 +86,7 @@
 				'title_reply_after'   => '</h5>',
 				'id_form'             => 'commentform-' . $post_id,
 				'cancel_reply_link'   => '<span></span>',
+				'format'              => 'html5',
 				'comment_notes_after' => implode(
 					"\n",
 					array(
