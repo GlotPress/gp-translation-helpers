@@ -81,6 +81,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function after_constructor() {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
+		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
+		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 	}
 
@@ -99,6 +101,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'public'  => false,
 				'show_ui' => false,
 				'rewrite' => false,
+				'capabilities' => array(
+					'assign_terms' => 'read',
+				),
 			)
 		);
 
@@ -151,6 +156,44 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'rewrite'           => false,
 			)
 		);
+	}
+
+	/**
+	 * Give subscribers permission to add our comment metas.
+	 *
+	 * @param      array  $caps     The capabilities they need to have.
+	 * @param      string $cap      The capability we're testing for.
+	 * @param      int    $user_id  The user id.
+	 * @param      array  $args     Other arguments.
+	 *
+	 * @return     array  The capabilities they need to have.
+	 */
+	public function map_comment_meta_caps( $caps, $cap, $user_id, $args ) {
+		if ( 'edit_comment_meta' === $cap && isset( $args[1] ) && in_array( $args[1], array( 'translation_id', 'locale', 'comment_topic' ), true ) ) {
+			return array( 'read' );
+		}
+		return $caps;
+	}
+
+	/**
+	 * Ensure that a user has the read capability on translate.wordpress.org.
+	 *
+	 * @param      array $allcaps  All capabilities of the uer.
+	 * @param      array $caps     The capabilities requested.
+	 * @param      array $args     Other arguments.
+	 *
+	 * @return     array  Potentially modified capabilities of the user.
+	 */
+	public function give_user_read_cap( $allcaps, $caps, $args ) {
+		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) || get_current_blog_id() !== WPORG_TRANSLATE_BLOGID ) {
+			return $allcaps;
+		}
+
+		if ( in_array( 'read', $caps, true ) && is_user_logged_in() && ! is_admin() ) {
+			$allcaps['read'] = true;
+		}
+
+		return $allcaps;
 	}
 
 	/**
