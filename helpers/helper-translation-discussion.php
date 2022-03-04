@@ -82,7 +82,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
 		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
-		add_filter( 'user_has_cap', array( $this, 'give_user_edit_comment_meta_cap' ), 10, 3 );
+		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 	}
 
@@ -181,7 +181,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return     array  Potentially modified capabilities of the user.
 	 */
-	public function give_user_edit_comment_meta_cap( $allcaps, $caps, $args ) {
+	public function give_user_read_cap( $allcaps, $caps, $args ) {
 		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) || get_current_blog_id() !== WPORG_TRANSLATE_BLOGID ) {
 			return $allcaps;
 		}
