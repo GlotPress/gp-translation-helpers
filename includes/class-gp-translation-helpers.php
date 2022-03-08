@@ -372,7 +372,6 @@ class GP_Translation_Helpers {
 				$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
 				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id[ $index ], $locale_slug );
 			}
-			die();
 		}
 
 		die();
