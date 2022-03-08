@@ -505,7 +505,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function sanitize_translation_id( $translation_id ) {
 		if ( ! is_numeric( $translation_id ) ) {
 			if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
-				wp_die( 'Invalid translation ID' );
+				throw new Exception( 'Invalid translation ID' );
 			}
 		}
 		return $translation_id;
@@ -525,7 +525,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function sanitize_original_id( $original_id ) {
 		if ( ! is_numeric( $original_id ) ) {
 			if ( $original_id > 0 && ! GP::$original->get( $original_id ) ) {
-				wp_die( 'Invalid original ID' );
+				throw new Exception( 'Invalid Original ID' );
 			}
 		}
 		return $original_id;
