@@ -380,7 +380,7 @@ class GP_Translation_Helpers {
 	/**
 	 * Inserts rejection feedback as WordPress comment
 	 *
-	 * @since 0.0.1
+	 * @since 0.0.2
 	 *
 	 *  @param string $reject_comment Feedback entered by reviewer.
 	 *  @param int    $post_id ID of the post where the comment will be added.
