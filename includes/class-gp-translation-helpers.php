@@ -322,6 +322,16 @@ class GP_Translation_Helpers {
 		<?php
 	}
 
+	/**
+	 * Registers and enqueues the reject-feedback.js script and also loads a few js variables on the page.
+	 *
+	 * @since 0.0.2
+	 *
+	 *  @param string $template Template of the current page.
+	 *  @param string $translation_set Current translation set
+	 *
+	 * @return void
+	 */
 	public function register_reject_feedback_js( $template, $translation_set ) {
 
 		if ( 'translations' !== $template ) {
@@ -342,6 +352,13 @@ class GP_Translation_Helpers {
 		);
 	}
 
+	/**
+	 * Is called from the AJAX request in reject-feedback.js to submit a rejection feedback.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return string|void
+	 */
 	public function reject_with_feedback() {
 		check_ajax_referer( 'gp_reject_feedback', 'nonce' );
 
