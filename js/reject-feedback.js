@@ -83,7 +83,7 @@
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
 				if ( ! comment.trim().length && ! rejectReason.length ) {
-					return;
+					$( 'form.filters-toolbar.bulk-actions' ).submit();
 				}
 
 				// eslint-disable-next-line no-undef
