@@ -345,9 +345,19 @@ class GP_Translation_Helpers {
 			'gp-reject-feedback-js',
 			'$gp_reject_feedback_settings',
 			array(
-				'url'         => admin_url( 'admin-ajax.php' ),
-				'nonce'       => wp_create_nonce( 'gp_reject_feedback' ),
-				'locale_slug' => $translation_set['locale_slug'],
+				'url'            => admin_url( 'admin-ajax.php' ),
+				'nonce'          => wp_create_nonce( 'gp_reject_feedback' ),
+				'locale_slug'    => $translation_set['locale_slug'],
+				'reject_reasons' => json_encode(
+					array(
+						'style'       => 'Style Guide',
+						'grammar'     => 'Grammar',
+						'branding'    => 'Branding',
+						'glossary'    => 'Glossary',
+						'punctuation' => 'Punctuation',
+						'typo'        => 'Typo',
+					)
+				),
 			)
 		);
 	}
