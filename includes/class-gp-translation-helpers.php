@@ -345,32 +345,32 @@ class GP_Translation_Helpers {
 	public function reject_with_feedback() {
 		check_ajax_referer( 'gp_reject_feedback', 'nonce' );
 
-		$helper_discussion = new Helper_Translation_Discussion();
-		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
-		$translation_id    = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
-		$original_id       = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
-		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$reject_reason     = array_map( 'sanitize_text_field', $reject_reason );
-		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
+		$helper_discussion    = new Helper_Translation_Discussion();
+		$locale_slug          = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
+		$translation_id_array = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
+		$original_id_array    = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
+		$reject_reason        = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
+		$reject_reason        = array_map( 'sanitize_text_field', $reject_reason );
+		$reject_comment       = sanitize_text_field( $_POST['data']['comment'] );
 
-		if ( ! $locale_slug || ! $translation_id || ! $original_id || ( ! $reject_reason && ! $reject_comment ) ) {
+		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $reject_reason && ! $reject_comment ) ) {
 			wp_send_json_error();
 		}
 
 		// Get original_id and translation_id of first string in the array
-		$first_original_id    = array_shift( $original_id );
-		$first_translation_id = array_shift( $translation_id );
+		$first_original_id    = array_shift( $original_id_array );
+		$first_translation_id = array_shift( $translation_id_array );
 		$post_id              = Helper_Translation_Discussion::get_shadow_post( $first_original_id );
 
 		// Post comment on discussion page for the first string
 		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $first_translation_id, $locale_slug );
 
-		if ( ! empty( $original_id ) && ! empty( $translation_id ) ) {
+		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
 			$reject_comment = get_comment_link( $save_feedback );
-			foreach ( $original_id as $index => $single_original_id ) {
+			foreach ( $original_id_array as $index => $single_original_id ) {
 				$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
-				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id[ $index ], $locale_slug );
+				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id_array[ $index ], $locale_slug );
 			}
 		}
 
