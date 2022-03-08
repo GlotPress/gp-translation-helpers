@@ -501,6 +501,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @param int|string $translation_id   The id for the translation showed when the comment was made.
 	 *
 	 * @return int|string
+	 * 
+	 * @throws Exception
 	 */
 	public function sanitize_translation_id( $translation_id ) {
 		if ( ! is_numeric( $translation_id ) ) {
@@ -521,6 +523,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @param int|string $original_id   The id of the original for the rejected translation.
 	 *
 	 * @return int|string
+	 * 
+	 * @throws Exception
 	 */
 	public function sanitize_original_id( $original_id ) {
 		if ( ! is_numeric( $original_id ) ) {
