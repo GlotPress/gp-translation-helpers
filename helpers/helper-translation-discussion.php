@@ -502,7 +502,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return int|string
 	 *
-	 * @throws Exception
+	 * @throws Exception Throws an exception with message if translation_id is invalid.
 	 */
 	public function sanitize_translation_id( $translation_id ) {
 		if ( ! is_numeric( $translation_id ) ) {
@@ -524,7 +524,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return int|string
 	 *
-	 * @throws Exception
+	 * @throws Exception Throws an exception with message if original_id is invalid.
 	 */
 	public function sanitize_original_id( $original_id ) {
 		if ( ! is_numeric( $original_id ) ) {
