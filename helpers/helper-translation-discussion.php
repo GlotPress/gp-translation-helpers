@@ -81,6 +81,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function after_constructor() {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
+		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
+		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 	}
 
@@ -99,6 +101,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'public'  => false,
 				'show_ui' => false,
 				'rewrite' => false,
+				'capabilities' => array(
+					'assign_terms' => 'read',
+				),
 			)
 		);
 
@@ -151,6 +156,44 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'rewrite'           => false,
 			)
 		);
+	}
+
+	/**
+	 * Give subscribers permission to add our comment metas.
+	 *
+	 * @param      array  $caps     The capabilities they need to have.
+	 * @param      string $cap      The capability we're testing for.
+	 * @param      int    $user_id  The user id.
+	 * @param      array  $args     Other arguments.
+	 *
+	 * @return     array  The capabilities they need to have.
+	 */
+	public function map_comment_meta_caps( $caps, $cap, $user_id, $args ) {
+		if ( 'edit_comment_meta' === $cap && isset( $args[1] ) && in_array( $args[1], array( 'translation_id', 'locale', 'comment_topic' ), true ) ) {
+			return array( 'read' );
+		}
+		return $caps;
+	}
+
+	/**
+	 * Ensure that a user has the read capability on translate.wordpress.org.
+	 *
+	 * @param      array $allcaps  All capabilities of the uer.
+	 * @param      array $caps     The capabilities requested.
+	 * @param      array $args     Other arguments.
+	 *
+	 * @return     array  Potentially modified capabilities of the user.
+	 */
+	public function give_user_read_cap( $allcaps, $caps, $args ) {
+		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) || get_current_blog_id() !== WPORG_TRANSLATE_BLOGID ) {
+			return $allcaps;
+		}
+
+		if ( in_array( 'read', $caps, true ) && is_user_logged_in() && ! is_admin() ) {
+			$allcaps['read'] = true;
+		}
+
+		return $allcaps;
 	}
 
 	/**
@@ -355,11 +398,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
-				'comments'           => $comments,
-				'post_id'            => self::get_shadow_post( $this->data['original_id'] ),
-				'translation_id'     => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
-				'locale_slug'        => $this->data['locale_slug'],
-				'original_permalink' => $this->data['permalink'],
+				'comments'             => $comments,
+				'post_id'              => self::get_shadow_post( $this->data['original_id'] ),
+				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
+				'locale_slug'          => $this->data['locale_slug'],
+				'original_permalink'   => $this->data['permalink'],
+				'original_id'          => $this->data['original_id'],
+				'project'              => $this->data['project'],
+				'translation_set_slug' => $this->data['translation_set_slug'],
+
 			),
 			$this->assets_dir . 'templates'
 		);
@@ -447,13 +494,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * Used as sanitize callback in the register_meta for the "comment" object type,
 	 * "locale" meta_key
 	 *
+	 * The string type (input and output) is because it is the type if $translation_id is empty.
+	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $translation_id   The id for the translation showed when the comment was made.
+	 * @param int|string $translation_id   The id for the translation showed when the comment was made.
 	 *
-	 * @return int
+	 * @return int|string
 	 */
-	public function sanitize_translation_id( int $translation_id ): int {
+	public function sanitize_translation_id( $translation_id ) {
 		if ( ! is_numeric( $translation_id ) ) {
 			if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
 				wp_die( 'Invalid translation ID' );
@@ -493,15 +542,17 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
 	$current_locale = $args['locale_slug'];
 
-	$current_translation_id  = $args['translation_id'];
-	$comment_translation_id  = get_comment_meta( $comment->comment_ID, 'translation_id', true );
-	$is_a_rejection_feedback = false;
-	$reject_reason           = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	$current_translation_id = $args['translation_id'];
+	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
+	$reject_reason          = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	$is_rejection_feedback  = false;
+
 	if ( ! empty( $reject_reason ) && ( $current_locale && $current_locale === $comment_locale ) ) {
-		$is_a_rejection_feedback = true;
+		// Set to true if rejection feedback belongs to current locale
+		$is_rejection_feedback = true;
 	}
 	?>
-	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_a_rejection_feedback ? 'true' : 'false'; ?>">
+	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_rejection_feedback ? 'true' : 'false'; ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 	<div class="comment-avatar">
 	<?php echo get_avatar( $comment, 25 ); ?>
@@ -608,8 +659,26 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<p><em><?php esc_html_e( 'Your comment is awaiting moderation.' ); ?></em></p>
 			<?php endif; ?>
 			<?php if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) : ?>
-				<?php $translation = GP::$translation->get( $comment_translation_id ); ?>
-				<em><?php echo ( $is_a_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ' ) . esc_translation( $translation->translation_0 ); ?></em>
+				<?php
+					$translation           = GP::$translation->get( $comment_translation_id );
+					$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
+						$args['project'],
+						$args['locale_slug'],
+						$args['translation_set_slug'],
+						$args['original_id'],
+						$comment_translation_id
+					);
+				?>
+				<em>
+					<?php
+					echo $is_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ';
+					if ( $translation_permalink ) {
+						echo wp_kses( gp_link( $translation_permalink, $translation->translation_0 ), array( 'a' => array( 'href' => true ) ) );
+					} else {
+						echo esc_html( $translation->translation_0 );
+					}
+					?>
+				</em>
 			<?php endif; ?>
 			<div class="clear"></div>
 			<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">

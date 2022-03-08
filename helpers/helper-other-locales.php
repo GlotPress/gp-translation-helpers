@@ -96,18 +96,32 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 	 * @return string
 	 */
 	public function async_output_callback( array $translations ): string {
-		$output = '<ul class="other-locales">';
+		$output  = '<ul class="other-locales">';
+		$project = null;
 		foreach ( $translations as $locale => $translation ) {
+			$translation_set = GP::$translation_set->get( $translation->translation_set_id );
+			if ( is_null( $project ) ) {
+				$project = GP::$project->get( $translation_set->project_id );
+			}
+
+			$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
+				$project,
+				$translation_set->locale,
+				$translation_set->slug,
+				$translation->original_id,
+				$translation->id
+			);
+
 			if ( ( null === $translation->translation_1 ) && ( null === $translation->translation_2 ) &&
 				 ( null === $translation->translation_3 ) && ( null === $translation->translation_4 ) &&
 				 ( null === $translation->translation_5 ) ) {
-				$output .= sprintf( '<li><span class="locale unique">%s</span>%s</li>', $locale, esc_translation( $translation->translation_0 ) );
+				$output .= sprintf( '<li><span class="locale unique">%s</span>%s</li>', $locale, gp_link_get( $translation_permalink, esc_translation( $translation->translation_0 ) ) );
 			} else {
 				$output .= sprintf( '<li><span class="locale">%s</span>', $locale );
 				$output .= '<ul>';
 				for ( $i = 0; $i <= 5; $i ++ ) {
 					if ( null !== $translation->{'translation_' . $i} ) {
-						$output .= sprintf( '<li>%s</li>', esc_translation( $translation->{'translation_' . $i} ) );
+						$output .= sprintf( '<li>%s</li>', gp_link_get( $translation_permalink, esc_translation( $translation->{'translation_' . $i} ) ) );
 					}
 				}
 				$output .= '</ul>';

@@ -92,45 +92,100 @@ class Helper_History extends GP_Translation_Helper {
 	 * @return string
 	 */
 	public function async_output_callback( array $translations ): string {
-		if ( $translations ) {
-			$output  = '<table id="translation-history-table">';
-			$output .= '<thead>';
-			$output .= '<tr><th>Date</th><th>Translation</th><th>Added by</th><th>Last modified by</th>';
-			$output .= '</thead>';
-
-			foreach ( $translations as $key => $translation ) {
-				$date_and_time = is_null( $translation->date_modified ) ? $translation->date_added : $translation->date_modified;
-				$date_and_time = explode( ' ', $date_and_time );
-
-				$user               = get_userdata( $translation->user_id );
-				$user_last_modified = get_userdata( $translation->user_id_last_modified );
-
-				if ( ( null === $translation->translation_1 ) && ( null === $translation->translation_2 ) &&
-					 ( null === $translation->translation_3 ) && ( null === $translation->translation_4 ) &&
-					 ( null === $translation->translation_5 ) ) {
-						$output_translation = $translation->translation_0;
-				} else {
-					$output_translation = '<ul>';
-					for ( $i = 0; $i <= 5; $i ++ ) {
-						if ( null !== $translation->{'translation_' . $i} ) {
-							$output_translation .= sprintf( '<li>%s</li>', esc_translation( $translation->{'translation_' . $i} ) );
-						}
-					}
-					$output_translation .= '</ul>';
-				}
-
-				$output .= sprintf(
-					'<tr class="preview status-%1$s"><td title="%2$s">%3$s</td><td>%4$s</td><td>%5$s</td><td>%6$s</td></tr>',
-					esc_attr( $translation->status ),
-					esc_attr( $translation->date_modified ?? $translation->date_added ),
-					esc_html( $date_and_time[0] ),
-					$output_translation,
-					$user ? esc_html( $user->user_login ) : '&mdash;',
-					$user_last_modified ? esc_html( $user_last_modified->user_login ) : '&mdash;'
-				);
-			}
+		if ( ! $translations ) {
+			return '';
 		}
+		$output  = '<table id="translation-history-table" class="translations">';
+		$output .= '<thead>';
+		$output .= '<tr><th>Date</th><th>Translation</th><th>Added by</th><th>Last modified by</th>';
+		$output .= '</thead>';
+
+		foreach ( $translations as $key => $translation ) {
+			$date_and_time = is_null( $translation->date_modified ) ? $translation->date_added : $translation->date_modified;
+			$date_and_time = explode( ' ', $date_and_time );
+
+			$user                  = get_userdata( $translation->user_id );
+			$user_last_modified    = get_userdata( $translation->user_id_last_modified );
+			$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
+				$this->data['project'],
+				$this->data['locale_slug'],
+				$this->data['translation_set_slug'],
+				$this->data['original_id'],
+				$translation->id
+			);
+
+			if (
+				is_null( $translation->translation_1 ) &&
+				is_null( $translation->translation_2 ) &&
+				is_null( $translation->translation_3 ) &&
+				is_null( $translation->translation_4 ) &&
+				is_null( $translation->translation_5 )
+			) {
+					$output_translation = $translation->translation_0;
+			} else {
+				$output_translation = '<ul>';
+				for ( $i = 0; $i <= 5; $i ++ ) {
+					if ( null !== $translation->{'translation_' . $i} ) {
+						$output_translation .= sprintf( '<li>%s</li>', esc_translation( $translation->{'translation_' . $i} ) );
+					}
+				}
+				$output_translation .= '</ul>';
+			}
+
+			$output .= sprintf(
+				'<tr class="preview status-%1$s"><td title="%2$s">%3$s</td><td>%4$s</td><td>%5$s</td><td>%6$s</td></tr>',
+				esc_attr( $translation->status ),
+				esc_attr( $translation->date_modified ?? $translation->date_added ),
+				esc_html( $date_and_time[0] ),
+				$translation_permalink ? '<a href="' . esc_url( $translation_permalink ) . '">' . esc_html( $output_translation ) . '</a>' : esc_html( $output_translation ),
+				$user ? esc_html( $user->user_login ) : '&mdash;',
+				$user_last_modified ? esc_html( $user_last_modified->user_login ) : '&mdash;'
+			);
+		}
+
+		$output .= '</table>';
+
+		$output .= $this->get_translation_status_legend();
+
 		return $output;
+	}
+
+	/**
+	 * Gets the translation status legend.
+	 *
+	 * @return     string  The translation status legend.
+	 */
+	public function get_translation_status_legend() {
+		$legend  = '<div id="legend" class="secondary clearfix">';
+		$legend .= '<div><strong>' . esc_html__( 'Legend:', 'glotpress' ) . '</strong></div>';
+		foreach ( GP::$translation->get_static( 'statuses' ) as $legend_status ) {
+			$legend .= '<div class="box status-' . esc_attr( $legend_status ) . '"></div>';
+			$legend .= '<div>';
+			switch ( $legend_status ) {
+				case 'current':
+					$legend .= esc_html__( 'Current', 'glotpress' );
+					break;
+				case 'waiting':
+					$legend .= esc_html__( 'Waiting', 'glotpress' );
+					break;
+				case 'fuzzy':
+					$legend .= esc_html__( 'Fuzzy', 'glotpress' );
+					break;
+				case 'old':
+					$legend .= esc_html__( 'Old', 'glotpress' );
+					break;
+				case 'rejected':
+					$legend .= esc_html__( 'Rejected', 'glotpress' );
+					break;
+				default:
+					$legend .= esc_html( $legend_status );
+			}
+			$legend .= '</div>';
+		}
+		$legend .= '<div class="box has-warnings"></div>';
+		$legend .= '<div>' . esc_html__( 'With warnings', 'glotpress' ) . '</div>';
+		$legend .= '</div>';
+		return $legend;
 	}
 
 	/**
@@ -143,4 +198,6 @@ class Helper_History extends GP_Translation_Helper {
 	public function empty_content(): string {
 		return esc_html__( 'No translation history for this string.' );
 	}
+
+
 }

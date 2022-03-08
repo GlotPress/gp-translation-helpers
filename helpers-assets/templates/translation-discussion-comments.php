@@ -14,19 +14,25 @@
 		<?php if ( $locale_slug ) : ?>
 			(<?php echo esc_html( $locale_slug ); ?>)
 			<?php
-			$countLocaleComments = 0;
+			$count_locale_comments    = 0;
+			$count_rejection_feedback = 0;
 			foreach ( $comments as $_comment ) {
 				$comment_locale = get_comment_meta( $_comment->comment_ID, 'locale', true );
 				if ( $locale_slug == $comment_locale ) {
-					$countLocaleComments++;
+					$count_locale_comments++;
+
+					$reject_reason = get_comment_meta( $_comment->comment_ID, 'reject_reason', true );
+					if ( ! empty( $reject_reason ) ) {
+						$count_rejection_feedback++;
+					}
 				}
 			}
 			?>
 		
 			<span class="comments-selector">
 				<a href="#" class="active-link" data-selector="all">Show all (<?php echo esc_html( $number ); ?>)</a> | 
-				<a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $countLocaleComments ); ?>)</a> | 
-				<a href="#" data-selector="rejection-feedback">Rejection Feedback</a>
+				<a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $count_locale_comments ); ?>)</a> | 
+				<a href="#" data-selector="rejection-feedback">Rejection Feedback (<?php echo esc_html( $count_rejection_feedback ); ?>)</a>
 			</span>
 		<?php endif; ?>
 		</h6>
@@ -35,12 +41,15 @@
 		<?php
 		wp_list_comments(
 			array(
-				'style'              => 'ul',
-				'type'               => 'comment',
-				'callback'           => 'gth_discussion_callback',
-				'translation_id'     => $translation_id,
-				'locale_slug'        => $locale_slug,
-				'original_permalink' => $original_permalink,
+				'style'                => 'ul',
+				'type'                 => 'comment',
+				'callback'             => 'gth_discussion_callback',
+				'translation_id'       => $translation_id,
+				'locale_slug'          => $locale_slug,
+				'original_permalink'   => $original_permalink,
+				'original_id'          => $original_id,
+				'project'              => $project,
+				'translation_set_slug' => $translation_set_slug,
 			),
 			$comments
 		);
@@ -83,6 +92,7 @@
 				'title_reply_after'   => '</h5>',
 				'id_form'             => 'commentform-' . $post_id,
 				'cancel_reply_link'   => '<span></span>',
+				'format'              => 'html5',
 				'comment_notes_after' => implode(
 					"\n",
 					array(

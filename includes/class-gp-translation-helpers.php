@@ -350,7 +350,8 @@ class GP_Translation_Helpers {
 		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
 		$translation_id    = $helper_discussion->sanitize_translation_id( intval( $_POST['data']['translation_id'] ) );
 		$original_id       = $_POST['data']['original_id'];
-		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : '';
+		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
+		$reject_reason     = array_map( 'sanitize_text_field', $reject_reason );
 		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
 
 		$is_valid_original = GP::$original->get( $original_id );
