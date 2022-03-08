@@ -489,7 +489,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Kills WordPress execution and displays HTML page with an error message if the translation id is incorrect.
+	 * Throws an exception with an error message if the translation id is incorrect.
 	 *
 	 * Used as sanitize callback in the register_meta for the "comment" object type,
 	 * "locale" meta_key
@@ -512,7 +512,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Kills WordPress execution and displays HTML page with an error message if the original id is incorrect.
+	 * Throws an exception with an error message if the original id is incorrect.
 	 *
 	 * Used as callback to validate the original_id passed on rejecting a string with feedback
 	 *
