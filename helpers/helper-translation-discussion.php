@@ -98,9 +98,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			self::LINK_TAXONOMY,
 			array(),
 			array(
-				'public'  => false,
-				'show_ui' => false,
-				'rewrite' => false,
+				'public'       => false,
+				'show_ui'      => false,
+				'rewrite'      => false,
 				'capabilities' => array(
 					'assign_terms' => 'read',
 				),
@@ -486,6 +486,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			$comment_locale = '';
 		}
 		return $comment_locale;
+	}
+
+	public function sanitize_original_id( $original_id ) {
+		if ( ! is_numeric( $original_id ) ) {
+			if ( $original_id > 0 && ! GP::$original->get( $original_id ) ) {
+				wp_die( 'Invalid original ID' );
+			}
+		}
+		return $original_id;
 	}
 
 	/**

@@ -122,9 +122,8 @@
 		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
 		rejectData.reason = rejectReason;
 		rejectData.comment = comment;
-		rejectData.original_id = $gp.editor.current.original_id;
-		rejectData.translation_id = $gp.editor.current.translation_id;
-		rejectData.is_bulk_reject = false;
+		rejectData.original_id = [ $gp.editor.current.original_id ];
+		rejectData.translation_id = [ $gp.editor.current.translation_id ];
 
 		rejectWithFeedback( rejectData, button );
 	};

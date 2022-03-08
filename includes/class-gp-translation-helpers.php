@@ -347,42 +347,33 @@ class GP_Translation_Helpers {
 
 		$helper_discussion = new Helper_Translation_Discussion();
 		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
-		$translation_id    = $helper_discussion->sanitize_translation_id( intval( $_POST['data']['translation_id'] ) );
-		$original_id       = $_POST['data']['original_id'];
+		$translation_id    = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
+		$original_id       = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
 		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$reject_reason     = array_map( 'sanitize_text_field', $reject_reason );
+		$reject_reason     = array_map( 'validate_reject_reason', $reject_reason );
 		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
-		$is_bulk_reject = sanitize_text_field( $_POST['data']['is_bulk_reject'] );
 
-		$is_valid_original = GP::$original->get( $original_id );
-
-		if ( ! $locale_slug || ! $translation_id || ! $is_valid_original || ( ! $reject_reason && ! $reject_comment ) ) {
+		if ( ! $locale_slug || ! $translation_id || ! $original_id || ( ! $reject_reason && ! $reject_comment ) ) {
 			wp_send_json_error();
 		}
-		if ( $is_bulk_reject && is_array( $original_id ) && ! empty( $original_id ) ) {
-			$bulk_original_ids    = $original_id;
-			$bulk_translation_ids = $translation_id;
 
-			// Get original_id and translation_id of first string in the array
-			$original_id    = array_shift( $bulk_original_ids );
-			$translation_id = array_shift( $bulk_translation_ids );
-			$post_id        = Helper_Translation_Discussion::get_shadow_post( $original_id );
+		// Get original_id and translation_id of first string in the array
+		$first_original_id    = array_shift( $original_id );
+		$first_translation_id = array_shift( $translation_id );
+		$post_id              = Helper_Translation_Discussion::get_shadow_post( $first_original_id );
 
-			// Post comment on discussion page for the first string
-			$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug );
+		// Post comment on discussion page for the first string
+		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $first_translation_id, $locale_slug );
 
-			if ( ! empty( $bulk_original_ids ) ) {
-				// For other strings post link to the comment.
-				$reject_comment = get_comment_link( $save_feedback );
-				foreach ( $bulk_original_ids as $index => $single_original_id ) {
-					$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
-					$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $bulk_translation_ids[ $index ], $locale_slug );
-				}
-				die();
+		if ( ! empty( $original_id ) && ! empty( $translation_id ) ) {
+			// For other strings post link to the comment.
+			$reject_comment = get_comment_link( $save_feedback );
+			foreach ( $original_id as $index => $single_original_id ) {
+				$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
+				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id[ $index ], $locale_slug );
 			}
+			die();
 		}
-		$post_id       = Helper_Translation_Discussion::get_shadow_post( $original_id );
-		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug );
 
 		die();
 	}
