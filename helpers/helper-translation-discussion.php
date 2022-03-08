@@ -488,15 +488,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return $comment_locale;
 	}
 
-	public function sanitize_original_id( $original_id ) {
-		if ( ! is_numeric( $original_id ) ) {
-			if ( $original_id > 0 && ! GP::$original->get( $original_id ) ) {
-				wp_die( 'Invalid original ID' );
-			}
-		}
-		return $original_id;
-	}
-
 	/**
 	 * Kills WordPress execution and displays HTML page with an error message if the translation id is incorrect.
 	 *
@@ -519,6 +510,27 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		}
 		return $translation_id;
 	}
+
+	/**
+	 * Kills WordPress execution and displays HTML page with an error message if the original id is incorrect.
+	 *
+	 * Used as callback to validate the original_id passed on rejecting a string with feedback
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int|string $original_id   The id of the original for the rejected translation.
+	 *
+	 * @return int|string
+	 */
+	public function sanitize_original_id( $original_id ) {
+		if ( ! is_numeric( $original_id ) ) {
+			if ( $original_id > 0 && ! GP::$original->get( $original_id ) ) {
+				wp_die( 'Invalid original ID' );
+			}
+		}
+		return $original_id;
+	}
+
 }
 
 	/**
