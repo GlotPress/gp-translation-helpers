@@ -350,7 +350,7 @@ class GP_Translation_Helpers {
 		$translation_id    = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
 		$original_id       = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
 		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$reject_reason     = array_map( 'validate_reject_reason', $reject_reason );
+		$reject_reason     = array_map( 'sanitize_text_field', $reject_reason );
 		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
 
 		if ( ! $locale_slug || ! $translation_id || ! $original_id || ( ! $reject_reason && ! $reject_comment ) ) {
