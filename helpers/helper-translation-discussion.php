@@ -64,6 +64,20 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 	/**
 	 *
+	 * @since 0.0.2
+	 * @var array
+	 */
+	public static $reject_reasons = array(
+		'style'       => 'Style Guide',
+		'grammar'     => 'Grammar',
+		'branding'    => 'Branding',
+		'glossary'    => 'Glossary',
+		'punctuation' => 'Punctuation',
+		'typo'        => 'Typo',
+	);
+
+	/**
+	 *
 	 * @since 0.0.1
 	 * @var string
 	 */

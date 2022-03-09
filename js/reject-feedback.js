@@ -153,7 +153,7 @@
 	}
 
 	function getReasonList( displayType ) {
-		var rejectReasons = JSON.parse( $gp_reject_feedback_settings.reject_reasons );
+		var rejectReasons = $gp_reject_feedback_settings.reject_reasons;
 
 		var rejectList = '';
 		var prefix = '';
