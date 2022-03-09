@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* global $gp, $gp_reject_feedback_settings, document, tb_show */
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
