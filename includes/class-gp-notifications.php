@@ -9,6 +9,14 @@
  */
 class GP_Notifications {
 	/**
+	 * Email to receive the comments about typos and asking for feedback in core, patterns, meta and apps.
+	 *
+	 * @since 0.0.2
+	 * @var array
+	 */
+	private static $i18n_email = 'i18n@wordpress.org';
+
+	/**
 	 * Sends notifications when a new comment in the discussion is stored using the WP REST API.
 	 *
 	 * @since 0.0.2
@@ -26,7 +34,7 @@ class GP_Notifications {
 				self::send_emails_to_thread_commenters( $comment, $comment_meta );
 			}
 			if ( array_key_exists( 'comment_topic', $comment_meta ) ) {
-				switch ( $comment_meta['comment_topic'] ) {
+				switch ( $comment_meta['comment_topic'][0] ) {
 					case 'typo':
 					case 'context': // Notify to the developer(s)
 						self::send_emails_to_developers( $comment, $comment_meta );
@@ -386,6 +394,9 @@ class GP_Notifications {
 			foreach ( $committers as $user_login ) {
 				$emails[] = get_user_by( 'login', $user_login )->user_email;
 			}
+		}
+		if ( ! ( ( 'wp-themes' === substr( $project->path, 0, 9 ) ) || ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) ) ) {
+			$emails[] = self::$i18n_email;
 		}
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
