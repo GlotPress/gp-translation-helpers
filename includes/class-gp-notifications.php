@@ -42,8 +42,6 @@ class GP_Notifications {
 					case 'question': // Notify to the GTE, PTE and CLPTE
 						self::send_emails_to_validators( $comment, $comment_meta );
 						break;
-					case 'unknown':  // todo: decide what to do.
-						break;
 				}
 			}
 		}
