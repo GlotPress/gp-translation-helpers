@@ -98,9 +98,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			self::LINK_TAXONOMY,
 			array(),
 			array(
-				'public'  => false,
-				'show_ui' => false,
-				'rewrite' => false,
+				'public'       => false,
+				'show_ui'      => false,
+				'rewrite'      => false,
 				'capabilities' => array(
 					'assign_terms' => 'read',
 				),
@@ -489,7 +489,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Kills WordPress execution and displays HTML page with an error message if the translation id is incorrect.
+	 * Throws an exception with an error message if the translation id is incorrect.
 	 *
 	 * Used as sanitize callback in the register_meta for the "comment" object type,
 	 * "locale" meta_key
@@ -501,15 +501,37 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @param int|string $translation_id   The id for the translation showed when the comment was made.
 	 *
 	 * @return int|string
+	 *
+	 * @throws Exception Throws an exception with message if translation_id is invalid.
 	 */
 	public function sanitize_translation_id( $translation_id ) {
-		if ( ! is_numeric( $translation_id ) ) {
-			if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
-				wp_die( 'Invalid translation ID' );
-			}
+		if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
+			throw new Exception( 'Invalid translation ID' );
 		}
 		return $translation_id;
 	}
+
+	/**
+	 * Throws an exception with an error message if the original id is incorrect.
+	 *
+	 * Used as callback to validate the original_id passed on rejecting a string with feedback
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int|string $original_id   The id of the original for the rejected translation.
+	 *
+	 * @return int|string
+	 *
+	 * @throws Exception Throws an exception with message if original_id is invalid.
+	 */
+	public function sanitize_original_id( $original_id ) {
+		if ( $original_id > 0 && ! GP::$original->get( $original_id ) ) {
+			throw new Exception( 'Invalid Original ID' );
+		}
+
+		return $original_id;
+	}
+
 }
 
 	/**

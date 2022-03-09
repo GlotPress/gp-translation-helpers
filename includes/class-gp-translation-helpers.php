@@ -322,6 +322,16 @@ class GP_Translation_Helpers {
 		<?php
 	}
 
+	/**
+	 * Registers and enqueues the reject-feedback.js script and also loads a few js variables on the page.
+	 *
+	 * @since 0.0.2
+	 *
+	 *  @param string $template Template of the current page.
+	 *  @param string $translation_set Current translation set
+	 *
+	 * @return void
+	 */
 	public function register_reject_feedback_js( $template, $translation_set ) {
 
 		if ( 'translations' !== $template ) {
@@ -342,25 +352,63 @@ class GP_Translation_Helpers {
 		);
 	}
 
+	/**
+	 * Is called from the AJAX request in reject-feedback.js to submit a rejection feedback.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return string|void
+	 */
 	public function reject_with_feedback() {
 		check_ajax_referer( 'gp_reject_feedback', 'nonce' );
 
-		$helper_discussion = new Helper_Translation_Discussion();
-		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
-		$translation_id    = $helper_discussion->sanitize_translation_id( intval( $_POST['data']['translation_id'] ) );
-		$original_id       = $_POST['data']['original_id'];
-		$reject_reason     = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$reject_reason     = array_map( 'sanitize_text_field', $reject_reason );
-		$reject_comment    = sanitize_text_field( $_POST['data']['comment'] );
+		$helper_discussion    = new Helper_Translation_Discussion();
+		$locale_slug          = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
+		$translation_id_array = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
+		$original_id_array    = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
+		$reject_reason        = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
+		$reject_reason        = array_map( 'sanitize_text_field', $reject_reason );
+		$reject_comment       = sanitize_text_field( $_POST['data']['comment'] );
 
-		$is_valid_original = GP::$original->get( $original_id );
-
-		if ( ! $locale_slug || ! $translation_id || ! $is_valid_original || ( ! $reject_reason && ! $reject_comment ) ) {
+		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $reject_reason && ! $reject_comment ) ) {
 			wp_send_json_error();
 		}
 
-		$post_id = Helper_Translation_Discussion::get_shadow_post( $original_id );
-		$comment = wp_insert_comment(
+		// Get original_id and translation_id of first string in the array
+		$first_original_id    = array_shift( $original_id_array );
+		$first_translation_id = array_shift( $translation_id_array );
+		$post_id              = Helper_Translation_Discussion::get_shadow_post( $first_original_id );
+
+		// Post comment on discussion page for the first string
+		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $first_translation_id, $locale_slug );
+
+		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
+			// For other strings post link to the comment.
+			$reject_comment = get_comment_link( $save_feedback );
+			foreach ( $original_id_array as $index => $single_original_id ) {
+				$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
+				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id_array[ $index ], $locale_slug );
+			}
+		}
+
+		die();
+	}
+
+	/**
+	 * Inserts rejection feedback as WordPress comment
+	 *
+	 * @since 0.0.2
+	 *
+	 *  @param string $reject_comment Feedback entered by reviewer.
+	 *  @param int    $post_id ID of the post where the comment will be added.
+	 *  @param array  $reject_reason Reason(s) for rejection.
+	 *  @param string $translation_id ID of the rejected translation.
+	 *  @param string $locale_slug Locale of the rejected translation.
+	 *
+	 * @return false|int
+	 */
+	private function insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug ) {
+		return wp_insert_comment(
 			array(
 				'comment_content' => $reject_comment,
 				'comment_post_ID' => $post_id,
