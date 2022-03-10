@@ -9,12 +9,12 @@
  */
 class GP_Notifications {
 	/**
-	 * Email to receive the comments about typos and asking for feedback in core, patterns, meta and apps.
+	 * The taxonomy key.
 	 *
 	 * @since 0.0.2
-	 * @var array
+	 * @var string
 	 */
-	private static $i18n_email = 'i18n@wordpress.org';
+	const LINK_TAXONOMY = 'gp_original_id';
 
 	/**
 	 * Sends notifications when a new comment in the discussion is stored using the WP REST API.
@@ -27,7 +27,7 @@ class GP_Notifications {
 	 *
 	 * @return void
 	 */
-	public static function new_comment( WP_Comment $comment, $request, $creating ) {
+	public static function init( WP_Comment $comment, $request, $creating ) {
 		if ( ( '1' === $comment->comment_approved ) || ( 'approve' === $comment->comment_approved ) ) {
 			$comment_meta = get_comment_meta( $comment->comment_ID );
 			if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
@@ -36,10 +36,10 @@ class GP_Notifications {
 			if ( array_key_exists( 'comment_topic', $comment_meta ) ) {
 				switch ( $comment_meta['comment_topic'][0] ) {
 					case 'typo':
-					case 'context': // Notify to the developer(s)
-						self::send_emails_to_developers( $comment, $comment_meta );
+					case 'context': // Notify to the GlotPress admins
+						self::send_emails_to_gp_admins( $comment, $comment_meta );
 						break;
-					case 'question': // Notify to the GTE, PTE and CLPTE
+					case 'question': // Notify to the project validator
 						self::send_emails_to_validators( $comment, $comment_meta );
 						break;
 				}
@@ -55,7 +55,7 @@ class GP_Notifications {
 	 * @return void
 	 */
 	public static function comment_change_status() {
-
+		// todo
 	}
 
 	/**
@@ -77,7 +77,7 @@ class GP_Notifications {
 	}
 
 	/**
-	 * Sends an email to the project developers.
+	 * Sends an email to the GlotPress admins.
 	 *
 	 * Currently, only works with themes and plugins.
 	 *
@@ -88,13 +88,14 @@ class GP_Notifications {
 	 *
 	 * @return void
 	 */
-	public static function send_emails_to_developers( WP_Comment $comment, array $comment_meta ) {
-		$emails = self::get_author_emails( $comment, $comment_meta );
+	public static function send_emails_to_gp_admins( WP_Comment $comment, array $comment_meta ) {
+		$emails = self::get_emails_from_the_gp_admins();
+		$emails = apply_filters( 'gp_notification_email_developer', $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
 	/**
-	 * Sends an email to the all the project validators: GTE, PTE and CLPTE.
+	 * Sends an email to the all the project validators.
 	 *
 	 * @param WP_Comment $comment       The comment object.
 	 * @param array      $comment_meta  The meta values for the comment.
@@ -104,14 +105,13 @@ class GP_Notifications {
 	 * @return void
 	 */
 	public static function send_emails_to_validators( WP_Comment $comment, array $comment_meta ) {
-		$translation_id         = $comment_meta['translation_id'][0];
-		$locale                 = $comment_meta['locale'][0];
-		$emails                 = self::get_gte_emails( $locale );
-		$emails                 = array_merge( $emails, self::get_pte_emails_by_project_and_locale( $translation_id, $locale ) );
-		$emails                 = array_merge( $emails, self::get_clpte_emails_by_project( $translation_id ) );
+		$emails                 = array();
+		$project                = self::get_project_to_translate( $comment );
+		$emails                 = self::get_emails_from_the_validators( $project->path );
+		$emails                 = apply_filters( 'gp_notification_validators', $emails );
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
-		// Set the emails array as empty if one GTE/PTE/CLPTE has a comment in the thread.
+		// Set the emails array as empty if one validator has a comment in the thread, to avoid sending the email to all validators.
 		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
 			$emails = array();
 		}
@@ -125,7 +125,7 @@ class GP_Notifications {
 	 *
 	 * @param int $comment_id   Last comment of the thread.
 	 *
-	 * @return array
+	 * @return array    The comments in the thread.
 	 */
 	public static function get_parent_comments( int $comment_id ): array {
 		$comments = array();
@@ -140,16 +140,16 @@ class GP_Notifications {
 	}
 
 	/**
-	 * Returns the emails to be notified from the thread comments.
+	 * Gets the emails to be notified from the thread comments.
 	 *
 	 * Removes the second parameter from the returned array if it is found.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param array|null $comments      Array with the parent comments to the posted comment.
+	 * @param array|null $comments          Array with the parent comments to the posted comment.
 	 * @param string     $email_to_remove   Email from the posted comment
 	 *
-	 * @return array|null
+	 * @return array|null   The emails to be notified from the thread comments.
 	 */
 	public static function get_emails_from_the_comments( ?array $comments, string $email_to_remove ): ?array {
 		$emails = array();
@@ -164,6 +164,64 @@ class GP_Notifications {
 	}
 
 	/**
+	 * Gets the emails of the validators of a project.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $project_path  The project path.
+	 *
+	 * @return array    The emails of the validators for the given project.
+	 */
+	public static function get_emails_from_the_validators( string $project_path ): array {
+		$emails  = array();
+		$project = GP::$project->by_path( $project_path );
+
+		$path_to_root = array_slice( $project->path_to_root(), 1 );
+		$permissions  = GP::$validator_permission->by_project_id( $project->id );
+		$cmp_fn       = function( $x, $y ) {
+			return strcmp( $x->locale_slug, $y->locale_slug );
+		};
+		usort( $permissions, $cmp_fn );
+		$parent_permissions = array();
+
+		foreach ( $path_to_root as $parent_project ) {
+			$this_parent_permissions = GP::$validator_permission->by_project_id( $parent_project->id );
+			usort( $this_parent_permissions, $cmp_fn );
+			foreach ( $this_parent_permissions as $permission ) {
+				$permission->project = $parent_project;
+			}
+			$parent_permissions = array_merge( $parent_permissions, (array) $this_parent_permissions );
+		}
+		// we can't join on users table
+		foreach ( array_merge( (array) $permissions, (array) $parent_permissions ) as $permission ) {
+			$permission->user = get_user_by( 'id', $permission->user_id );
+			$emails[]         = $permission->user->data->user_email;
+		}
+
+		return $emails;
+	}
+
+	/**
+	 * Gets the emails from the GlotPress admins
+	 *
+	 * @return array    The GlotPress admins' emails.
+	 */
+	public static function get_emails_from_the_gp_admins():array {
+		global $wpdb;
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"
+            SELECT user_email FROM {$wpdb->users} 
+            INNER JOIN {$wpdb->gp_permissions}
+            ON {$wpdb->users}.ID = {$wpdb->gp_permissions}.user_id 
+            WHERE action='admin'"
+			),
+			ARRAY_N
+		);
+	}
+
+	/**
 	 * Sends an email to all the email addresses.
 	 *
 	 * @since 0.0.2
@@ -174,8 +232,8 @@ class GP_Notifications {
 	 *
 	 * @return bool
 	 */
-	public static function send_emails( ?WP_Comment $comment, ?array $comment_meta, ?array $emails ) {
-		if ( ( null === $comment ) || ( null === $comment_meta ) ) {
+	public static function send_emails( ?WP_Comment $comment, ?array $comment_meta, ?array $emails ): bool {
+		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $emails ) ) ) {
 			return false;
 		}
 		foreach ( $emails as $email ) {
@@ -185,7 +243,6 @@ class GP_Notifications {
 				'Content-Type: text/html; charset=UTF-8',
 				'From: Translating WordPress.org <no-reply@wordpress.org>',
 			);
-
 			wp_mail( $email, $subject, $body, $headers );
 		}
 		return true;
@@ -202,21 +259,22 @@ class GP_Notifications {
 	 * @return string|null
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
+		// todo: add a prefilter, a postfilter and a filter that changes all content.
 		$output  = esc_html__( 'Hi:' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'There is a new comment in a discussion of the WordPress translation system that may be of interest to you.' );
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
 		$output .= '<br><br>';
-		if ( array_key_exists( 'locale', $comment_meta ) ) {
+		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
 			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] );
 			$output .= '<br>';
 		}
-		if ( array_key_exists( 'translation_id', $comment_meta ) ) {
+		$original = self::get_original( $comment );
+		$output  .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
+		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
 			$translation_id = $comment_meta['translation_id'][0];
 			$translation    = GP::$translation->get( $translation_id );
-			$original       = GP::$original->get( $translation->original_id );
-			$output        .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
 			// todo: add the plurals
 			if ( ! is_null( $translation ) ) {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
@@ -232,177 +290,26 @@ class GP_Notifications {
 	}
 
 	/**
-	 * Gets the general translation editors (GTE) emails for the given locale.
+	 * Gets the project the translated string belongs to.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param string $locale Locale slug.
+	 * @param WP_Comment $comment  The comment the user has just made.
 	 *
-	 * @return array
+	 * @return GP_Project|bool      The project the translated string belongs to.
 	 */
-	public static function get_gte_emails( string $locale ): array {
-		$emails    = array();
-		$gp_locale = GP_Locales::by_field( 'slug', $locale );
-		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
-			return $emails;
-		}
-		$result  = get_sites(
-			array(
-				'locale'     => $gp_locale->wp_locale,
-				'network_id' => WPORG_GLOBAL_NETWORK_ID,
-				'path'       => '/',
-				'fields'     => 'ids',
-				'number'     => '1',
-			)
-		);
-		$site_id = array_shift( $result );
-		if ( ! $site_id ) {
-			return $emails;
+	private static function get_project_to_translate( WP_Comment $comment ) {
+		$post_id = $comment->comment_post_ID;
+		$terms   = wp_get_object_terms( $post_id, self::LINK_TAXONOMY, array( 'number' => 1 ) );
+		if ( empty( $terms ) ) {
+			return false;
 		}
 
-		$users = get_users(
-			array(
-				'blog_id'     => $site_id,
-				'role'        => 'general_translation_editor',
-				'count_total' => false,
-			)
-		);
-		foreach ( $users as $user ) {
-			$emails[] = $user->data->user_email;
-		}
+		$original   = GP::$original->get( $terms[0]->slug );
+		$project_id = $original->project_id;
+		$project    = GP::$project->get( $project_id );
 
-		return $emails;
-	}
-
-	/**
-	 * Gets the project translation editors (PTE) emails for the given translation_id (from a project) and locale.
-	 *
-	 * @since 0.0.2
-	 *
-	 * @param int    $translation_id The id for the translation showed when the comment was made.
-	 * @param string $locale         The locale. E.g. 'zh-tw'.
-	 *
-	 * @return array
-	 */
-	public static function get_pte_emails_by_project_and_locale( $translation_id, $locale ): array {
-		return self::get_pte_clpte_emails_by_project_and_locale( $translation_id, $locale );
-	}
-
-	/**
-	 * Gets the cross language project translation editors (CLPTE) emails for the given translation_id (from a project).
-	 *
-	 * @since 0.0.2
-	 *
-	 * @param int $translation_id The id for the translation showed when the comment was made.
-	 *
-	 * @return array
-	 */
-	public static function get_clpte_emails_by_project( $translation_id ): array {
-		return self::get_pte_clpte_emails_by_project_and_locale( $translation_id, 'all-locales' );
-	}
-
-	/**
-	 * Gets the PTE/CLPTE emails for the given translation_id (from a project) and locale.
-	 *
-	 * @since 0.0.2
-	 *
-	 * @param int    $translation_id The id for the translation showed when the comment was made.
-	 * @param string $locale         The locale. E.g. 'zh-tw'.
-	 *
-	 * @return array
-	 */
-	private static function get_pte_clpte_emails_by_project_and_locale( int $translation_id, string $locale ): array {
-		global $wpdb;
-		$emails = array();
-
-		if ( 'all-locales' === $locale ) {
-			$gp_locale = 'all-locales';
-		} else {
-			$gp_locale = GP_Locales::by_field( 'slug', $locale );
-		}
-
-		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
-			return $emails;
-		}
-
-		$project = self::get_project_to_translate( $translation_id );
-
-		// todo: remove the deleted users in the SQL query
-		$translation_editors = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-			SELECT
-				{$wpdb->wporg_translation_editors}.user_id, 
-			    {$wpdb->wporg_translation_editors}.locale
-			FROM {$wpdb->wporg_translation_editors}
-			WHERE {$wpdb->wporg_translation_editors}.project_id = %d AND
-			      {$wpdb->wporg_translation_editors}.locale = %s 
-		",
-				$project->id,
-				$locale
-			),
-			OBJECT
-		);
-		foreach ( $translation_editors as $pte ) {
-			$emails[] = WP_User::get_data_by( 'id', $pte->user_id )->user_email;
-		}
-		return $emails;
-	}
-
-	/**
-	 * Gets the emails for the commiters of a theme or a plugin.
-	 *
-	 * Themes: only one email.
-	 * Plugins: all the plugin commiters.
-	 *
-	 * @param WP_Comment $comment       The comment object.
-	 * @param array      $comment_meta  The meta values for the comment.
-	 *
-	 * @return array
-	 */
-	public static function get_author_emails( WP_Comment $comment, array $comment_meta ): array {
-		global $wpdb;
-
-		$emails         = array();
-		$translation_id = $comment_meta['translation_id'][0];
-		$project        = self::get_project_to_translate( $translation_id );
-		if ( 'wp-themes' === substr( $project->path, 0, 9 ) ) {
-			$author   = $wpdb->get_row(
-				$wpdb->prepare(
-					"SELECT post_author 
-                            FROM wporg_35_posts 
-                            WHERE 
-                                post_type = 'repopackage' AND 
-                                post_name = %s
-                            ",
-					$project->slug
-				),
-				OBJECT
-			);
-			$author   = get_user_by( 'id', $author->post_author );
-			$emails[] = $author->data->user_email;
-		}
-		if ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) {
-			$committers = $wpdb->get_col(
-				$wpdb->prepare(
-					'SELECT user FROM plugin_2_svn_access WHERE path = %s',
-					'/' . $project->slug
-				)
-			);
-			foreach ( $committers as $user_login ) {
-				$emails[] = get_user_by( 'login', $user_login )->user_email;
-			}
-		}
-		if ( ! ( ( 'wp-themes' === substr( $project->path, 0, 9 ) ) || ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) ) ) {
-			$emails[] = self::$i18n_email;
-		}
-		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
-		// Return an empty array of emails if one author has a comment in the thread.
-		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
-			return array();
-		}
-		return $emails;
+		return $project;
 	}
 
 	/**
@@ -410,49 +317,17 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $translation_id   The id for the translation showed when the comment was made.
+	 * @param WP_Comment $comment  The comment the user has just made.
 	 *
-	 * @return GP_Project           The project the translated string belongs to.
+	 * @return false|GP_Thing       The project the translated string belongs to.
 	 */
-	private static function get_project_to_translate( int $translation_id ): GP_Project {
-		global $wpdb;
-
-		$main_projects = self::get_main_projects();
-
-		$translation = GP::$translation->get( $translation_id );
-		$original    = GP::$original->get( $translation->original_id );
-		$project_id  = $original->project_id;
-		$project     = GP::$project->get( $project_id );
-
-		// If the parent project is not a main project, get the parent project. We need to do this
-		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
-		// assigned to the second level
-		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! ( in_array( $project->parent_project_id, $main_projects ) ) ) ) {
-			$project = GP::$project->get( $project->parent_project_id );
+	private static function get_original( WP_Comment $comment ) {
+		$post_id = $comment->comment_post_ID;
+		$terms   = wp_get_object_terms( $post_id, self::LINK_TAXONOMY, array( 'number' => 1 ) );
+		if ( empty( $terms ) ) {
+			return false;
 		}
-		return $project;
-	}
 
-	/**
-	 * Gets the id of the main projects without parent projects.
-	 *
-	 * @since 0.0.2
-	 *
-	 * @return array    The id of the main projects.
-	 */
-	private static function get_main_projects():array {
-		global $wpdb;
-
-		$main_projects = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-			SELECT id
-			FROM {$wpdb->gp_projects}
-			WHERE parent_project_id IS NULL"
-			),
-			ARRAY_N
-		);
-
-		return array_merge( ...$main_projects );
+		return GP::$original->get( $terms[0]->slug );
 	}
 }

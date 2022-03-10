@@ -32,5 +32,6 @@
 require_once __DIR__ . '/includes/class-gp-route-translation-helpers.php';
 require_once __DIR__ . '/includes/class-gp-translation-helpers.php';
 require_once __DIR__ . '/includes/class-gp-notifications.php';
+require_once __DIR__ . '/includes/class-wporg-notifications.php';
 
 add_action( 'gp_init', array( 'GP_Translation_Helpers', 'init' ) );
