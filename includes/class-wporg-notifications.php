@@ -7,7 +7,7 @@
  * @package gp-translation-helpers
  * @since 0.0.2
  */
-class WPorg_Notifications {
+class WPorg_GlotPress_Notifications {
 	/**
 	 * The taxonomy key.
 	 *
