@@ -71,9 +71,11 @@ class GP_Notifications {
 	 * @return void
 	 */
 	public static function send_emails_to_thread_commenters( WP_Comment $comment, array $comment_meta ) {
-		$parent_comments  = self::get_parent_comments( $comment->comment_parent );
-		$emails_to_notify = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
-		self::send_emails( $comment, $comment_meta, $emails_to_notify );
+		$parent_comments = self::get_parent_comments( $comment->comment_parent );
+		$emails          = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
+		$emails          = apply_filters( 'gp_notification_email_commenters', $comment, $comment_meta, $emails );
+
+		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
 	/**
@@ -90,7 +92,7 @@ class GP_Notifications {
 	 */
 	public static function send_emails_to_gp_admins( WP_Comment $comment, array $comment_meta ) {
 		$emails = self::get_emails_from_the_gp_admins();
-		$emails = apply_filters( 'gp_notification_email_developer', $emails );
+		$emails = apply_filters( 'gp_notification_email_admins', $comment, $comment_meta, $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -108,7 +110,7 @@ class GP_Notifications {
 		$emails                 = array();
 		$project                = self::get_project_to_translate( $comment );
 		$emails                 = self::get_emails_from_the_validators( $project->path );
-		$emails                 = apply_filters( 'gp_notification_validators', $emails );
+		$emails                 = apply_filters( 'gp_notification_email_validators', $comment, $comment_meta, $emails );
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
 		// Set the emails array as empty if one validator has a comment in the thread, to avoid sending the email to all validators.
@@ -260,9 +262,13 @@ class GP_Notifications {
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
 		// todo: add a prefilter, a postfilter and a filter that changes all content.
-		$output  = esc_html__( 'Hi:' );
+		$output  = '';
+		$output  = apply_filters( 'gp_notification_pre_email_body', $comment, $comment_meta, $output );
+		$output .= esc_html__( 'Hi:' );
 		$output .= '<br><br>';
-		$output .= esc_html__( 'There is a new comment in a discussion of the WordPress translation system that may be of interest to you.' );
+		$output .= esc_html__( 'There is a new comment in a discussion in the GlotPress translation system installed at ' );
+		$output .= gp_plugin_url();
+		$output .= esc_html__( ' that may be of interest to you.' );
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
 		$output .= '<br><br>';
@@ -285,7 +291,7 @@ class GP_Notifications {
 		$output .= esc_html__( 'Have a nice day' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.' );
-
+		$output .= apply_filters( 'gp_notification_post_email_body', $comment, $comment_meta, $output );
 		return $output;
 	}
 
