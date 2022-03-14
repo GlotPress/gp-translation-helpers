@@ -321,18 +321,21 @@ class WPorg_GlotPress_Notifications {
 	 * @return string|null
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
-		$output  = esc_html__( 'Hi:' );
-		$output .= '<br><br>';
-		$output .= esc_html__( 'There is a new comment in a discussion of the WordPress translation system that may be of interest to you.' );
-		$output .= '<br>';
-		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
-		$output .= '<br><br>';
+		$project  = self::get_project_to_translate( $comment );
+		$original = self::get_original( $comment );
+		$output   = esc_html__( 'Hi:' );
+		$output  .= '<br><br>';
+		$output  .= esc_html__( 'There is a new comment in a discussion of the WordPress translation system that may be of interest to you.' );
+		$output  .= '<br>';
+		$output  .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
+		$output  .= '<br><br>';
 		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
 			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] );
 			$output .= '<br>';
 		}
-		$original = self::get_original( $comment );
-		$output  .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
+		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
+		$output .= '- <strong>' . esc_html__( 'Discussion URL: ' ) . '</strong><a href="' . $url . '">' . $url . '</a><br>';
+		$output .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
 		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
 			$translation_id = $comment_meta['translation_id'][0];
 			$translation    = GP::$translation->get( $translation_id );
