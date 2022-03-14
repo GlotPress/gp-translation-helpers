@@ -49,8 +49,8 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_notification_email_admins',
-				function ( $comment, $comment_meta, $emails ) {
-					return array_merge( $emails, self::get_emails_from_author( $comment, $comment_meta ) );
+				function ( $comment, $comment_meta ) {
+					return self::get_emails_from_author( $comment, $comment_meta );
 				},
 				10,
 				3
@@ -65,7 +65,7 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_notification_post_email_body',
-				function ( $comment, $comment_meta, $output ) {
+				function ( $output, $comment, $comment_meta ) {
 					return self::get_email_body( $comment, $comment_meta );
 				},
 				10,

@@ -91,8 +91,7 @@ class GP_Notifications {
 	 * @return void
 	 */
 	public static function send_emails_to_gp_admins( WP_Comment $comment, array $comment_meta ) {
-		$emails = self::get_emails_from_the_gp_admins();
-		$emails = apply_filters( 'gp_notification_email_admins', $comment, $comment_meta, $emails );
+		$emails = self::get_emails_from_the_gp_admins( $comment, $comment_meta );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -208,19 +207,28 @@ class GP_Notifications {
 	 *
 	 * @return array    The GlotPress admins' emails.
 	 */
-	public static function get_emails_from_the_gp_admins():array {
+	public static function get_emails_from_the_gp_admins( $comment, $comment_meta ):array {
 		global $wpdb;
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				"
-            SELECT user_email FROM {$wpdb->users} 
-            INNER JOIN {$wpdb->gp_permissions}
-            ON {$wpdb->users}.ID = {$wpdb->gp_permissions}.user_id 
-            WHERE action='admin'"
-			),
-			ARRAY_N
-		);
+		$emails = apply_filters( 'gp_notification_email_admins', $comment, $comment_meta );
+		if ( ! empty( $emails ) ) {
+			return $emails;
+		}
+
+		try {
+			return $wpdb->get_results(
+				$wpdb->prepare(
+					"
+			SELECT user_email FROM {$wpdb->users} 
+			INNER JOIN {$wpdb->gp_permissions}
+			ON {$wpdb->users}.ID = {$wpdb->gp_permissions}.user_id 
+			WHERE action='admin'"
+				),
+				ARRAY_N
+			);
+		} catch ( Exception $e ) {
+			return array();
+		}
 	}
 
 	/**
@@ -261,9 +269,8 @@ class GP_Notifications {
 	 * @return string|null
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
-		// todo: add a prefilter, a postfilter and a filter that changes all content.
-		$output  = '';
-		$output  = apply_filters( 'gp_notification_pre_email_body', $comment, $comment_meta, $output );
+		$output = '';
+		// $output  = apply_filters( 'gp_notification_pre_email_body', $comment, $comment_meta, $output );
 		$output .= esc_html__( 'Hi:' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'There is a new comment in a discussion in the GlotPress translation system installed at ' );
@@ -291,7 +298,7 @@ class GP_Notifications {
 		$output .= esc_html__( 'Have a nice day' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.' );
-		$output .= apply_filters( 'gp_notification_post_email_body', $comment, $comment_meta, $output );
+		$output = apply_filters( 'gp_notification_post_email_body', $output, $comment, $comment_meta );
 		return $output;
 	}
 
