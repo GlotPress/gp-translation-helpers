@@ -281,12 +281,11 @@ class GP_Notifications {
 		$output  .= '<br>';
 		$output  .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
 		$output  .= '<br><br>';
-		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
-			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] );
-			$output .= '<br>';
-		}
 		$url      = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
 		$output  .= '- <strong>' . esc_html__( 'Discussion URL: ' ) . '</strong><a href="' . $url . '">' . $url . '</a><br>';
+		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
+			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] ) . '<br>';
+		}
 		$original = self::get_original( $comment );
 		$output  .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
 		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
