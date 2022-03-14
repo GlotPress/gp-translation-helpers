@@ -298,7 +298,7 @@ class GP_Notifications {
 		$output .= esc_html__( 'Have a nice day' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.' );
-		$output = apply_filters( 'gp_notification_post_email_body', $output, $comment, $comment_meta );
+		$output  = apply_filters( 'gp_notification_post_email_body', $output, $comment, $comment_meta );
 		return $output;
 	}
 

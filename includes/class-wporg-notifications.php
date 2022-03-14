@@ -327,15 +327,15 @@ class WPorg_GlotPress_Notifications {
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
 		$output .= '<br><br>';
-		if ( array_key_exists( 'locale', $comment_meta ) ) {
+		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
 			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] );
 			$output .= '<br>';
 		}
-		if ( array_key_exists( 'translation_id', $comment_meta ) ) {
+		$original = self::get_original( $comment );
+		$output  .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
+		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
 			$translation_id = $comment_meta['translation_id'][0];
 			$translation    = GP::$translation->get( $translation_id );
-			$original       = GP::$original->get( $translation->original_id );
-			$output        .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
 			// todo: add the plurals
 			if ( ! is_null( $translation ) ) {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
@@ -423,5 +423,24 @@ class WPorg_GlotPress_Notifications {
 		);
 
 		return array_merge( ...$main_projects );
+	}
+
+	/**
+	 * Gets the project the translated string belongs to.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment  The comment the user has just made.
+	 *
+	 * @return false|GP_Thing       The project the translated string belongs to.
+	 */
+	private static function get_original( WP_Comment $comment ) {
+		$post_id = $comment->comment_post_ID;
+		$terms   = wp_get_object_terms( $post_id, self::LINK_TAXONOMY, array( 'number' => 1 ) );
+		if ( empty( $terms ) ) {
+			return false;
+		}
+
+		return GP::$original->get( $terms[0]->slug );
 	}
 }
