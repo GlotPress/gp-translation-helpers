@@ -33,8 +33,10 @@ class GP_Notifications {
 			if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
 				self::send_emails_to_thread_commenters( $comment, $comment_meta );
 			}
-			if ( array_key_exists( 'comment_topic', $comment_meta ) ) {
-				switch ( $comment_meta['comment_topic'][0] ) {
+			$root_comment      = self::get_root_comment_in_a_thread( $comment );
+			$root_comment_meta = get_comment_meta( $root_comment->comment_ID );
+			if ( array_key_exists( 'comment_topic', $root_comment_meta ) ) {
+				switch ( $root_comment_meta['comment_topic'][0] ) {
 					case 'typo':
 					case 'context': // Notify to the GlotPress admins
 						self::send_emails_to_gp_admins( $comment, $comment_meta );
@@ -73,7 +75,7 @@ class GP_Notifications {
 	public static function send_emails_to_thread_commenters( WP_Comment $comment, array $comment_meta ) {
 		$parent_comments = self::get_parent_comments( $comment->comment_parent );
 		$emails          = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
-		$emails          = apply_filters( 'gp_notification_email_commenters', $comment, $comment_meta, $emails );
+		$emails          = apply_filters( 'gp_notification_email_commenters', $emails, $comment, $comment_meta );
 
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
@@ -303,6 +305,25 @@ class GP_Notifications {
 		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.' );
 		$output  = apply_filters( 'gp_notification_post_email_body', $output, $comment, $comment_meta );
 		return $output;
+	}
+
+	/**
+	 * Gets the root comment in a thread
+     *
+     * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment   A comment in a thread.
+	 *
+	 * @return WP_Comment   The root comment in the thread.
+	 */
+	public static function get_root_comment_in_a_thread( WP_Comment $comment ): WP_Comment {
+		$comments = self::get_parent_comments( $comment->comment_ID );
+		foreach ( $comments as $item ) {
+			if ( 0 == $item->comment_parent ) {
+				return $item;
+			}
+		}
+		return $comment;
 	}
 
 	/**

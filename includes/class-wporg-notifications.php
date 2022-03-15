@@ -41,8 +41,9 @@ class WPorg_GlotPress_Notifications {
 		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && ( get_current_blog_id() === WPORG_TRANSLATE_BLOGID ) ) {
 			add_filter(
 				'gp_notification_email_commenters',
-				function ( $comment, $comment_meta, $emails ) {
-					return array_merge( $emails, self::get_emails_from_the_comments( $comment, $comment_meta ) );
+				function ( $emails, $comment, $comment_meta ) {
+					$parent_comments = self::get_parent_comments( $comment->comment_parent );
+					return self::get_emails_from_the_comments( $parent_comments, '' );
 				},
 				10,
 				3
@@ -299,7 +300,7 @@ class WPorg_GlotPress_Notifications {
 			}
 		}
 		if ( ! ( ( 'wp-themes' === substr( $project->path, 0, 9 ) ) || ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) ) ) {
-			$emails[] = self::$i18n_email;
+			$emails = self::$i18n_email;
 		}
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
@@ -354,7 +355,7 @@ class WPorg_GlotPress_Notifications {
 
 
 	/**
-	 * Return the comments in the thread, including the last one.
+	 * Returns the comments in the thread, including the last one.
 	 *
 	 * @since 0.0.2
 	 *
