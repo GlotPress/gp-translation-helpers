@@ -114,8 +114,8 @@ class GP_Notifications {
 		$emails                 = apply_filters( 'gp_notification_email_validators', $comment, $comment_meta, $emails );
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
-		// Set the emails array as empty if one validator has a comment in the thread, to avoid sending the email to all validators.
-		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
+		// Set the emails array as empty if one validator has a comment in the thread or if one validator is the commenter, to avoid sending the email to all validators.
+		if ( ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
 			$emails = array();
 		}
 		self::send_emails( $comment, $comment_meta, $emails );
@@ -309,8 +309,8 @@ class GP_Notifications {
 
 	/**
 	 * Gets the root comment in a thread
-     *
-     * @since 0.0.2
+	 *
+	 * @since 0.0.2
 	 *
 	 * @param WP_Comment $comment   A comment in a thread.
 	 *

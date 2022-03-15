@@ -304,8 +304,8 @@ class WPorg_GlotPress_Notifications {
 		}
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
-		// Return an empty array of emails if one author has a comment in the thread.
-		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
+		// Return an empty array of emails if one author has a comment in the thread or if one validator is the commenter, to avoid sending the email to all validators.
+		if ( ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
 			return array();
 		}
 		return $emails;
