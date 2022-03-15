@@ -76,6 +76,7 @@ class GP_Notifications {
 		$parent_comments = self::get_parent_comments( $comment->comment_parent );
 		$emails          = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
 		$emails          = apply_filters( 'gp_notification_email_commenters', $emails, $comment, $comment_meta );
+		$emails          = self::remove_commenter_email( $comment, $emails );
 
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
@@ -94,6 +95,7 @@ class GP_Notifications {
 	 */
 	public static function send_emails_to_gp_admins( WP_Comment $comment, array $comment_meta ) {
 		$emails = self::get_emails_from_the_gp_admins( $comment, $comment_meta );
+		$emails = self::remove_commenter_email( $comment, $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -118,6 +120,7 @@ class GP_Notifications {
 		if ( ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
 			$emails = array();
 		}
+		$emails = self::remove_commenter_email( $comment, $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -324,6 +327,24 @@ class GP_Notifications {
 			}
 		}
 		return $comment;
+	}
+
+	/**
+	 * Removes the commenter email from the emails to be notified.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment
+	 * @param array      $emails
+	 * @return array
+	 */
+	public static function remove_commenter_email( WP_Comment $comment, array $emails ): array {
+		error_log( PHP_EOL . '$emails: ' . json_encode( $emails ) . PHP_EOL );
+		if ( ( $key = array_search( $comment->comment_author_email, $emails ) ) !== false ) {
+			unset( $emails[ $key ] );
+		}
+		error_log( PHP_EOL . '$emails: ' . json_encode( $emails ) . PHP_EOL );
+		return $emails;
 	}
 
 	/**
