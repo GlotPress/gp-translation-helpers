@@ -248,6 +248,7 @@ class GP_Notifications {
 	 * @return bool
 	 */
 	public static function send_emails( ?WP_Comment $comment, ?array $comment_meta, ?array $emails ): bool {
+		$emails = apply_filters( 'gp_notification_before_send_emails', $emails );
 		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $emails ) ) ) {
 			return false;
 		}
@@ -339,12 +340,10 @@ class GP_Notifications {
 	 * @return array
 	 */
 	public static function remove_commenter_email( WP_Comment $comment, array $emails ): array {
-		error_log( PHP_EOL . '$emails: ' . json_encode( $emails ) . PHP_EOL );
 		if ( ( $key = array_search( $comment->comment_author_email, $emails ) ) !== false ) {
 			unset( $emails[ $key ] );
 		}
-		error_log( PHP_EOL . '$emails: ' . json_encode( $emails ) . PHP_EOL );
-		return $emails;
+		return array_values( $emails );
 	}
 
 	/**

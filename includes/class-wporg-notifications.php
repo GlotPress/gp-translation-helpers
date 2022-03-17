@@ -72,6 +72,14 @@ class WPorg_GlotPress_Notifications {
 				10,
 				3
 			);
+			add_filter(
+				'gp_notification_before_send_emails',
+				function ( $emails ) {
+					return self::optin_emails( $emails );
+				},
+				10,
+				1
+			);
 		}
 	}
 
@@ -445,5 +453,27 @@ class WPorg_GlotPress_Notifications {
 		}
 
 		return GP::$original->get( $terms[0]->slug );
+	}
+
+	/**
+	 * Gets a list with the opt-in emails.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param array $emails The list of emails to be notified.
+	 *
+	 * @return array    The list of emails with the opt-in enabled.
+	 */
+	private static function optin_emails( array $emails ): array {
+		foreach ( $emails as $email ) {
+			$user            = get_user_by( 'email', $email );
+			$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
+			if ( 'on' != gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ) {
+				if ( ( $key = array_search( $email, $emails ) ) !== false ) {
+					unset( $emails[ $key ] );
+				}
+			}
+		}
+		return array_values( $emails );
 	}
 }
