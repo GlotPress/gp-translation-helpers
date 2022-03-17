@@ -18,9 +18,9 @@ gp_title( __( 'Your Settings &lt; GlotPress', 'glotpress' ) );
 gp_breadcrumb( array( __( 'Your Settings', 'glotpress' ) ) );
 gp_tmpl_header();
 
-$per_page = (int) get_user_option( 'gp_per_page' );
+$per_page = (int) get_user_option( 'gp_per_page' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 if ( 0 === $per_page ) {
-	$per_page = 15;
+	$per_page = 15; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 }
 
 $default_sort = get_user_option( 'gp_default_sort' );

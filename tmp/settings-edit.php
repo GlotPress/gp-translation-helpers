@@ -58,13 +58,13 @@ if ( ! is_array( $gp_default_sort ) ) {
 			?>
 		</td>
 	</tr>
-    <!-- Including the "notifications_optin" in the "default_sort" array is a hack.
-         If we include it in the future in the GlotPress core, it would be interesting to put
-         this value in it own option item.
-         I do this because the post values are processed in the GP_Route_Settings->settings_post,
-         and I have to modify the GlotPress core to add a new configuration item. -->
-    <tr>
-        <th><label for="default_sort[notifications_optin]"><?php _e( 'I want to receive notifications of discussions:', 'glotpress' ); ?></label></th>
-        <td><input type="checkbox" id="default_sort[notifications_optin]" name="default_sort[notifications_optin]" <?php gp_checked( "on" == gp_array_get( $gp_default_sort, 'notifications_optin', "off" ) ); ?> /></td>
-    </tr>
+	<!-- Including the "notifications_optin" in the "default_sort" array is a hack.
+		 If we include it in the future in the GlotPress core, it would be interesting to put
+		 this value in it own option item.
+		 I do this because the post values are processed in the GP_Route_Settings->settings_post,
+		 and I have to modify the GlotPress core to add a new configuration item. -->
+	<tr>
+		<th><label for="default_sort[notifications_optin]"><?php _e( 'I want to receive notifications of discussions:', 'glotpress' ); ?></label></th>
+		<td><input type="checkbox" id="default_sort[notifications_optin]" name="default_sort[notifications_optin]" <?php gp_checked( 'on' == gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ); ?> /></td>
+	</tr>
 </table>
