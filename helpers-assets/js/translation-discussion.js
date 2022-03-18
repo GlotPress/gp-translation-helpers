@@ -9,7 +9,7 @@ jQuery( function( $ ) {
 			$comments.children().show();
 		} else if ( 'rejection-feedback' === selector ) {
 			$comments.children().hide();
-			$comments.children( '[data-rejection-feedback="true"]' ).show();
+			$comments.children( '.rejection-feedback' ).show();
 		} else {
 			$comments.children().hide();
 			$comments.children( '.comment-locale-' + selector ).show();

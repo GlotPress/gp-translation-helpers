@@ -137,20 +137,13 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		/** Get translation for this original */
 		$existing_translations = array();
 		if ( ! $translation && $translation_set && $original_id ) {
-			$existing_translations = GP::$translation->find_many_no_map(
+			$translation = GP::$translation->find_one(
 				array(
 					'status'             => 'current',
 					'original_id'        => $original_id,
 					'translation_set_id' => $translation_set->id,
 				)
 			);
-
-			foreach ( $existing_translations as $e ) {
-				if ( 'current' === $e->status ) {
-					$translation = $e;
-					break;
-				}
-			}
 
 			if ( ! $translation ) {
 				$existing_translations = GP::$translation->find_many_no_map(
@@ -159,6 +152,17 @@ class GP_Route_Translation_Helpers extends GP_Route {
 						'translation_set_id' => $translation_set->id,
 					)
 				);
+				usort(
+					$existing_translations,
+					function ( $t1, $t2 ) {
+						$cmp_prop_t1 = $t1->date_modified ?? $t1->date_added;
+						$cmp_prop_t2 = $t2->date_modified ?? $t2->date_added;
+						return $cmp_prop_t1 < $cmp_prop_t2;
+					}
+				);
+
+				// Something falsy is not enough.
+				$translation = null;
 			}
 		}
 
