@@ -54,10 +54,14 @@ gp_tmpl_header();
 				$original_id,
 				$translation_id
 			);
-		}
+		};
+		$row_translation_id = null;
 		?>
 <?php if ( $translation ) : ?>
-	<?php $translation_permalink = $generate_permalink( $translation->id ); ?>
+	<?php
+		$row_translation_id    = $translation->id;
+		$translation_permalink = $generate_permalink( $translation->id );
+	?>
 	<p>
 	
 		<?php echo esc_html( ucfirst( $translation->status ) ); ?> translation:
@@ -80,7 +84,9 @@ gp_tmpl_header();
 		<?php endif ?>
 	</p>
 <?php elseif ( $existing_translations ) : ?>
+	<?php $row_translation_id = end( $existing_translations )->id; ?>
 	<?php foreach ( $existing_translations as $e ) : ?>
+		
 		<p>
 		<?php $translation_permalink = $generate_permalink( $e->id ); ?>
 			<?php echo esc_html( ucfirst( $e->status ) ); ?> translation:
@@ -120,7 +126,7 @@ gp_tmpl_header();
 		<?php esc_html_e( 'This string has no translation in this language.' ); ?>
 	</p>
 <?php endif; ?>
-<div class="translations" row="<?php echo esc_attr( $row_id . ( $translation ? '-' . $translation->id : '' ) ); ?>" replytocom="<?php echo esc_attr( gp_get( 'replytocom' ) ); ?>" >
+<div class="translations" row="<?php echo esc_attr( $row_id . '-' . $row_translation_id ); ?>" replytocom="<?php echo esc_attr( gp_get( 'replytocom' ) ); ?>" >
 <div class="translation-helpers">
 	<nav>
 		<ul class="helpers-tabs">

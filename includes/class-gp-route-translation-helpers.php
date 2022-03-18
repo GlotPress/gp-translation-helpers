@@ -161,6 +161,9 @@ class GP_Route_Translation_Helpers extends GP_Route {
 				);
 			}
 		}
+		if ( ! $translation_id ) {
+			$translation_id = ! empty( $existing_translations ) ? end( $existing_translations )->id : null;
+		}
 
 		$priorities_key_value = $original->get_static( 'priorities' );
 		$priority             = $priorities_key_value[ $original->priority ];
