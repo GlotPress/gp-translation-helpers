@@ -687,11 +687,22 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	</div>
 	<?php endif; ?>
 	<div class="comment-content" dir="auto">
-		<?php if ( $is_linking_comment ) : ?>
-			<?php if ( $reject_reason ) : ?>
-				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> was rejected with <a href="<?php echo esc_url( $comment->comment_content ); ?>"><?php esc_html_e( 'a reason that is being discussed here' ); ?></a>.
+		<?php if ( $is_linking_comment ) :
+			$linked_comment = $comment->comment_content;
+			$parts = wp_parse_url( $linked_comment );
+			$parts['path'] = rtrim( $parts['path'], '/' );
+			$path_parts = explode( '/', $parts['path'] );
+			$linking_comment_set_slug = array_pop( $path_parts );
+			$linking_comment_locale = array_pop( $path_parts );
+			if ( $current_locale && $current_locale !== $linking_comment_locale ) {
+				$parts['path_new'] = $parts['path'] . '/' . $current_locale . '/default';
+				$linked_comment = str_replace( $parts['path'], $parts['path_new'], $linked_comment );
+			}
+
+			if ( $reject_reason ) : ?>
+				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> was rejected with <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'a reason that is being discussed here' ); ?></a>.
 			<?php else : ?>
-				<a href="<?php echo esc_url( $comment->comment_content ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
+				<a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
 			<?php endif; ?>
 		<?php else : ?>
 			<?php comment_text(); ?>
