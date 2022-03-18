@@ -520,7 +520,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @param      string  $comment  The comment.
 	 * @param      WP_Post $post     The post.
 	 *
-	 * @return     <type>  ( description_of_the_return_value )
+	 * @return     string  Return the reply link HTML.
 	 */
 	public function comment_reply_link( $link, $args, $comment, $post ) {
 		$data_attributes = array(
@@ -534,7 +534,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$data_attribute_string = '';
 
 		foreach ( $data_attributes as $name => $value ) {
-			$data_attribute_string .= " data-${name}=\"" . esc_attr( $value ) . '"';
+			$data_attribute_string .= ' data-'. $name .'="' . esc_attr( $value ) . '"';
 		}
 
 		$data_attribute_string = trim( $data_attribute_string );
