@@ -53,14 +53,21 @@ class GP_Notifications {
 	}
 
 	/**
-	 * Sends notifications when a new comment changes its status to "approve".
+	 * Sends notifications when a comment changes its status to "approved".
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return void
 	 */
-	public static function comment_change_status() {
-		// todo
+	public static function comment_change_status( $new_status, $old_status, $comment ) {
+		$post = get_post( $comment->comment_post_ID );
+		if ( Helper_Translation_Discussion::POST_TYPE === $post->post_type ) {
+			if ( $old_status != $new_status ) {
+				if ( ( 'approved' === $new_status ) ) {
+					self::init( $comment, '', '' );
+				}
+			}
+		}
 	}
 
 	/**
