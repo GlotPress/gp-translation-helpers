@@ -113,7 +113,7 @@ h6 {
 .modal-item {
 	display: inline-block;
 	width: 30%;
-	margin-top: 7px;
+	margin-top: 11px;
 }
 .modal-item label {
 	display: inherit;
@@ -121,7 +121,6 @@ h6 {
 	cursor: pointer;
 }
 .modal-item input[type="checkbox"] {
-	transform: scale(1.5);
 	margin-right: 5px;
 }
 .modal-comment {
