@@ -28,22 +28,25 @@ class GP_Notifications {
 	 * @return void
 	 */
 	public static function init( WP_Comment $comment, $request, $creating ) {
-		if ( ( '1' === $comment->comment_approved ) || ( 'approve' === $comment->comment_approved ) ) {
-			$comment_meta = get_comment_meta( $comment->comment_ID );
-			if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
-				self::send_emails_to_thread_commenters( $comment, $comment_meta );
-			}
-			$root_comment      = self::get_root_comment_in_a_thread( $comment );
-			$root_comment_meta = get_comment_meta( $root_comment->comment_ID );
-			if ( array_key_exists( 'comment_topic', $root_comment_meta ) ) {
-				switch ( $root_comment_meta['comment_topic'][0] ) {
-					case 'typo':
-					case 'context': // Notify to the GlotPress admins
-						self::send_emails_to_gp_admins( $comment, $comment_meta );
-						break;
-					case 'question': // Notify to the project validator
-						self::send_emails_to_validators( $comment, $comment_meta );
-						break;
+		$post = get_post( $comment->comment_post_ID );
+		if ( Helper_Translation_Discussion::POST_TYPE === $post->post_type ) {
+			if ( ( '1' === $comment->comment_approved ) || ( 'approve' === $comment->comment_approved ) ) {
+				$comment_meta = get_comment_meta( $comment->comment_ID );
+				if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
+					self::send_emails_to_thread_commenters( $comment, $comment_meta );
+				}
+				$root_comment      = self::get_root_comment_in_a_thread( $comment );
+				$root_comment_meta = get_comment_meta( $root_comment->comment_ID );
+				if ( array_key_exists( 'comment_topic', $root_comment_meta ) ) {
+					switch ( $root_comment_meta['comment_topic'][0] ) {
+						case 'typo':
+						case 'context': // Notify to the GlotPress admins
+							self::send_emails_to_gp_admins( $comment, $comment_meta );
+							break;
+						case 'question': // Notify to the project validator
+							self::send_emails_to_validators( $comment, $comment_meta );
+							break;
+					}
 				}
 			}
 		}
