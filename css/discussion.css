@@ -130,6 +130,7 @@ h6 {
 .modal-comment textarea {
 	width: 97%;
 	height: 170px;
+	font-family: "Helvetica", "Arial", sans-serif;
 }
 .modal-btn {
 	float: right;
