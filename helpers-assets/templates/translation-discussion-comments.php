@@ -50,6 +50,7 @@
 				'original_id'          => $original_id,
 				'project'              => $project,
 				'translation_set_slug' => $translation_set_slug,
+				'reverse_children'     => true,
 			),
 			$comments
 		);
