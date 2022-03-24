@@ -293,11 +293,17 @@ class GP_Notifications {
 		foreach ( $emails as $email ) {
 			$subject = esc_html__( 'New comment in a translation discussion' );
 			$body    = self::get_email_body( $comment, $comment_meta );
-			// todo: add a filter to update the headers.
 			$headers = array(
 				'Content-Type: text/html; charset=UTF-8',
-				'From: Translating WordPress.org <no-reply@wordpress.org>',
 			);
+			/**
+			 * Filters the email headers.
+			 *
+			 * @since 0.0.2
+			 *
+			 * @param array $headers The email headers.
+			 */
+			$headers = apply_filters( 'gp_notification_email_headers', $headers );
 			wp_mail( $email, $subject, $body, $headers );
 		}
 		return true;

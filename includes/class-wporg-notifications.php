@@ -71,6 +71,15 @@ class WPorg_GlotPress_Notifications {
 				10,
 				1
 			);
+			add_filter(
+				'gp_notification_email_headers',
+				function () {
+					return array(
+						'Content-Type: text/html; charset=UTF-8',
+						'From: Translating WordPress.org <no-reply@wordpress.org>',
+					);
+				}
+			);
 		}
 	}
 
