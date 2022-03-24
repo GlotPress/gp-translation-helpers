@@ -243,13 +243,14 @@ class GP_Notifications {
 		 * @param array      $comment_meta The meta values for the comment.
 		 */
 		$emails = array();
+		$output = array();
 		$emails = apply_filters( 'gp_notification_email_admins', $emails, $comment, $comment_meta );
 		if ( ! empty( $emails ) ) {
 			return $emails;
 		}
 
 		try {
-			return $wpdb->get_results(
+			$emails = $wpdb->get_results(
 				$wpdb->prepare(
 					"
 			SELECT user_email FROM {$wpdb->users} 
@@ -259,6 +260,10 @@ class GP_Notifications {
 				),
 				ARRAY_N
 			);
+			foreach ( $emails as $email ) {
+				$output[] = $email[0];
+			}
+			return $output;
 		} catch ( Exception $e ) {
 			return array();
 		}
