@@ -89,7 +89,6 @@ class GP_Notifications {
 		 * @param array      $comment_meta The meta values for the comment.
 		 */
 		$emails = apply_filters( 'gp_notification_email_commenters', $emails, $comment, $comment_meta );
-		$emails = self::remove_commenter_email( $comment, $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -105,7 +104,6 @@ class GP_Notifications {
 	 */
 	public static function send_emails_to_gp_admins( WP_Comment $comment, array $comment_meta ) {
 		$emails = self::get_emails_from_the_gp_admins( $comment, $comment_meta );
-		$emails = self::remove_commenter_email( $comment, $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -139,7 +137,6 @@ class GP_Notifications {
 		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
 			$emails = array();
 		}
-		$emails = self::remove_commenter_email( $comment, $emails );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -290,6 +287,7 @@ class GP_Notifications {
 		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $emails ) ) ) {
 			return false;
 		}
+		$emails = self::remove_commenter_email( $comment, $emails );
 		foreach ( $emails as $email ) {
 			$subject = esc_html__( 'New comment in a translation discussion' );
 			$body    = self::get_email_body( $comment, $comment_meta );
