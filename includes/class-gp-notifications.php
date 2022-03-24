@@ -298,23 +298,24 @@ class GP_Notifications {
 		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $emails ) ) ) {
 			return false;
 		}
-		$emails = self::remove_commenter_email( $comment, $emails );
+		$emails  = self::remove_commenter_email( $comment, $emails );
+		$headers = array(
+			'Content-Type: text/html; charset=UTF-8',
+		);
+		/**
+		 * Filters the email headers.
+		 *
+		 * @since 0.0.2
+		 *
+		 * @param array $headers The email headers.
+		 */
+		$headers = apply_filters( 'gp_notification_email_headers', $headers );
+		$subject = esc_html__( 'New comment in a translation discussion' );
+		$body    = self::get_email_body( $comment, $comment_meta );
 		foreach ( $emails as $email ) {
-			$subject = esc_html__( 'New comment in a translation discussion' );
-			$body    = self::get_email_body( $comment, $comment_meta );
-			$headers = array(
-				'Content-Type: text/html; charset=UTF-8',
-			);
-			/**
-			 * Filters the email headers.
-			 *
-			 * @since 0.0.2
-			 *
-			 * @param array $headers The email headers.
-			 */
-			$headers = apply_filters( 'gp_notification_email_headers', $headers );
-			wp_mail( $email, $subject, $body, $headers );
+			$headers[] = 'Bcc: ' . $email;
 		}
+		wp_mail( '', $subject, $body, $headers );
 		return true;
 	}
 
