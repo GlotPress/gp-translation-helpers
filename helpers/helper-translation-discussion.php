@@ -364,6 +364,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'status'             => 'approve',
 				'type'               => 'comment',
 				'include_unapproved' => array( get_current_user_id() ),
+				'order'              => 'ASC',
 			)
 		);
 	}
