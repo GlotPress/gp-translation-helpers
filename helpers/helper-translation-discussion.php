@@ -84,6 +84,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
 		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
+		add_filter( 'comment_reply_link', array( $this, 'comment_reply_link' ), 10, 4 );
 	}
 
 	/**
@@ -98,9 +99,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			self::LINK_TAXONOMY,
 			array(),
 			array(
-				'public'  => false,
-				'show_ui' => false,
-				'rewrite' => false,
+				'public'       => false,
+				'show_ui'      => false,
+				'rewrite'      => false,
 				'capabilities' => array(
 					'assign_terms' => 'read',
 				),
@@ -482,14 +483,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$gp_locales     = new GP_Locales();
 		$all_gp_locales = array_keys( $gp_locales->locales );
 
-		if ( ! in_array( $comment_locale, $all_gp_locales ) ) {
+		if ( ! in_array( $comment_locale, $all_gp_locales, true ) ) {
 			$comment_locale = '';
 		}
 		return $comment_locale;
 	}
 
 	/**
-	 * Kills WordPress execution and displays HTML page with an error message if the translation id is incorrect.
+	 * Throws an exception with an error message if the translation id is incorrect.
 	 *
 	 * Used as sanitize callback in the register_meta for the "comment" object type,
 	 * "locale" meta_key
@@ -501,74 +502,179 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @param int|string $translation_id   The id for the translation showed when the comment was made.
 	 *
 	 * @return int|string
+	 *
+	 * @throws Exception Throws an exception with message if translation_id is invalid.
 	 */
 	public function sanitize_translation_id( $translation_id ) {
-		if ( ! is_numeric( $translation_id ) ) {
-			if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
-				wp_die( 'Invalid translation ID' );
-			}
+		if ( $translation_id > 0 && ! GP::$translation->get( $translation_id ) ) {
+			throw new Exception( 'Invalid translation ID' );
 		}
 		return $translation_id;
 	}
-}
 
 	/**
-	 * Gets the slug for the post ID.
+	 * The comment reply link override.
 	 *
-	 * @since 0.0.1
+	 * @param      string  $link     The link.
+	 * @param      array   $args     The arguments.
+	 * @param      string  $comment  The comment.
+	 * @param      WP_Post $post     The post.
 	 *
-	 * @param int $post_id  The id of the post.
-	 *
-	 * @return false|string
+	 * @return     string  Return the reply link HTML.
 	 */
+	public function comment_reply_link( $link, $args, $comment, $post ) {
+		$data_attributes = array(
+			'commentid'      => $comment->comment_ID,
+			'postid'         => $post->ID,
+			'belowelement'   => $args['add_below'] . '-' . $comment->comment_ID,
+			'respondelement' => $args['respond_id'],
+			'replyto'        => sprintf( $args['reply_to_text'], $comment->comment_author ),
+		);
+
+		$data_attribute_string = '';
+
+		foreach ( $data_attributes as $name => $value ) {
+			$data_attribute_string .= ' data-' . $name . '="' . esc_attr( $value ) . '"';
+		}
+
+		$data_attribute_string = trim( $data_attribute_string );
+
+		$link = sprintf(
+			"<a rel='nofollow' class='comment-reply-link' href='%s' %s aria-label='%s'>%s</a>",
+			esc_url(
+				add_query_arg(
+					array(
+						'replytocom'      => $comment->comment_ID,
+						'unapproved'      => false,
+						'moderation-hash' => false,
+					),
+					$args['original_permalink']
+				)
+			) . '#' . $args['respond_id'],
+			$data_attribute_string,
+			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
+			$args['reply_text']
+		);
+		return $args['before'] . $link . $args['after'];
+	}
+
+	/**
+	 * Throws an exception with an error message if the original id is incorrect.
+	 *
+	 * Used as callback to validate the original_id passed on rejecting a string with feedback
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int|string $original_id   The id of the original for the rejected translation.
+	 *
+	 * @return int|string
+	 *
+	 * @throws Exception Throws an exception with message if original_id is invalid.
+	 */
+	public function sanitize_original_id( $original_id ) {
+		if ( $original_id > 0 && ! GP::$original->get( $original_id ) ) {
+			throw new Exception( 'Invalid Original ID' );
+		}
+
+		return $original_id;
+	}
+}
+
+/**
+ * Gets the slug for the post ID.
+ *
+ * @since 0.0.1
+ *
+ * @param int $post_id  The id of the post.
+ *
+ * @return false|string
+ */
 function gth_discussion_get_original_id_from_post( int $post_id ) {
 	return Helper_Translation_Discussion::get_original_from_post_id( $post_id );
 }
 
-	/**
-	 * Callback for the wp_list_comments() function in the translation-discussion-comments.php template.
-	 *
-	 * @since 0.0.1
-	 *
-	 * @param WP_Comment $comment   The comment object.
-	 * @param array      $args      Formatting options.
-	 * @param int        $depth     The depth of the new comment.
-	 *
-	 * @return void
-	 */
+/**
+ * Print a (linked) translation.
+ *
+ * @param      int    $comment_translation_id  The comment translation identifier.
+ * @param      array  $args                    The arguments.
+ * @param      string $prefix                  The prefix text.
+ */
+function gth_print_translation( $comment_translation_id, $args, $prefix = '' ) {
+	static $cache = array();
+	if ( ! isset( $cache[ $comment_translation_id ] ) ) {
+		$cache[ $comment_translation_id ] = GP::$translation->get( $comment_translation_id );
+	}
+	$translation           = $cache[ $comment_translation_id ];
+	$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
+		$args['project'],
+		$args['locale_slug'],
+		$args['translation_set_slug'],
+		$args['original_id'],
+		$comment_translation_id
+	);
+	?>
+			<em>
+			<?php
+			echo esc_html( $prefix );
+			if ( $translation_permalink ) {
+				echo wp_kses( gp_link( $translation_permalink, $translation->translation_0 ), array( 'a' => array( 'href' => true ) ) );
+			} else {
+				echo esc_html( $translation->translation_0 );
+			}
+			?>
+			</em>
+		<?php
+}
+/**
+ * Callback for the wp_list_comments() function in the helper-translation-discussion.php template.
+ *
+ * @since 0.0.1
+ *
+ * @param WP_Comment $comment   The comment object.
+ * @param array      $args      Formatting options.
+ * @param int        $depth     The depth of the new comment.
+ *
+ * @return void
+ */
 function gth_discussion_callback( WP_Comment $comment, array $args, int $depth ) {
 	$GLOBALS['comment'] = $comment;// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+	$is_linking_comment = preg_match( '!^' . home_url( gp_url() ) . '[a-z0-9_/#-]+$!i', $comment->comment_content );
 
 	$comment_locale = get_comment_meta( $comment->comment_ID, 'locale', true );
 	$current_locale = $args['locale_slug'];
 
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
-	$reject_reason          = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
-	$is_rejection_feedback  = false;
 
-	if ( ! empty( $reject_reason ) && ( $current_locale && $current_locale === $comment_locale ) ) {
-		// Set to true if rejection feedback belongs to current locale
-		$is_rejection_feedback = true;
+	$reject_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+
+	$classes = array( 'comment-locale-' . $comment_locale );
+	if ( ! empty( $reject_reason ) ) {
+		$classes[] = 'rejection-feedback';
+		$classes[] = 'rejection-feedback-' . $comment_locale;
 	}
 	?>
-	<li class="<?php echo esc_attr( 'comment-locale-' . $comment_locale ); ?>" data-rejection-feedback="<?php echo $is_rejection_feedback ? 'true' : 'false'; ?>">
+	<li class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
 	<article id="comment-<?php comment_ID(); ?>" class="comment">
 	<div class="comment-avatar">
 	<?php echo get_avatar( $comment, 25 ); ?>
 	</div><!-- .comment-avatar -->
 	<?php printf( '<cite class="fn">%s</cite>', get_comment_author_link( $comment->comment_ID ) ); ?>
+	<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 	<?php
 	// Older than a week, show date; otherwise show __ time ago.
-	if ( current_time( 'timestamp' ) - get_comment_time( 'U' ) > 604800 ) {
+	if ( time() - get_comment_time( 'U', true ) > 604800 ) {
 		/* translators: 1: Date , 2: Time */
 		$time = sprintf( _x( '%1$s at %2$s', '1: date, 2: time' ), get_comment_date(), get_comment_time() );
 	} else {
 		/* translators: Human readable time difference */
-		$time = sprintf( __( '%1$s ago' ), human_time_diff( get_comment_time( 'U' ), current_time( 'timestamp' ) ) );
+		$time = sprintf( __( '%1$s ago' ), human_time_diff( get_comment_time( 'U' ), time() ) );
 	}
 	echo '<time datetime=" ' . get_comment_time( 'c' ) . '">' . esc_html( $time ) . '</time>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	?>
+	</a>
 	<?php if ( $comment_locale ) : ?>
 	<div class="comment-locale">Locale:
 				<?php if ( ! $current_locale ) : ?>
@@ -581,12 +687,33 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	</div>
 	<?php endif; ?>
 	<div class="comment-content" dir="auto">
-		<?php comment_text(); ?>
-		<?php if ( $reject_reason ) : ?>
-		<p>
-			<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
-			<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
-		</p>
+		<?php
+		if ( $is_linking_comment ) :
+			$linked_comment = $comment->comment_content;
+			$parts          = wp_parse_url( $linked_comment );
+			$parts['path']  = rtrim( $parts['path'], '/' );
+			$path_parts     = explode( '/', $parts['path'] );
+
+			$linking_comment_set_slug = array_pop( $path_parts );
+			$linking_comment_locale   = array_pop( $path_parts );
+			if ( $current_locale && $current_locale !== $linking_comment_locale ) {
+				$linked_comment = str_replace( $parts['path'], $parts['path'] . '/' . $current_locale . '/default', $linked_comment );
+			}
+
+			if ( $reject_reason ) :
+				?>
+				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> was rejected with <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'a reason that is being discussed here' ); ?></a>.
+			<?php else : ?>
+				<a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
+			<?php endif; ?>
+		<?php else : ?>
+			<?php comment_text(); ?>
+			<?php if ( $reject_reason ) : ?>
+			<p>
+				<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
+				<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
+			</p>
+			<?php endif; ?>
 		<?php endif; ?>
 	</div>
 	<footer>
@@ -600,119 +727,74 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 					sprintf( esc_attr( __( 'in reply to %s' ) ), esc_html( get_comment_author( $comment->comment_parent ) ) )
 				);
 			}
-
-			add_filter(
-				'comment_reply_link',
-				function( $link, $args, $comment, $post ) {
-					$data_attributes = array(
-						'commentid'      => $comment->comment_ID,
-						'postid'         => $post->ID,
-						'belowelement'   => $args['add_below'] . '-' . $comment->comment_ID,
-						'respondelement' => $args['respond_id'],
-						'replyto'        => sprintf( $args['reply_to_text'], $comment->comment_author ),
-					);
-
-					$data_attribute_string = '';
-
-					foreach ( $data_attributes as $name => $value ) {
-						$data_attribute_string .= " data-${name}=\"" . esc_attr( $value ) . '"';
-					}
-
-					$data_attribute_string = trim( $data_attribute_string );
-
-					$link = sprintf(
-						"<a rel='nofollow' class='comment-reply-link' href='%s' %s aria-label='%s'>%s</a>",
-						esc_url(
-							add_query_arg(
-								array(
-									'replytocom'      => $comment->comment_ID,
-									'unapproved'      => false,
-									'moderation-hash' => false,
-								),
-								$args['original_permalink']
-							)
-						) . '#' . $args['respond_id'],
-						$data_attribute_string,
-						esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
-						$args['reply_text']
-					);
-					return $args['before'] . $link . $args['after'];
-				},
-				10,
-				4
-			);
-
-			comment_reply_link(
-				array_merge(
-					$args,
-					array(
-						'depth'     => $depth,
-						'max_depth' => $args['max_depth'],
-						'before'    => '<span class="alignright">',
-						'after'     => '</span>',
-					)
-				)
-			);
-			?>
-			</div><!-- .comment-author .vcard -->
-			<?php if ( '0' === $comment->comment_approved ) : ?>
-				<p><em><?php esc_html_e( 'Your comment is awaiting moderation.' ); ?></em></p>
-			<?php endif; ?>
-			<?php if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) : ?>
-				<?php
-					$translation           = GP::$translation->get( $comment_translation_id );
-					$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
-						$args['project'],
-						$args['locale_slug'],
-						$args['translation_set_slug'],
-						$args['original_id'],
-						$comment_translation_id
-					);
+			if ( $is_linking_comment ) {
 				?>
-				<em>
-					<?php
-					echo $is_rejection_feedback ? 'Translation (Rejected): ' : 'Translation: ';
-					if ( $translation_permalink ) {
-						echo wp_kses( gp_link( $translation_permalink, $translation->translation_0 ), array( 'a' => array( 'href' => true ) ) );
-					} else {
-						echo esc_html( $translation->translation_0 );
-					}
-					?>
-				</em>
-			<?php endif; ?>
-			<div class="clear"></div>
-			<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">
-			<?php
-			if ( is_user_logged_in() ) {
-				comment_form(
-					array(
-						'title_reply'         => esc_html__( 'Discuss this string' ),
-						/* translators: username */
-						'title_reply_to'      => esc_html__( 'Reply to %s' ),
-						'title_reply_before'  => '<h5 id="reply-title" class="discuss-title">',
-						'title_reply_after'   => '</h5>',
-						'id_form'             => 'commentform-' . $comment->comment_post_ID,
-						'cancel_reply_link'   => '<span></span>',
-						'comment_notes_after' => implode(
-							"\n",
-							array(
-								'<input type="hidden" name="comment_parent" value="' . esc_attr( $comment->comment_ID ) . '" />',
-								'<input type="hidden" name="comment_locale" value="' . esc_attr( $args['locale_slug'] ) . '" />',
-								'<input type="hidden" name="translation_id" value="' . esc_attr( $args['translation_id'] ) . '" />',
-								'<input type="hidden" name="redirect_to" value="' . esc_url( $args['original_permalink'] ) . '" />',
-							)
-						),
-					),
-					$comment->comment_post_ID
-				);
+				<span class="alignright">
+					<a href="<?php echo esc_url( $comment->comment_content ); ?>"><?php esc_html_e( 'Reply' ); ?></a>
+				</span>
+				<?php
 			} else {
-				/* translators: Log in URL. */
-				echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
+				comment_reply_link(
+					array_merge(
+						$args,
+						array(
+							'depth'     => $depth,
+							'max_depth' => $args['max_depth'],
+							'before'    => '<span class="alignright">',
+							'after'     => '</span>',
+						)
+					)
+				);
 			}
 			?>
+			</div><!-- .comment-author .vcard -->
+			<?php
+			if ( '0' === $comment->comment_approved ) {
+				?>
+				<p><em><?php esc_html_e( 'Your comment is awaiting moderation.' ); ?></em></p>
+				<?php
+			}
+
+			if ( ! $is_linking_comment ) :
+				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
+					gth_print_translation( $comment_translation_id, $args, empty( $reject_reason ) ? 'Translation: ' : 'Translation  (Rejected): ' );
+				}
+
+				?>
+				<div id="comment-reply-<?php echo esc_attr( $comment->comment_ID ); ?>" style="display: none;">
+				<?php
+				if ( is_user_logged_in() ) {
+					comment_form(
+						array(
+							'title_reply'         => esc_html__( 'Discuss this string' ),
+							/* translators: username */
+							'title_reply_to'      => esc_html__( 'Reply to %s' ),
+							'title_reply_before'  => '<h5 id="reply-title" class="discuss-title">',
+							'title_reply_after'   => '</h5>',
+							'id_form'             => 'commentform-' . $comment->comment_post_ID,
+							'cancel_reply_link'   => '<span></span>',
+							'comment_notes_after' => implode(
+								"\n",
+								array(
+									'<input type="hidden" name="comment_parent" value="' . esc_attr( $comment->comment_ID ) . '" />',
+									'<input type="hidden" name="comment_locale" value="' . esc_attr( $args['locale_slug'] ) . '" />',
+									'<input type="hidden" name="translation_id" value="' . esc_attr( $args['translation_id'] ) . '" />',
+									'<input type="hidden" name="redirect_to" value="' . esc_url( $args['original_permalink'] ) . '" />',
+								)
+							),
+						),
+						$comment->comment_post_ID
+					);
+				} else {
+					/* translators: Log in URL. */
+					echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
+				}
+				?>
 			</div>
+			<?php endif; ?>
 		</footer>
 	</article><!-- #comment-## -->
 </li>
 	<?php
 }
+
