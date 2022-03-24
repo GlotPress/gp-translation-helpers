@@ -31,15 +31,6 @@ class WPorg_GlotPress_Notifications {
 	public static function init() {
 		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && ( get_current_blog_id() === WPORG_TRANSLATE_BLOGID ) ) {
 			add_filter(
-				'gp_notification_email_commenters',
-				function ( $emails, $comment, $comment_meta ) {
-					$parent_comments = self::get_parent_comments( $comment->comment_parent );
-					return self::get_emails_from_the_comments( $parent_comments, '' );
-				},
-				10,
-				3
-			);
-			add_filter(
 				'gp_notification_email_admins',
 				function ( $emails, $comment, $comment_meta ) {
 					return self::get_emails_from_author( $comment, $comment_meta );
