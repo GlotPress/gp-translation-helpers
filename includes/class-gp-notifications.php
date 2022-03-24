@@ -250,7 +250,7 @@ class GP_Notifications {
 		}
 
 		try {
-			$emails = $wpdb->get_results(
+			$db_emails = $wpdb->get_results(
 				$wpdb->prepare(
 					"
 			SELECT user_email FROM {$wpdb->users} 
@@ -260,10 +260,16 @@ class GP_Notifications {
 				),
 				ARRAY_N
 			);
-			foreach ( $emails as $email ) {
-				$output[] = $email[0];
+			foreach ( $db_emails as $email ) {
+				$emails[] = $email[0];
 			}
-			return $output;
+			$parent_comments        = self::get_parent_comments( $comment->comment_parent );
+			$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+			// Set the emails array as empty if one admin has a comment in the thread.
+			if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
+				$emails = array();
+			}
+			return $emails;
 		} catch ( Exception $e ) {
 			return array();
 		}
