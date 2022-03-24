@@ -9,14 +9,6 @@
  */
 class WPorg_GlotPress_Notifications {
 	/**
-	 * The taxonomy key.
-	 *
-	 * @since 0.0.2
-	 * @var string
-	 */
-	const LINK_TAXONOMY = 'gp_original_id';
-
-	/**
 	 * Emails to receive the comments about typos and asking for feedback in core, patterns, meta and apps.
 	 *
 	 * @todo Update these emails to the correct ones.
@@ -24,7 +16,6 @@ class WPorg_GlotPress_Notifications {
 	 * @since 0.0.2
 	 * @var array
 	 */
-
 	private static $i18n_email = array(
 		'i18n@wordpress.org',
 		'i18n2@wordpress.org',
@@ -50,7 +41,7 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_notification_email_admins',
-				function ( $comment, $comment_meta ) {
+				function ( $emails, $comment, $comment_meta ) {
 					return self::get_emails_from_author( $comment, $comment_meta );
 				},
 				10,
@@ -58,8 +49,8 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_notification_email_validators',
-				function ( $comment, $comment_meta, $emails ) {
-					return array_merge( $emails, self::get_emails_from_validators( $comment, $comment_meta ) );
+				function ( $emails, $comment, $comment_meta ) {
+					return self::get_emails_from_validators( $comment, $comment_meta );
 				},
 				10,
 				3
@@ -84,16 +75,31 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Sends notifications when a new comment changes its status to "approve".
+	 * Gets the emails of all project validators: GTE, PTE and CLPTE.
+	 *
+	 * Returns an empty array if one GTE/PTE/CLPTE has a comment in the thread,
+	 * so only one validators is notified.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @return void
+	 * @param WP_Comment $comment      The comment object.
+	 * @param array      $comment_meta The meta values for the comment.
+	 *
+	 * @return array    The validators' emails.
 	 */
-	public static function comment_change_status() {
-
+	public static function get_emails_from_validators( WP_Comment $comment, array $comment_meta ): array {
+		$locale                 = $comment_meta['locale'][0];
+		$emails                 = self::get_emails_from_gte( $locale );
+		$emails                 = array_merge( $emails, self::get_emails_from_pte_by_project_and_locale( $comment, $locale ) );
+		$emails                 = array_merge( $emails, self::get_emails_from_clpte_by_project( $comment ) );
+		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
+		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+		// Set the emails array as empty if one GTE/PTE/CLPTE has a comment in the thread.
+		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
+			$emails = array();
+		}
+		return $emails;
 	}
-
 
 	/**
 	 * Gets the emails to be notified from the thread comments.
@@ -102,12 +108,12 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param array|null $comments          Array with the parent comments to the posted comment.
-	 * @param string     $email_to_remove   Email from the posted comment
+	 * @param array  $comments        Array with the parent comments to the posted comment.
+	 * @param string $email_to_remove Email from the posted comment.
 	 *
-	 * @return array|null   The emails to be notified in the thread.
+	 * @return array The emails to be notified in the thread.
 	 */
-	public static function get_emails_from_the_comments( ?array $comments, string $email_to_remove ): ?array {
+	public static function get_emails_from_the_comments( array $comments, string $email_to_remove ): array {
 		$emails = array();
 		foreach ( $comments as $comment ) {
 			$emails[] = $comment->comment_author_email;
@@ -120,40 +126,13 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Gets the emails of all project validators: GTE, PTE and CLPTE.
-	 *
-	 * Returns an empty array if one GTE/PTE/CLPTE has a comment in the thread,
-	 * so only one validators is notified.
-	 *
-	 * @param WP_Comment $comment       The comment object.
-	 * @param array      $comment_meta  The meta values for the comment.
-	 *
-	 * @since 0.0.2
-	 *
-	 * @return array    The validators' emails.
-	 */
-	public static function get_emails_from_validators( WP_Comment $comment, array $comment_meta ): array {
-		$locale                 = $comment_meta['locale'][0];
-		$emails                 = self::get_emails_from_gte( $locale );
-		$emails                 = array_merge( $emails, self::get_emails_from_pte_by_project_and_locale( $comment, $locale ) );
-		$emails                 = array_merge( $emails, self::get_emails_from_clpte_by_project( $comment ) );
-		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
-		// Set the emails array as empty if one GTE/PTE/CLPTE has a comment in the thread.
-		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
-			$emails = array();
-		}
-		return $emails;
-	}
-
-	/**
 	 * Gets the general translation editors (GTE) emails for the given locale.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param string $locale Locale slug.
+	 * @param string $locale The locale. E.g. 'zh-tw'.
 	 *
-	 * @return array
+	 * @return array The general translation editors (GTE) emails.
 	 */
 	public static function get_emails_from_gte( string $locale ): array {
 		$emails    = array();
@@ -194,10 +173,10 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment   The comment object.
-	 * @param string     $locale         The locale. E.g. 'zh-tw'.
+	 * @param WP_Comment $comment The comment object.
+	 * @param string     $locale  The locale. E.g. 'zh-tw'.
 	 *
-	 * @return array
+	 * @return array The project translation editors (PTE) emails.
 	 */
 	public static function get_emails_from_pte_by_project_and_locale( $comment, $locale ): array {
 		return self::get_emails_from_pte_clpte_by_project_and_locale( $comment, $locale );
@@ -208,9 +187,9 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $translation_id The id for the translation showed when the comment was made.
+	 * @param WP_Comment $comment The comment object.
 	 *
-	 * @return array
+	 * @return array The cross language project translation editors (CLPTE) emails.
 	 */
 	public static function get_emails_from_clpte_by_project( $comment ): array {
 		return self::get_emails_from_pte_clpte_by_project_and_locale( $comment, 'all-locales' );
@@ -221,10 +200,10 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment   The comment object.
-	 * @param string     $locale        The locale. E.g. 'zh-tw'.
+	 * @param WP_Comment $comment The comment object.
+	 * @param string     $locale  The locale. E.g. 'zh-tw'.
 	 *
-	 * @return array
+	 * @return array The PTE/CLPTE emails for the project and locale.
 	 */
 	private static function get_emails_from_pte_clpte_by_project_and_locale( WP_Comment $comment, string $locale ): array {
 		global $wpdb;
@@ -242,7 +221,7 @@ class WPorg_GlotPress_Notifications {
 
 		$project = self::get_project_to_translate( $comment );
 
-		// todo: remove the deleted users in the SQL query
+		// todo: remove the deleted users in the SQL query.
 		$translation_editors = $wpdb->get_results(
 			$wpdb->prepare(
 				"
@@ -265,15 +244,15 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Gets the emails for the commiters of a theme or a plugin.
+	 * Gets the emails for the author of a theme or a plugin.
 	 *
 	 * Themes: only one email.
-	 * Plugins: all the plugin commiters.
+	 * Plugins: all the plugin authors.
 	 *
-	 * @param WP_Comment $comment       The comment object.
-	 * @param array      $comment_meta  The meta values for the comment.
+	 * @param WP_Comment $comment      The comment object.
+	 * @param array      $comment_meta The meta values for the comment.
 	 *
-	 * @return array
+	 * @return array The emails for the author of a theme or a plugin.
 	 */
 	public static function get_emails_from_author( WP_Comment $comment, array $comment_meta ): array {
 		global $wpdb;
@@ -324,10 +303,10 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment       The comment object.
-	 * @param array|null $comment_meta  The meta values for the comment.
+	 * @param WP_Comment $comment      The comment object.
+	 * @param array|null $comment_meta The meta values for the comment.
 	 *
-	 * @return string|null
+	 * @return string|null The email body message.
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
 		$project  = self::get_project_to_translate( $comment );
@@ -347,7 +326,7 @@ class WPorg_GlotPress_Notifications {
 		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
 			$translation_id = $comment_meta['translation_id'][0];
 			$translation    = GP::$translation->get( $translation_id );
-			// todo: add the plurals
+			// todo: add the plurals.
 			if ( ! is_null( $translation ) ) {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
 			}
@@ -369,7 +348,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @param int $comment_id   Last comment of the thread.
 	 *
-	 * @return array
+	 * @return array All the comments in the thread.
 	 */
 	public static function get_parent_comments( int $comment_id ): array {
 		$comments = array();
@@ -388,13 +367,13 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment   The comment object.
+	 * @param WP_Comment $comment The comment object.
 	 *
-	 * @return GP_Project           The project the translated string belongs to.
+	 * @return GP_Project The project the translated string belongs to.
 	 */
 	private static function get_project_to_translate( WP_Comment $comment ): GP_Project {
 		$post_id = $comment->comment_post_ID;
-		$terms   = wp_get_object_terms( $post_id, self::LINK_TAXONOMY, array( 'number' => 1 ) );
+		$terms   = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
 		}
@@ -406,7 +385,7 @@ class WPorg_GlotPress_Notifications {
 
 		// If the parent project is not a main project, get the parent project. We need to do this
 		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
-		// assigned to the second level
+		// assigned to the second level.
 		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! ( in_array( $project->parent_project_id, $main_projects ) ) ) ) {
 			$project = GP::$project->get( $project->parent_project_id );
 		}
@@ -418,7 +397,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @return array    The id of the main projects.
+	 * @return array The id of the main projects.
 	 */
 	private static function get_main_projects():array {
 		global $wpdb;
@@ -437,17 +416,17 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Gets the project the translated string belongs to.
+	 * Gets the original string that the translated string belongs to.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment  The comment the user has just made.
+	 * @param WP_Comment $comment The comment object.
 	 *
-	 * @return false|GP_Thing       The project the translated string belongs to.
+	 * @return GP_Thing|false The original string that the translated string belongs to.
 	 */
 	private static function get_original( WP_Comment $comment ) {
 		$post_id = $comment->comment_post_ID;
-		$terms   = wp_get_object_terms( $post_id, self::LINK_TAXONOMY, array( 'number' => 1 ) );
+		$terms   = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
 		}
@@ -462,7 +441,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @param array $emails The list of emails to be notified.
 	 *
-	 * @return array    The list of emails with the opt-in enabled.
+	 * @return array The list of emails with the opt-in enabled.
 	 */
 	private static function optin_emails( array $emails ): array {
 		foreach ( $emails as $email ) {
