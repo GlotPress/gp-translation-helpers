@@ -56,6 +56,7 @@
 			} );
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
+				var rowIdsArray = rowIds.split( ',' );
 				var translationIds = [];
 				var originalIds = [];
 				var comment = '';
@@ -63,7 +64,7 @@
 				var rejectData = {};
 				var form = $( this ).closest( 'form' );
 
-				rowIds.forEach( function( rowId ) {
+				rowIdsArray.forEach( function( rowId ) {
 					var originalId = $gp.editor.original_id_from_row_id( rowId );
 					var translationId = $gp.editor.translation_id_from_row_id( rowId );
 
@@ -82,7 +83,7 @@
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
 				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
-					$( 'form#bulk-actions-toolbar-top' ).submit();
+					$( 'form.filters-toolbar.bulk-actions' ).submit();
 				}
 
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
