@@ -348,7 +348,7 @@ class GP_Translation_Helpers {
 				'url'            => admin_url( 'admin-ajax.php' ),
 				'nonce'          => wp_create_nonce( 'gp_reject_feedback' ),
 				'locale_slug'    => $translation_set['locale_slug'],
-				'reject_reasons' => Helper_Translation_Discussion::$reject_reasons,
+				'reject_reasons' => Helper_Translation_Discussion::get_reject_reasons(),
 			)
 		);
 	}
@@ -368,7 +368,7 @@ class GP_Translation_Helpers {
 		$translation_id_array = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
 		$original_id_array    = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
 		$reject_reason        = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
-		$all_reject_reasons   = array_keys( Helper_Translation_Discussion::$reject_reasons );
+		$all_reject_reasons   = array_keys( Helper_Translation_Discussion::get_reject_reasons() );
 		$reject_reason        = array_filter(
 			$reject_reason,
 			function( $reason ) use ( $all_reject_reasons ) {

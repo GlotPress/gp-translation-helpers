@@ -64,20 +64,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 	/**
 	 *
-	 * @since 0.0.2
-	 * @var array
-	 */
-	public static $reject_reasons = array(
-		'style'       => 'Style Guide',
-		'grammar'     => 'Grammar',
-		'branding'    => 'Branding',
-		'glossary'    => 'Glossary',
-		'punctuation' => 'Punctuation',
-		'typo'        => 'Typo',
-	);
-
-	/**
-	 *
 	 * @since 0.0.1
 	 * @var string
 	 */
@@ -592,6 +578,25 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		return $original_id;
 	}
+
+	/**
+	 * Return an array of allowed rejection reasons
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return array
+	 */
+	public static function get_reject_reasons() {
+		return array(
+			'style'       => __( 'Style Guide' ),
+			'grammar'     => __( 'Grammar' ),
+			'branding'    => __( 'Branding' ),
+			'glossary'    => __( 'Glossary' ),
+			'punctuation' => __( 'Punctuation' ),
+			'typo'        => __( 'Typo' ),
+		);
+	}
+
 }
 
 /**
