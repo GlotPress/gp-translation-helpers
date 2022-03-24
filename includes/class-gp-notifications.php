@@ -131,7 +131,7 @@ class GP_Notifications {
 		 * @param array      $comment_meta The meta values for the comment.
 		 */
 		$emails                 = apply_filters( 'gp_notification_email_validators', $emails, $comment, $comment_meta );
-		$parent_comments        = self::get_parent_comments( $comment->comment_post_ID ); // Includes the current comment.
+		$parent_comments        = self::get_parent_comments( $comment->comment_ID ); // Includes the current comment.
 		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
 		// Set the emails array as empty if one validator has a comment in the thread or if one validator is the commenter, to avoid sending the email to all validators.
 		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {

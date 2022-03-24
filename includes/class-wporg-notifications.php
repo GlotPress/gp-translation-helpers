@@ -346,7 +346,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $comment_id   Last comment of the thread.
+	 * @param int $comment_id Last comment of the thread.
 	 *
 	 * @return array All the comments in the thread.
 	 */
