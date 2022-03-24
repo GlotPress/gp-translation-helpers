@@ -53,18 +53,22 @@
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
 				var rowIdsArray = rowIds.split( ',' );
-
-				var originalIds = rowIdsArray.map( function( rowId ) {
-					return $gp.editor.original_id_from_row_id( rowId );
-				} );
-				var translationIds = rowIdsArray.map( function( rowId ) {
-					return $gp.editor.translation_id_from_row_id( rowId );
-				} );
-
+				var translationIds = [];
+				var originalIds = [];
 				var comment = '';
 				var rejectReason = [];
 				var rejectData = {};
 				var form = $( this ).closest( 'form' );
+
+				rowIdsArray.forEach( function( rowId ) {
+					var originalId = $gp.editor.original_id_from_row_id( rowId );
+					var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+					if ( originalId && translationId ) {
+						originalIds.push( originalId );
+						translationIds.push( translationId );
+					}
+				} );
 
 				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
@@ -74,8 +78,9 @@
 
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
-				if ( ! comment.trim().length && ! rejectReason.length ) {
+				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form#bulk-actions-toolbar-top' ).submit();
+
 				}
 
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
