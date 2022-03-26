@@ -102,6 +102,8 @@ class GP_Translation_Helpers {
 	 *
 	 * @since 0.0.2
 	 *
+	 * @todo Move the inline CSS style to a CSS file when this plugin be integrated into GlotPress.
+	 *
 	 * @param array              $more_links         The links to be output.
 	 * @param GP_Project         $project            Project object.
 	 * @param GP_Locale          $locale             Locale object.
@@ -113,7 +115,9 @@ class GP_Translation_Helpers {
 	public function translation_row_template_more_links( array $more_links, GP_Project $project, GP_Locale $locale, GP_Translation_Set $translation_set, Translation_Entry $translation ): array {
 		$permalink = GP_Route_Translation_Helpers::get_permalink( $project->path, $translation->original_id, $translation_set->slug, $translation_set->locale );
 
-		$more_links['discussion'] = '<a href="' . esc_url( $permalink ) . '">Discussion</a>';
+		$links                    = '<a href="' . esc_url( $permalink ) . '">Discussion</a>';
+		$links                   .= '<a href="' . esc_url( $permalink ) . '" style="float:right" target="_blank"><span class="dashicons dashicons-external"></span></a>';
+		$more_links['discussion'] = $links;
 
 		return $more_links;
 	}
