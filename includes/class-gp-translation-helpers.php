@@ -417,6 +417,7 @@ class GP_Translation_Helpers {
 					'translation_id' => $translation_id,
 					'locale'         => $locale_slug,
 				),
+				'user_id'         => get_current_user_id(),
 			)
 		);
 
