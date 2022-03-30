@@ -578,6 +578,25 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		return $original_id;
 	}
+
+	/**
+	 * Return an array of allowed rejection reasons
+	 *
+	 * @since 0.0.2
+	 *
+	 * @return array
+	 */
+	public static function get_reject_reasons() {
+		return array(
+			'style'       => __( 'Style Guide' ),
+			'grammar'     => __( 'Grammar' ),
+			'branding'    => __( 'Branding' ),
+			'glossary'    => __( 'Glossary' ),
+			'punctuation' => __( 'Punctuation' ),
+			'typo'        => __( 'Typo' ),
+		);
+	}
+
 }
 
 /**
