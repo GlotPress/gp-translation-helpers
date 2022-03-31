@@ -106,6 +106,7 @@
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
 		if ( ! comment.trim().length && ! rejectReason.length ) {
+			$gp.editor.set_status( button, 'rejected' );
 			return;
 		}
 
