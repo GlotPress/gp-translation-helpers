@@ -55,7 +55,7 @@ class GP_Notifications {
 	 *
 	 * @return void
 	 */
-	public static function comment_change_status( $new_status, $old_status, WP_Comment $comment ) {
+	public static function on_comment_status_change( $new_status, $old_status, WP_Comment $comment ) {
 		$post = get_post( $comment->comment_post_ID );
 		if ( Helper_Translation_Discussion::POST_TYPE === $post->post_type ) {
 			if ( $old_status != $new_status ) {
