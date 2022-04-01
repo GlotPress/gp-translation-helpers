@@ -254,7 +254,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The emails for the author of a theme or a plugin.
 	 */
-	public static function get_emails_from_author( WP_Comment $comment, array $comment_meta ): array {
+	public static function get_author_email_address( WP_Comment $comment, array $comment_meta ): array {
 		global $wpdb;
 
 		$emails  = array();
