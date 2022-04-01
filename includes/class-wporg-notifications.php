@@ -191,7 +191,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The cross language project translation editors (CLPTE) emails.
 	 */
-	public static function get_emails_from_clpte_by_project( $comment ): array {
+	public static function get_clpte_email_addresses_by_project_and_locale( $comment ): array {
 		return self::get_emails_from_pte_clpte_by_project_and_locale( $comment, 'all-locales' );
 	}
 
