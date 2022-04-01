@@ -113,7 +113,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The emails to be notified in the thread.
 	 */
-	public static function get_emails_from_the_comments( array $comments, string $email_to_remove ): array {
+	public static function get_commenters_email_addresses( array $comments, string $email_address_to_remove ): array {
 		$emails = array();
 		foreach ( $comments as $comment ) {
 			$emails[] = $comment->comment_author_email;
