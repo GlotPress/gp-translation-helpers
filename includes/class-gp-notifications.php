@@ -231,7 +231,7 @@ class GP_Notifications {
 	 *
 	 * @return array The GlotPress admins' emails.
 	 */
-	public static function get_emails_from_the_gp_admins( WP_Comment $comment, array $comment_meta ):array {
+	public static function get_admins_email_addresses( WP_Comment $comment, array $comment_meta ):array {
 		global $wpdb;
 		/**
 		 * Filters the validators' emails.
