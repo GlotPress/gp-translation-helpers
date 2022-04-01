@@ -178,7 +178,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The project translation editors (PTE) emails.
 	 */
-	public static function get_emails_from_pte_by_project_and_locale( $comment, $locale ): array {
+	public static function get_pte_email_addresses_by_project_and_locale( $comment, $locale ): array {
 		return self::get_emails_from_pte_clpte_by_project_and_locale( $comment, $locale );
 	}
 
