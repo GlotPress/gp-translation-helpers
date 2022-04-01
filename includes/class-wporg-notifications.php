@@ -205,7 +205,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The PTE/CLPTE emails for the project and locale.
 	 */
-	private static function get_emails_from_pte_clpte_by_project_and_locale( WP_Comment $comment, string $locale ): array {
+	private static function get_pte_clpte_email_addresses_by_project_and_locale( WP_Comment $comment, string $locale ): array {
 		global $wpdb;
 		$emails = array();
 
