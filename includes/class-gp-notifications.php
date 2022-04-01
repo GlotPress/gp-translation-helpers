@@ -412,11 +412,12 @@ class GP_Notifications {
 	 *
 	 * @return array The list of emails without the commenter's email.
 	 */
-	public static function remove_commenter_email( WP_Comment $comment, array $emails ): array {
-		if ( ( $key = array_search( $comment->comment_author_email, $emails ) ) !== false ) {
-			unset( $emails[ $key ] );
+	public static function remove_commenter_email_address( WP_Comment $comment, array $email_addresses ): array {
+		$key = array_search( $comment->comment_author_email, $email_addresses );
+		if ( false !== $key ) {
+			unset( $email_addresses[ $key ] );
 		}
-		return array_values( $emails );
+		return array_values( $email_addresses );
 	}
 
 	/**
