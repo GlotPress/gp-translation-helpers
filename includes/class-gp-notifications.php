@@ -194,7 +194,7 @@ class GP_Notifications {
 	 *
 	 * @return array The emails of the validators for the given project.
 	 */
-	public static function get_emails_from_the_validators( string $project_path ): array {
+	public static function get_validators_email_addresses( string $project_path ): array {
 		$emails  = array();
 		$project = GP::$project->by_path( $project_path );
 
