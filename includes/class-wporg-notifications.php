@@ -134,7 +134,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The general translation editors (GTE) emails.
 	 */
-	public static function get_emails_from_gte( string $locale ): array {
+	public static function get_gte_email_addresses( string $locale ): array {
 		$emails    = array();
 		$gp_locale = GP_Locales::by_field( 'slug', $locale );
 		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
