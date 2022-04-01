@@ -87,7 +87,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array    The validators' emails.
 	 */
-	public static function get_emails_from_validators( WP_Comment $comment, array $comment_meta ): array {
+	public static function get_validator_email_addresses( WP_Comment $comment, array $comment_meta ): array {
 		$locale                 = $comment_meta['locale'][0];
 		$emails                 = self::get_emails_from_gte( $locale );
 		$emails                 = array_merge( $emails, self::get_emails_from_pte_by_project_and_locale( $comment, $locale ) );
