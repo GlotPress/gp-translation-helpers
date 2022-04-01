@@ -443,7 +443,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The list of emails with the opt-in enabled.
 	 */
-	private static function optin_emails( array $emails ): array {
+	private static function get_opted_in_email_addresses( array $email_addresses ): array {
 		foreach ( $emails as $email ) {
 			$user            = get_user_by( 'email', $email );
 			$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
