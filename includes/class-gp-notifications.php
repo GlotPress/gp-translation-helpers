@@ -345,9 +345,7 @@ class GP_Notifications {
 		$output  = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
 		$output .= esc_html__( 'Hi there,' );
 		$output .= '<br><br>';
-		$output .= esc_html__( 'There is a new comment in a discussion in the GlotPress translation system installed at ' );
-		$output .= gp_plugin_url();
-		$output .= esc_html__( ' that may be of interest to you.' );
+		$output .= esc_html( sprintf( __( 'There is a new comment in a GlotPress discussion at %s that may be of interest to you.', 'glotpress' ), gp_plugin_url() ) );
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
 		$output .= '<br><br>';
