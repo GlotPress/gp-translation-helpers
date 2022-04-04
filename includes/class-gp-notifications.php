@@ -343,7 +343,7 @@ class GP_Notifications {
 		 * @param array      $comment_meta The meta values for the comment.
 		 */
 		$output  = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
-		$output .= esc_html__( 'Hi:' );
+		$output .= esc_html__( 'Hi there,' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'There is a new comment in a discussion in the GlotPress translation system installed at ' );
 		$output .= gp_plugin_url();
