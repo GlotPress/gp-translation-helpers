@@ -345,12 +345,17 @@ class GP_Notifications {
 		$output  = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
 		$output .= esc_html__( 'Hi there,', 'glotpress' );
 		$output .= '<br><br>';
-		/* translators: The discussion URL where the user can find the comment. */
-		$output .= esc_html( sprintf( __( 'There is a new comment in a GlotPress discussion at %s that may be of interest to you.', 'glotpress' ), gp_plugin_url() ) );
+		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
+		$output .= wp_kses(
+			/* translators: The discussion URL where the user can find the comment. */
+			sprintf( __( 'There is a new comment in a <a href="%1$s">GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $url ),
+			array(
+				'a' => array( 'href' => array() ),
+			)
+		) . '<br/>';
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.', 'glotpress' );
 		$output .= '<br><br>';
-		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
 		$output .= '- ' . wp_kses(
 			/* translators: The discussion URL where the user can find the comment. */
 			sprintf( __( '<strong>Discussion URL:</strong> <a href="%1$s">%1$s</a>', 'glotpress' ), $url ),
