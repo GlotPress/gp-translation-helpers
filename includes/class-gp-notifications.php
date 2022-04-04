@@ -310,7 +310,7 @@ class GP_Notifications {
 		 * @param array $headers The email headers.
 		 */
 		$headers = apply_filters( 'gp_notification_email_headers', $headers );
-		$subject = esc_html__( 'New comment in a translation discussion' );
+		$subject = esc_html__( 'New comment in a translation discussion', 'glotpress' );
 		$body    = self::get_email_body( $comment, $comment_meta );
 		foreach ( $emails as $email ) {
 			$headers[] = 'Bcc: ' . $email;
@@ -343,27 +343,38 @@ class GP_Notifications {
 		 * @param array      $comment_meta The meta values for the comment.
 		 */
 		$output  = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
-		$output .= esc_html__( 'Hi there,' );
+		$output .= esc_html__( 'Hi there,', 'glotpress' );
 		$output .= '<br><br>';
+		/* translators: The discussion URL where the user can find the comment. */
 		$output .= esc_html( sprintf( __( 'There is a new comment in a GlotPress discussion at %s that may be of interest to you.', 'glotpress' ), gp_plugin_url() ) );
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.', 'glotpress' );
 		$output .= '<br><br>';
 		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
-		$output .= '- ' . wp_kses( sprintf( __( '<strong>Discussion URL:</strong> <a href="%1$s">%1$s</a>', 'glotpress' ), $url ), array( 'strong' => array(), 'a' => array( 'href' => array() ) ) ) . '<br/>';
+		$output .= '- ' . wp_kses(
+			/* translators: The discussion URL where the user can find the comment. */
+			sprintf( __( '<strong>Discussion URL:</strong> <a href="%1$s">%1$s</a>', 'glotpress' ), $url ),
+			array(
+				'strong' => array(),
+				'a'      => array( 'href' => array() ),
+			)
+		) . '<br/>';
 		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
+			/* translators: The translation locale for the comment. */
 			$output .= '- ' . wp_kses( sprintf( __( '<strong>Locale:</strong> %s', 'glotpress' ), $comment_meta['locale'][0] ), array( 'strong' => array() ) ) . '<br/>';
 		}
+		/* translators: The original string to translate. */
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Original string:</strong> %s', 'glotpress' ), $original->singular ), array( 'strong' => array() ) ) . '<br/>';
 		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
 			$translation_id = $comment_meta['translation_id'][0];
 			$translation    = GP::$translation->get( $translation_id );
 			// todo: add the plurals.
 			if ( ! is_null( $translation ) ) {
-
+				/* translators: The translation string. */
 				$output .= '- ' . wp_kses( sprintf( __( '<strong>Translation string:</strong> %s', 'glotpress' ), $translation->translation_0 ), array( 'strong' => array() ) ) . '<br/>';
 			}
 		}
+		/* translators: The comment made. */
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'Have a nice day!', 'glotpress' );
