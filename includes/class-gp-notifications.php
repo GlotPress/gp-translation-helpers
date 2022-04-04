@@ -360,7 +360,8 @@ class GP_Notifications {
 			$translation    = GP::$translation->get( $translation_id );
 			// todo: add the plurals.
 			if ( ! is_null( $translation ) ) {
-				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
+
+				$output .= '- ' . wp_kses( sprintf( __( '<strong>Translation string:</strong> %s', 'glotpress' ), $translation->translation_0 ), array( 'strong' => array() ) ) . '<br/>';
 			}
 		}
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) );
