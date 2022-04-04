@@ -350,7 +350,7 @@ class GP_Notifications {
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
 		$output .= '<br><br>';
 		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
-		$output .= '- <strong>' . esc_html__( 'Discussion URL: ' ) . '</strong><a href="' . $url . '">' . $url . '</a><br>';
+		$output .= '- ' . wp_kses( sprintf( __( '<strong>Discussion URL:</strong> <a href="%1$s">%1$s</a>', 'glotpress' ), $url ), array( 'strong' => array(), 'a' => array( 'href' => array() ) ) ) . '<br/>';
 		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
 			$output .= '- ' . wp_kses( sprintf( __( '<strong>Locale:</strong> %s', 'glotpress' ), $comment_meta['locale'][0] ), array( 'strong' => array() ) ) . '<br/>';
 		}
