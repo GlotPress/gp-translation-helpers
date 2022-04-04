@@ -368,7 +368,7 @@ class GP_Notifications {
 		$output .= '<br><br>';
 		$output .= esc_html__( 'Have a nice day' );
 		$output .= '<br><br>';
-		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.' );
+		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.', 'glotpress' );
 		/**
 		 * Filters the content of the email at the end of the function that gets its content.
 		 *
