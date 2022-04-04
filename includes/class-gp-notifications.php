@@ -347,7 +347,7 @@ class GP_Notifications {
 		$output .= '<br><br>';
 		$output .= esc_html( sprintf( __( 'There is a new comment in a GlotPress discussion at %s that may be of interest to you.', 'glotpress' ), gp_plugin_url() ) );
 		$output .= '<br>';
-		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.' );
+		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.', 'glotpress' );
 		$output .= '<br><br>';
 		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Discussion URL:</strong> <a href="%1$s">%1$s</a>', 'glotpress' ), $url ), array( 'strong' => array(), 'a' => array( 'href' => array() ) ) ) . '<br/>';
