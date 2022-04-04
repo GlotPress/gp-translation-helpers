@@ -363,7 +363,7 @@ class GP_Notifications {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
 			}
 		}
-		$output .= '- <strong>' . esc_html__( 'Comment: ' ) . '</strong>' . esc_html( $comment->comment_content ) . '</pre>';
+		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'Have a nice day' );
 		$output .= '<br><br>';
