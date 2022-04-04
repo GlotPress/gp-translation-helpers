@@ -78,7 +78,7 @@ class GP_Notifications {
 	 */
 	public static function send_emails_to_thread_commenters( WP_Comment $comment, array $comment_meta ) {
 		$parent_comments = self::get_parent_comments( $comment->comment_parent );
-		$emails          = self::get_emails_from_the_comments( $parent_comments, $comment->comment_author_email );
+		$emails          = self::get_commenters_email_addresses( $parent_comments, $comment->comment_author_email );
 		/**
 		 * Filters the emails in a thread.
 		 *
@@ -103,7 +103,7 @@ class GP_Notifications {
 	 * @return void
 	 */
 	public static function send_emails_to_gp_admins( WP_Comment $comment, array $comment_meta ) {
-		$emails = self::get_emails_from_the_gp_admins( $comment, $comment_meta );
+		$emails = self::get_admins_email_addresses( $comment, $comment_meta );
 		self::send_emails( $comment, $comment_meta, $emails );
 	}
 
@@ -120,7 +120,7 @@ class GP_Notifications {
 	public static function send_emails_to_validators( WP_Comment $comment, array $comment_meta ) {
 		$emails  = array();
 		$project = self::get_project_to_translate( $comment );
-		$emails  = self::get_emails_from_the_validators( $project->path );
+		$emails  = self::get_validators_email_addresses( $project->path );
 		/**
 		 * Filters the validators' emails.
 		 *
@@ -132,7 +132,7 @@ class GP_Notifications {
 		 */
 		$emails                 = apply_filters( 'gp_notification_email_validators', $emails, $comment, $comment_meta );
 		$parent_comments        = self::get_parent_comments( $comment->comment_ID ); // Includes the current comment.
-		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+		$emails_from_the_thread = self::get_commenters_email_addresses( $parent_comments, '' );
 		// Set the emails array as empty if one validator has a comment in the thread or if one validator is the commenter, to avoid sending the email to all validators.
 		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) {
 			$emails = array();
@@ -264,7 +264,7 @@ class GP_Notifications {
 				$emails[] = $email[0];
 			}
 			$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-			$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+			$emails_from_the_thread = self::get_commenters_email_addresses( $parent_comments, '' );
 			// Set the emails array as empty if one admin has a comment in the thread.
 			if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
 				$emails = array();
@@ -298,7 +298,7 @@ class GP_Notifications {
 		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $emails ) ) ) {
 			return false;
 		}
-		$emails  = self::remove_commenter_email( $comment, $emails );
+		$emails  = self::remove_commenter_email_address( $comment, $emails );
 		$headers = array(
 			'Content-Type: text/html; charset=UTF-8',
 		);
@@ -417,8 +417,8 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment The comment object.
-	 * @param array      $emails  A list of emails.
+	 * @param WP_Comment $comment         The comment object.
+	 * @param array      $email_addresses A list of emails.
 	 *
 	 * @return array The list of emails without the commenter's email.
 	 */

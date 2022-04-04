@@ -33,7 +33,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_email_admins',
 				function ( $emails, $comment, $comment_meta ) {
-					return self::get_emails_from_author( $comment, $comment_meta );
+					return self::get_author_email_address( $comment, $comment_meta );
 				},
 				10,
 				3
@@ -41,7 +41,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_email_validators',
 				function ( $emails, $comment, $comment_meta ) {
-					return self::get_emails_from_validators( $comment, $comment_meta );
+					return self::get_validator_email_addresses( $comment, $comment_meta );
 				},
 				10,
 				3
@@ -57,7 +57,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_before_send_emails',
 				function ( $emails ) {
-					return self::optin_emails( $emails );
+					return self::get_opted_in_email_addresses( $emails );
 				},
 				10,
 				1
@@ -89,11 +89,11 @@ class WPorg_GlotPress_Notifications {
 	 */
 	public static function get_validator_email_addresses( WP_Comment $comment, array $comment_meta ): array {
 		$locale                 = $comment_meta['locale'][0];
-		$emails                 = self::get_emails_from_gte( $locale );
-		$emails                 = array_merge( $emails, self::get_emails_from_pte_by_project_and_locale( $comment, $locale ) );
-		$emails                 = array_merge( $emails, self::get_emails_from_clpte_by_project( $comment ) );
+		$emails                 = self::get_gte_email_addresses( $locale );
+		$emails                 = array_merge( $emails, self::get_pte_email_addresses_by_project_and_locale( $comment, $locale ) );
+		$emails                 = array_merge( $emails, self::get_clpte_email_addresses_by_project( $comment ) );
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+		$emails_from_the_thread = self::get_commenters_email_addresses( $parent_comments, '' );
 		// Set the emails array as empty if one GTE/PTE/CLPTE has a comment in the thread.
 		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
 			$emails = array();
@@ -108,8 +108,8 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param array  $comments        Array with the parent comments to the posted comment.
-	 * @param string $email_to_remove Email from the posted comment.
+	 * @param array  $comments                Array with the parent comments to the posted comment.
+	 * @param string $email_address_to_remove Email from the posted comment.
 	 *
 	 * @return array The emails to be notified in the thread.
 	 */
@@ -119,7 +119,7 @@ class WPorg_GlotPress_Notifications {
 			$emails[] = $comment->comment_author_email;
 		}
 		$emails = array_unique( $emails );
-		if ( ( $key = array_search( $email_to_remove, $emails ) ) !== false ) {
+		if ( ( $key = array_search( $email_address_to_remove, $emails ) ) !== false ) {
 			unset( $emails[ $key ] );
 		}
 		return $emails;
@@ -179,7 +179,7 @@ class WPorg_GlotPress_Notifications {
 	 * @return array The project translation editors (PTE) emails.
 	 */
 	public static function get_pte_email_addresses_by_project_and_locale( $comment, $locale ): array {
-		return self::get_emails_from_pte_clpte_by_project_and_locale( $comment, $locale );
+		return self::get_pte_clpte_email_addresses_by_project_and_locale( $comment, $locale );
 	}
 
 	/**
@@ -191,8 +191,8 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The cross language project translation editors (CLPTE) emails.
 	 */
-	public static function get_clpte_email_addresses_by_project_and_locale( $comment ): array {
-		return self::get_emails_from_pte_clpte_by_project_and_locale( $comment, 'all-locales' );
+	public static function get_clpte_email_addresses_by_project($comment ): array {
+		return self::get_pte_clpte_email_addresses_by_project_and_locale( $comment, 'all-locales' );
 	}
 
 	/**
@@ -290,7 +290,7 @@ class WPorg_GlotPress_Notifications {
 			$emails = self::$i18n_email;
 		}
 		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = self::get_emails_from_the_comments( $parent_comments, '' );
+		$emails_from_the_thread = self::get_commenters_email_addresses( $parent_comments, '' );
 		// Return an empty array of emails if one author has a comment in the thread or if one validator is the commenter, to avoid sending the email to all validators.
 		if ( ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
 			return array();
@@ -439,7 +439,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param array $emails The list of emails to be notified.
+	 * @param array $email_addresses The list of emails to be notified.
 	 *
 	 * @return array The list of emails with the opt-in enabled.
 	 */
