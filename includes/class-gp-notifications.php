@@ -366,7 +366,7 @@ class GP_Notifications {
 		}
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) );
 		$output .= '<br><br>';
-		$output .= esc_html__( 'Have a nice day' );
+		$output .= esc_html__( 'Have a nice day!', 'glotpress' );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'This is an automated message. Please, do not reply directly to this email.', 'glotpress' );
 		/**
