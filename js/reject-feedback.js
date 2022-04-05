@@ -3,6 +3,9 @@
 	$( document ).ready(
 		function() {
 			var rowIds = '';
+			var rowIdsArray = [];
+			var translationIds = [];
+			var originalIds = [];
 
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
@@ -43,24 +46,30 @@
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					return $( this ).parents( 'tr.preview' ).attr( 'row' );
 				} ).get().join( ',' );
+				rowIdsArray = rowIds.split( ',' );
+
+				rowIdsArray.forEach( function( rowId ) {
+					var originalId = $gp.editor.original_id_from_row_id( rowId );
+					var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+					if ( originalId && translationId ) {
+						originalIds.push( originalId );
+						translationIds.push( translationId );
+					}
+				} );
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
 					e.stopImmediatePropagation();
+					if ( ! translationIds.length ) {
+						$( 'form.filters-toolbar.bulk-actions' ).submit();
+						return;
+					}
 
 					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
 				}
 			} );
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
-				var rowIdsArray = rowIds.split( ',' );
-
-				var originalIds = rowIdsArray.map( function( rowId ) {
-					return $gp.editor.original_id_from_row_id( rowId );
-				} );
-				var translationIds = rowIdsArray.map( function( rowId ) {
-					return $gp.editor.translation_id_from_row_id( rowId );
-				} );
-
 				var comment = '';
 				var rejectReason = [];
 				var rejectData = {};
