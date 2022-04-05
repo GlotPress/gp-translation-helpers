@@ -17,11 +17,13 @@
     "wp-coding-standards/wpcs": "^2.2",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "gettext/languages": "^2.6",
+    "phpunit/phpunit": "^7",
     "yoast/phpunit-polyfills": "^1.0"
   },
   "scripts": {
     "format": "@php ./vendor/bin/phpcbf --report=summary,source",
-    "lint": "@php ./vendor/bin/phpcs --report=summary,source"
+    "lint": "@php ./vendor/bin/phpcs --report=summary,source",
+    "test": "@php ./vendor/bin/phpunit"
   },
   "config": {
     "allow-plugins": {
