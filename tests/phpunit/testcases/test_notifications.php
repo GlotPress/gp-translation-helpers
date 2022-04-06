@@ -48,17 +48,15 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter(
 			'pre_wp_mail',
 			function ( $empty, $atts ) use( $that, &$counter ) {
-				
-
 				if( $counter === 0 ){
 					$counter++;	
 					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by('id', $this->user1_id)->data->user_email );
 				} else {
 					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by('id', $this->user1_id)->data->user_email );
 					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by('id', $this->user2_id)->data->user_email );
-
-					
 				}
+				return true;
+
 			}, 10, 2
 		);
 
@@ -66,8 +64,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 
 		wp_set_current_user( $this->user2_id );
 		$comment_reply_id = $this->create_comment( $this->user2_id, $post_id, 'Reply to first comment.', $comment_id);
-		
-		
 		
 		wp_set_current_user( $this->user3_id );
 		$comment_reply_2_id = $this->create_comment( $this->user3_id, $post_id, 'Reply to first reply.', $comment_reply_id);
