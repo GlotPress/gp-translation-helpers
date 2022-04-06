@@ -3,22 +3,24 @@
 class GP_Test_Notifications extends GP_UnitTestCase {
 
 	private $set;
-	private $user1;
-	private $user2;
+	private $user1_id;
+	private $user2_id;
 	private $translation;
 
 	function setUp() {
 		parent::setUp();
 
 		$object_type = GP::$validator_permission->object_type;
-		$this->user1 = $this->factory->user->create();
-		wp_set_current_user( $this->user1 );
+		$this->user1_id = $this->factory->user->create();
+		$user1_id_data = get_user_by( 'id', $this->user1_id );
+		
+		wp_set_current_user( $this->user1_id );
 
-		$this->user2 = $this->factory->user->create();
+		$this->user2_id = $this->factory->user->create();
 
 		$this->set  = $this->factory->translation_set->create_with_project_and_locale();
 		$permission = array(
-			'user_id'     => $this->user1,
+			'user_id'     => $this->user1_id,
 			'action'      => 'approve',
 			'project_id'  => $this->set->project_id,
 			'locale_slug' => $this->set->locale,
@@ -40,12 +42,12 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$post_id = Helper_Translation_Discussion::get_shadow_post( $this->translation->original_id );
 
 		$gp_translation = GP_Translation_Helpers::get_instance();
-
 		$comment_id = wp_insert_comment(
 			array(
 				'comment_content' => 'Testing a comment.',
 				'comment_post_ID' => $post_id,
-				'user_id'         => $this->user1,
+				'comment_author_email' => get_user_by('id', $this->user1_id)->data->user_email,
+				'user_id'         => $this->user1_id,
 				'comment_meta'    => array(
 					'reject_reason'  => 1,
 					'translation_id' => $this->translation->id,
@@ -54,7 +56,16 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 			)
 		);
 
-		wp_set_current_user( $this->user2 );
+		$that = $this;
+		add_filter(
+			'pre_wp_mail',
+			function ( $empty, $atts ) use( $that) {
+				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by('id', $this->user1_id)->data->user_email );
+				return true;
+			}, 10, 2
+		);
+
+		wp_set_current_user( $this->user2_id );
 		$comment_reply_id = wp_insert_comment(
 			array(
 				'comment_content' => 'Reply to testing a comment.',
@@ -67,11 +78,8 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 				),
 			)
 		);
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) {
-			}
-		);
+		
+		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
 	}
 }
