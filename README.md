@@ -28,7 +28,7 @@ will receive an email.
 If you want to avoid sending notifications, you can add 
 
 ```
-add_filter( 'gp_notification_before_send_emails', '__return_empty_array()', 10, 1 );
+add_filter( 'gp_notification_before_send_emails', '__return_empty_array', 10, 1 );
 ```
 
 ## Code standards
