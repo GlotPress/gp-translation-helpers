@@ -42,6 +42,7 @@ ul.discussion-list ul.children {
 
 article.comment {
 	margin: 15px 30px 15px 30px;
+	padding-bottom: 15px;
 	position: relative;
 	font-size: 0.9rem;
 }
@@ -80,4 +81,8 @@ article.comment time {
 }
 .comment-content {
 	text-align: start;
+}
+
+.alignright {
+	float: right;
 }
