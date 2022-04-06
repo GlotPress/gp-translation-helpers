@@ -391,14 +391,14 @@ class GP_Translation_Helpers {
 		$post_id              = Helper_Translation_Discussion::get_shadow_post( $first_original_id );
 
 		// Post comment on discussion page for the first string
-		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $first_translation_id, $locale_slug );
+		$save_feedback = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
 			$reject_comment = get_comment_link( $save_feedback );
 			foreach ( $original_id_array as $index => $single_original_id ) {
 				$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
-				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id_array[ $index ], $locale_slug );
+				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
 			}
 		}
 
@@ -411,24 +411,31 @@ class GP_Translation_Helpers {
 	 * @since 0.0.2
 	 *
 	 *  @param string $reject_comment Feedback entered by reviewer.
-	 *  @param int    $post_id ID of the post where the comment will be added.
-	 *  @param array  $reject_reason Reason(s) for rejection.
+	 *  @param int    $post_id        ID of the post where the comment will be added.
+	 *  @param array  $reject_reason  Reason(s) for rejection.
 	 *  @param string $translation_id ID of the rejected translation.
-	 *  @param string $locale_slug Locale of the rejected translation.
+	 *  @param string $locale_slug    Locale of the rejected translation.
+	 *  @param array  $server         The $_SERVER array
 	 *
 	 * @return false|int
 	 */
-	private function insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug ) {
+	private function insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug, $server ) {
+		$user = wp_get_current_user();
 		return wp_insert_comment(
 			array(
-				'comment_content' => $reject_comment,
-				'comment_post_ID' => $post_id,
-				'comment_meta'    => array(
+				'comment_post_ID'      => $post_id,
+				'comment_author'       => $user->display_name,
+				'comment_author_email' => $user->user_email,
+				'comment_author_url'   => $user->user_url,
+				'comment_author_IP'    => sanitize_text_field( $server['REMOTE_ADDR'] ),
+				'comment_content'      => $reject_comment,
+				'comment_agent'        => sanitize_text_field( $server['HTTP_USER_AGENT'] ),
+				'user_id'              => $user->ID,
+				'comment_meta'         => array(
 					'reject_reason'  => $reject_reason,
 					'translation_id' => $translation_id,
 					'locale'         => $locale_slug,
 				),
-				'user_id'         => get_current_user_id(),
 			)
 		);
 
