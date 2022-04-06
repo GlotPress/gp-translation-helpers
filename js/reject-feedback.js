@@ -3,6 +3,8 @@
 	$( document ).ready(
 		function() {
 			var rowIds = [];
+			var translationIds = [];
+			var originalIds = [];
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
 			'<form>' +
@@ -47,24 +49,37 @@
 					$( this ).prop( 'checked', false );
 					return null;
 				} ).get();
+
+				rowIds.forEach( function( rowId ) {
+					var originalId = $gp.editor.original_id_from_row_id( rowId );
+					var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+					if ( originalId && translationId ) {
+						originalIds.push( originalId );
+						translationIds.push( translationId );
+					}
+				} );
+
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
 					e.stopImmediatePropagation();
+					if ( ! translationIds.length ) {
+						$( 'form.filters-toolbar.bulk-actions' ).submit();
+						return;
+					}
 
+					// eslint-disable-next-line no-undef
 					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
 				}
 			} );
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
-				var rowIdsArray = rowIds.split( ',' );
-				var translationIds = [];
-				var originalIds = [];
 				var comment = '';
 				var rejectReason = [];
 				var rejectData = {};
 				var form = $( this ).closest( 'form' );
 
-				rowIdsArray.forEach( function( rowId ) {
+				rowIds.forEach( function( rowId ) {
 					var originalId = $gp.editor.original_id_from_row_id( rowId );
 					var translationId = $gp.editor.translation_id_from_row_id( rowId );
 
