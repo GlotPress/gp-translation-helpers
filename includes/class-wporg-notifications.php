@@ -31,16 +31,16 @@ class WPorg_GlotPress_Notifications {
 	public static function init() {
 		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && ( get_current_blog_id() === WPORG_TRANSLATE_BLOGID ) ) {
 			add_filter(
-				'gp_notification_email_admins',
-				function ( $emails, $comment, $comment_meta ) {
+				'gp_notification_admin_email_addresses',
+				function ( $email_addresses, $comment, $comment_meta ) {
 					return self::get_author_email_address( $comment, $comment_meta );
 				},
 				10,
 				3
 			);
 			add_filter(
-				'gp_notification_email_validators',
-				function ( $emails, $comment, $comment_meta ) {
+				'gp_notification_validator_email_addresses',
+				function ( $email_addresses, $comment, $comment_meta ) {
 					return self::get_validator_email_addresses( $comment, $comment_meta );
 				},
 				10,
@@ -56,8 +56,8 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_notification_before_send_emails',
-				function ( $emails ) {
-					return self::get_opted_in_email_addresses( $emails );
+				function ( $email_addresses ) {
+					return self::get_opted_in_email_addresses( $email_addresses );
 				},
 				10,
 				1
@@ -75,7 +75,7 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Gets the emails of all project validators: GTE, PTE and CLPTE.
+	 * Gets the email addresses of all project validators: GTE, PTE and CLPTE.
 	 *
 	 * Returns an empty array if one GTE/PTE/CLPTE has a comment in the thread,
 	 * so only one validators is notified.
@@ -89,40 +89,16 @@ class WPorg_GlotPress_Notifications {
 	 */
 	public static function get_validator_email_addresses( WP_Comment $comment, array $comment_meta ): array {
 		$locale                 = $comment_meta['locale'][0];
-		$emails                 = self::get_gte_email_addresses( $locale );
-		$emails                 = array_merge( $emails, self::get_pte_email_addresses_by_project_and_locale( $comment, $locale ) );
-		$emails                 = array_merge( $emails, self::get_clpte_email_addresses_by_project( $comment ) );
-		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = self::get_commenters_email_addresses( $parent_comments, '' );
-		// Set the emails array as empty if one GTE/PTE/CLPTE has a comment in the thread.
-		if ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
-			$emails = array();
+		$email_addresses        = self::get_gte_email_addresses( $locale );
+		$email_addresses        = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $comment, $locale ) );
+		$email_addresses        = array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $comment ) );
+		$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
+		$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
+		// Set the email addresses array as empty if one GTE/PTE/CLPTE has a comment in the thread.
+		if ( ! empty( array_intersect( $email_addresses, $emails_from_the_thread, true ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
+			return array();
 		}
-		return $emails;
-	}
-
-	/**
-	 * Gets the emails to be notified from the thread comments.
-	 *
-	 * Removes the second parameter from the returned array if it is found.
-	 *
-	 * @since 0.0.2
-	 *
-	 * @param array  $comments                Array with the parent comments to the posted comment.
-	 * @param string $email_address_to_remove Email from the posted comment.
-	 *
-	 * @return array The emails to be notified in the thread.
-	 */
-	public static function get_commenters_email_addresses( array $comments, string $email_address_to_remove ): array {
-		$emails = array();
-		foreach ( $comments as $comment ) {
-			$emails[] = $comment->comment_author_email;
-		}
-		$emails = array_unique( $emails );
-		if ( ( $key = array_search( $email_address_to_remove, $emails ) ) !== false ) {
-			unset( $emails[ $key ] );
-		}
-		return $emails;
+		return $email_addresses;
 	}
 
 	/**
@@ -135,10 +111,11 @@ class WPorg_GlotPress_Notifications {
 	 * @return array The general translation editors (GTE) emails.
 	 */
 	public static function get_gte_email_addresses( string $locale ): array {
-		$emails    = array();
+		$email_addresses = array();
+
 		$gp_locale = GP_Locales::by_field( 'slug', $locale );
 		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
-			return $emails;
+			return $email_addresses;
 		}
 		$result  = get_sites(
 			array(
@@ -151,7 +128,7 @@ class WPorg_GlotPress_Notifications {
 		);
 		$site_id = array_shift( $result );
 		if ( ! $site_id ) {
-			return $emails;
+			return $email_addresses;
 		}
 
 		$users = get_users(
@@ -162,10 +139,10 @@ class WPorg_GlotPress_Notifications {
 			)
 		);
 		foreach ( $users as $user ) {
-			$emails[] = $user->data->user_email;
+			$email_addresses[] = $user->data->user_email;
 		}
 
-		return $emails;
+		return $email_addresses;
 	}
 
 	/**
@@ -207,7 +184,6 @@ class WPorg_GlotPress_Notifications {
 	 */
 	private static function get_pte_clpte_email_addresses_by_project_and_locale( WP_Comment $comment, string $locale ): array {
 		global $wpdb;
-		$emails = array();
 
 		if ( 'all-locales' === $locale ) {
 			$gp_locale = 'all-locales';
@@ -216,7 +192,7 @@ class WPorg_GlotPress_Notifications {
 		}
 
 		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
-			return $emails;
+			return $array();
 		}
 
 		$project = self::get_project_to_translate( $comment );
@@ -234,17 +210,18 @@ class WPorg_GlotPress_Notifications {
 		",
 				$project->id,
 				$locale
-			),
-			OBJECT
+			)
 		);
+
+		$email_addresses = array();
 		foreach ( $translation_editors as $pte ) {
-			$emails[] = WP_User::get_data_by( 'id', $pte->user_id )->user_email;
+			$email_addresses[] = get_user_by( 'id', $pte->user_id )->user_email;
 		}
-		return $emails;
+		return $email_addresses;
 	}
 
 	/**
-	 * Gets the emails for the author of a theme or a plugin.
+	 * Gets the email addresses for the author of a theme or a plugin.
 	 *
 	 * Themes: only one email.
 	 * Plugins: all the plugin authors.
@@ -252,15 +229,15 @@ class WPorg_GlotPress_Notifications {
 	 * @param WP_Comment $comment      The comment object.
 	 * @param array      $comment_meta The meta values for the comment.
 	 *
-	 * @return array The emails for the author of a theme or a plugin.
+	 * @return array The email addresses for the author of a theme or a plugin.
 	 */
 	public static function get_author_email_address( WP_Comment $comment, array $comment_meta ): array {
 		global $wpdb;
 
-		$emails  = array();
-		$project = self::get_project_to_translate( $comment );
+		$email_addresses = array();
+		$project         = self::get_project_to_translate( $comment );
 		if ( 'wp-themes' === substr( $project->path, 0, 9 ) ) {
-			$author   = $wpdb->get_row(
+			$author = $wpdb->get_row(
 				$wpdb->prepare(
 					"SELECT post_author 
                             FROM wporg_35_posts 
@@ -269,11 +246,12 @@ class WPorg_GlotPress_Notifications {
                                 post_name = %s
                             ",
 					$project->slug
-				),
-				OBJECT
+				)
 			);
-			$author   = get_user_by( 'id', $author->post_author );
-			$emails[] = $author->data->user_email;
+			if ( $author ) {
+				$author            = get_user_by( 'id', $author->post_author );
+				$email_addresses[] = $author->data->user_email;
+			}
 		}
 		if ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) {
 			$committers = $wpdb->get_col(
@@ -283,19 +261,19 @@ class WPorg_GlotPress_Notifications {
 				)
 			);
 			foreach ( $committers as $user_login ) {
-				$emails[] = get_user_by( 'login', $user_login )->user_email;
+				$email_addresses[] = get_user_by( 'login', $user_login )->user_email;
 			}
 		}
 		if ( ! ( ( 'wp-themes' === substr( $project->path, 0, 9 ) ) || ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) ) ) {
-			$emails = self::$i18n_email;
+			$email_addresses = self::$i18n_email;
 		}
-		$parent_comments        = self::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = self::get_commenters_email_addresses( $parent_comments, '' );
-		// Return an empty array of emails if one author has a comment in the thread or if one validator is the commenter, to avoid sending the email to all validators.
-		if ( ( true !== empty( array_intersect( $emails, $emails_from_the_thread ) ) ) || ( in_array( $comment->comment_author_email, $emails ) ) ) {
+		$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
+		$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
+		// If one author has a comment in the thread or if one validator is the commenter, we don't need to inform any other validator.
+		if ( ( true !== empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
 			return array();
 		}
-		return $emails;
+		return $email_addresses;
 	}
 
 	/**
@@ -323,7 +301,7 @@ class WPorg_GlotPress_Notifications {
 			$output .= '- <strong>' . esc_html__( 'Locale: ' ) . '</strong>' . esc_html( $comment_meta['locale'][0] ) . '<br>';
 		}
 		$output .= '- <strong>' . esc_html__( 'Original string: ' ) . '</strong>' . esc_html( $original->singular ) . '<br>';
-		if ( array_key_exists( 'translation_id', $comment_meta ) && ( 0 != $comment_meta['translation_id'][0] ) ) {
+		if ( array_key_exists( 'translation_id', $comment_meta ) && $comment_meta['translation_id'][0] ) {
 			$translation_id = $comment_meta['translation_id'][0];
 			$translation    = GP::$translation->get( $translation_id );
 			// todo: add the plurals.
@@ -340,27 +318,6 @@ class WPorg_GlotPress_Notifications {
 		return $output;
 	}
 
-
-	/**
-	 * Returns the comments in the thread, including the last one.
-	 *
-	 * @since 0.0.2
-	 *
-	 * @param int $comment_id Last comment of the thread.
-	 *
-	 * @return array All the comments in the thread.
-	 */
-	public static function get_parent_comments( int $comment_id ): array {
-		$comments = array();
-		$comment  = get_comment( $comment_id );
-		if ( ( isset( $comment ) ) && ( 0 != $comment->comment_parent ) ) {
-			$comments = self::get_parent_comments( $comment->comment_parent );
-		}
-		if ( ! is_null( $comment ) ) {
-			$comments[] = $comment;
-		}
-		return $comments;
-	}
 
 	/**
 	 * Gets the project the translated string belongs to.
@@ -386,7 +343,7 @@ class WPorg_GlotPress_Notifications {
 		// If the parent project is not a main project, get the parent project. We need to do this
 		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
 		// assigned to the second level.
-		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! ( in_array( $project->parent_project_id, $main_projects ) ) ) ) {
+		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! in_array( $project->parent_project_id, $main_projects, true ) ) ) {
 			$project = GP::$project->get( $project->parent_project_id );
 		}
 		return $project;
@@ -402,17 +359,9 @@ class WPorg_GlotPress_Notifications {
 	private static function get_main_projects():array {
 		global $wpdb;
 
-		$main_projects = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-			SELECT id
-			FROM {$wpdb->gp_projects}
-			WHERE parent_project_id IS NULL"
-			),
-			ARRAY_N
-		);
+		$main_projects = $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL" );
 
-		return array_merge( ...$main_projects );
+		return $main_projects;
 	}
 
 	/**
@@ -444,15 +393,16 @@ class WPorg_GlotPress_Notifications {
 	 * @return array The list of emails with the opt-in enabled.
 	 */
 	private static function get_opted_in_email_addresses( array $email_addresses ): array {
-		foreach ( $emails as $email ) {
-			$user            = get_user_by( 'email', $email );
+		foreach ( $email_addresses as $email_address ) {
+			$user            = get_user_by( 'email', $email_address );
 			$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
 			if ( 'on' != gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ) {
-				if ( ( $key = array_search( $email, $emails ) ) !== false ) {
-					unset( $emails[ $key ] );
+				$index = array_search( $email_address, $email_addresses, true );
+				if ( false !== $index ) {
+					unset( $email_addresses[ $index ] );
 				}
 			}
 		}
-		return array_values( $emails );
+		return array_values( $email_addresses );
 	}
 }
