@@ -5,6 +5,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	private $set;
 	private $user1_id;
 	private $user2_id;
+	private $user3_id;
 	private $translation;
 
 	function setUp() {
@@ -17,6 +18,9 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		wp_set_current_user( $this->user1_id );
 
 		$this->user2_id = $this->factory->user->create();
+
+		$this->user3_id = $this->factory->user->create();
+
 
 		$this->set  = $this->factory->translation_set->create_with_project_and_locale();
 		$permission = array(
@@ -37,40 +41,53 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	}
 
 	function test_reply_notification() {
-		$for_translation = GP::$translation->for_translation( $this->set->project, $this->set, 0, array( 'status' => 'current' ) );
-
 		$post_id = Helper_Translation_Discussion::get_shadow_post( $this->translation->original_id );
 
-		$gp_translation = GP_Translation_Helpers::get_instance();
-		$comment_id = wp_insert_comment(
-			array(
-				'comment_content' => 'Testing a comment.',
-				'comment_post_ID' => $post_id,
-				'comment_author_email' => get_user_by('id', $this->user1_id)->data->user_email,
-				'user_id'         => $this->user1_id,
-				'comment_meta'    => array(
-					'reject_reason'  => 1,
-					'translation_id' => $this->translation->id,
-					'locale'         => 'es',
-				),
-			)
-		);
-
 		$that = $this;
+		$counter = 0;
 		add_filter(
 			'pre_wp_mail',
-			function ( $empty, $atts ) use( $that) {
-				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by('id', $this->user1_id)->data->user_email );
-				return true;
+			function ( $empty, $atts ) use( $that, &$counter ) {
+				
+
+				if( $counter === 0 ){
+					$counter++;	
+					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by('id', $this->user1_id)->data->user_email );
+				} else {
+					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by('id', $this->user1_id)->data->user_email );
+					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by('id', $this->user2_id)->data->user_email );
+
+					
+				}
 			}, 10, 2
 		);
 
+		$comment_id = $this->create_comment( $this->user1_id, $post_id, 'Testing a comment.', 0);
+
 		wp_set_current_user( $this->user2_id );
-		$comment_reply_id = wp_insert_comment(
+		$comment_reply_id = $this->create_comment( $this->user2_id, $post_id, 'Reply to first comment.', $comment_id);
+		
+		
+		
+		wp_set_current_user( $this->user3_id );
+		$comment_reply_2_id = $this->create_comment( $this->user3_id, $post_id, 'Reply to first reply.', $comment_reply_id);
+
+		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
+		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_2_id ), null, null );
+
+
+	}
+
+	
+
+	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id ){
+		return wp_insert_comment(
 			array(
-				'comment_content' => 'Reply to testing a comment.',
+				'comment_content' => $comment_content,
 				'comment_post_ID' => $post_id,
-				'comment_parent'  => $comment_id,
+				'comment_parent'  => $comment_parent_id,
+				'comment_author_email' => get_user_by('id', $user_id)->data->user_email,
+				'user_id'         => $user_id,
 				'comment_meta'    => array(
 					'reject_reason'  => 1,
 					'translation_id' => $this->translation->id,
@@ -78,8 +95,5 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 				),
 			)
 		);
-		
-		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
-
 	}
 }
