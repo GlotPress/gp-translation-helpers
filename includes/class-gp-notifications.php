@@ -118,7 +118,8 @@ class GP_Notifications {
 	 * @return bool Whether the email has been sent or not.
 	 */
 	public static function send_emails_to_validators( WP_Comment $comment, array $comment_meta ) {
-		$project = self::get_project_to_translate( $comment );
+		$post    = get_post( $comment->comment_post_ID );
+		$project = self::get_project_to_translate( $post );
 
 		$email_addresses = self::get_validators_email_addresses( $project->path );
 		/**
@@ -327,7 +328,8 @@ class GP_Notifications {
 	 * @return string|null
 	 */
 	public static function get_email_body( WP_Comment $comment, array $comment_meta ): string {
-		$project  = self::get_project_to_translate( $comment );
+		$post     = get_post( $comment->comment_post_ID );
+		$project  = self::get_project_to_translate( $post );
 		$original = self::get_original( $comment );
 		$output   = '';
 		/**
@@ -437,13 +439,12 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment The comment object.
+	 * @param WP_Post $post The post object.
 	 *
 	 * @return GP_Project|bool The project that the translated string belongs to.
 	 */
-	private static function get_project_to_translate( WP_Comment $comment ) {
-		$post_id = $comment->comment_post_ID;
-		$terms   = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
+	private static function get_project_to_translate( WP_Post $post ) {
+		$terms = wp_get_object_terms( $post->ID, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
 		}
@@ -472,5 +473,131 @@ class GP_Notifications {
 		}
 
 		return GP::$original->get( $terms[0]->slug );
+	}
+
+	/**
+	 * Returns if the given user is an GlotPress admin or not.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_User $user A user object.
+	 *
+	 * @return bool
+	 */
+	public static function is_user_an_gp_admin( WP_User $user ): bool {
+		global $wpdb;
+		try {
+			$db_email_addresses = $wpdb->get_results(
+				$wpdb->prepare(
+					"
+			SELECT user_email FROM {$wpdb->users} 
+			INNER JOIN {$wpdb->gp_permissions}
+			ON {$wpdb->users}.ID = {$wpdb->gp_permissions}.user_id 
+			WHERE action='admin'"
+				),
+				ARRAY_N
+			);
+			foreach ( $db_email_addresses as $email_address ) {
+				$email_addresses[] = $email_address[0];
+			}
+		} catch ( Exception $e ) {
+			$email_addresses = array();
+		}
+		if ( empty( array_intersect( array( $user->user_email ), $email_addresses ) ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Returns if the given user is an GlotPress validator for the post or not.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_User $user    A user object.
+	 * @param int     $post_id The ID of the post to which the project for which the role is being evaluated belongs for the given user.
+	 *
+	 * @return bool
+	 */
+	public static function is_user_an_gp_validator( WP_User $user, int $post_id ): bool {
+		$email_addresses = array();
+		$post            = get_post( $post_id );
+		$project         = self::get_project_to_translate( $post );
+		$email_addresses = self::get_validators_email_addresses( $project->path );
+		if ( empty( array_intersect( array( $user->user_email ), $email_addresses ) ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Gets the opt-in/oup-out message to show at the bottom of the discussions.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int $post_id The id of the shadow post used for the discussion.
+	 *
+	 * @return string
+	 */
+	public static function optin_message_for_each_discussion( int $post_id ): string {
+		/**
+		 * Filters the optin message that will be showed in each discussion.
+		 *
+		 * @since 0.0.2
+		 *
+		 * @param array      $emails       The emails in the thread.
+		 * @param WP_Comment $comment      The comment object.
+		 * @param array      $comment_meta The meta values for the comment.
+		 */
+		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '' );
+		if ( $message ) {
+			return $message;
+		}
+		$user            = wp_get_current_user();
+		$is_user_opt_out = ! empty(
+			get_users(
+				array(
+					'meta_key'   => 'gp_opt_out',
+					'meta_value' => $post_id,
+					'user_login' => $user->user_login,
+				)
+			)
+		);
+
+		if ( ! $is_user_opt_out ) {
+			$comments = get_comments(
+				array(
+					'user_id'            => $user->ID,
+					'post_id'            => $post_id,
+					'status'             => 'approve',
+					'type'               => 'comment',
+					'include_unapproved' => array( $user->ID ),
+				)
+			);
+		}
+		$output = '';
+		if ( $is_user_opt_out ) {  // opt-out user
+			$output .= __( 'You will not receive notifications for this discussion because you have not agreed to get notifications.' );
+			$output .= ' <a href="#" class="opt-in-discussion">' . __( 'Start receiving notifications' ) . '</a>';
+		} elseif ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $post_id ) ) ) { // regular user with comments
+			$output .= __( 'You are going to receive notifications for the threads where you have participated. ' );
+			$output .= ' <a href="#" class="opt-out-discussion">' . __( 'Stop notifications for this discussion' ) . '</a>';
+		} elseif ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $post_id ) ) {  // admin and validator user
+			$output .= __( 'You are going to receive notifications because you are a GlotPress administrator and a validator for this project and language. ' );
+			$output .= __( 'You will not receive notifications if another administrator or another validator participate in a thread where you do not take part.' );
+			$output .= ' <a href="#" class="opt-out-discussion">' . __( 'Stop notifications for this discussion' ) . '</a>';
+		} elseif ( self::is_user_an_gp_admin( $user ) ) {   // admin user
+			$output .= __( 'You are going to receive notifications because you are a GlotPress administrator. ' );
+			$output .= __( 'You will not receive notifications if another administrator participate in a thread where you do not take part.' );
+			$output .= ' <a href="#" class="opt-out-discussion">' . __( 'Stop notifications for this discussion' ) . '</a>';
+		} elseif ( self::is_user_an_gp_validator( $user, $post_id ) ) { // validator user
+			$output .= __( 'You are going to receive notifications because you are a GlotPress validator for this project and language. ' );
+			$output .= __( 'You will not receive notifications if another validator participate in a thread where you do not take part.' );
+			$output .= ' <a href="#" class="opt-out-discussion">' . __( 'Stop notifications for this discussion' ) . '</a>';
+		} else {    // regular user without comments
+			$output .= __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' );
+		}
+
+		return $output;
 	}
 }

@@ -104,6 +104,17 @@
 			),
 			$post_id
 		);
+		echo '<div class="optin-message-for-each-discussion">';
+		echo wp_kses(
+			GP_Notifications::optin_message_for_each_discussion( $post_id ),
+			array(
+				'a' => array(
+					'href'  => array(),
+					'class' => array(),
+				),
+			)
+		);
+		echo '</div>';
 	} else {
 		/* translators: Log in URL. */
 		echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );

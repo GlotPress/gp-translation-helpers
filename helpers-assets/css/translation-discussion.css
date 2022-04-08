@@ -81,3 +81,6 @@ article.comment time {
 .comment-content {
 	text-align: start;
 }
+.optin-message-for-each-discussion {
+	padding: 0.5rem 1rem;
+}
