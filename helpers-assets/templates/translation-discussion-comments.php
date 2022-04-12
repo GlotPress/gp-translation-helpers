@@ -109,8 +109,10 @@
 			GP_Notifications::optin_message_for_each_discussion( $post_id ),
 			array(
 				'a' => array(
-					'href'  => array(),
-					'class' => array(),
+					'href'          => array(),
+					'class'         => array(),
+					'data-postid'   => array(),
+					'data-opt-type' => array(),
 				),
 			)
 		);
