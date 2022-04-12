@@ -545,9 +545,7 @@ class GP_Notifications {
 		 *
 		 * @since 0.0.2
 		 *
-		 * @param array      $emails       The emails in the thread.
-		 * @param WP_Comment $comment      The comment object.
-		 * @param array      $comment_meta The meta values for the comment.
+		 * @param string $message The opt-in/oup-out message to show at the bottom of the discussions.
 		 */
 		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '' );
 		if ( $message ) {
