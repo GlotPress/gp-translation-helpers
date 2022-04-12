@@ -39,7 +39,7 @@
 
 			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
 
-			$( '#bulk-actions-toolbar-top .button' ).click( function( e ) {
+			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					return $( this ).parents( 'tr.preview' ).attr( 'row' );
 				} ).get().join( ',' );
