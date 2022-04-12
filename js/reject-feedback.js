@@ -75,7 +75,7 @@
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
 				if ( ! comment.trim().length && ! rejectReason.length ) {
-					$( 'form.filters-toolbar.bulk-actions' ).submit();
+					$( 'form#bulk-actions-toolbar-top' ).submit();
 				}
 
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
@@ -143,7 +143,7 @@
 		).done(
 			function() {
 				if ( rejectData.is_bulk_reject ) {
-					$( 'form.filters-toolbar.bulk-actions' ).submit();
+					$( 'form#bulk-actions-toolbar-top' ).submit();
 				} else {
 					$gp.editor.set_status( button, 'rejected' );
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
