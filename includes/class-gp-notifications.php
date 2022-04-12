@@ -296,6 +296,7 @@ class GP_Notifications {
 			return false;
 		}
 		$email_addresses = self::remove_commenter_email_address( $comment, $email_addresses );
+		$email_addresses = self::remove_optout_discussion_email_addresses( $comment, $email_addresses );
 
 		$headers = array(
 			'Content-Type: text/html; charset=UTF-8',
@@ -435,6 +436,37 @@ class GP_Notifications {
 	}
 
 	/**
+	 * Removes the opt-out emails in the current discussion.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment         The comment object.
+	 * @param array      $email_addresses A list of emails.
+	 *
+	 * @return array
+	 */
+	public static function remove_optout_discussion_email_addresses( WP_Comment $comment, array $email_addresses ): array {
+		foreach ( $email_addresses as $email_address ) {
+			$user            = get_user_by( 'email', $email_address );
+			$is_user_opt_out = ! empty(
+				get_users(
+					array(
+						'meta_key'   => 'gp_opt_out',
+						'meta_value' => $comment->comment_post_ID,
+						'include'    => array( $user->ID ),
+					)
+				)
+			);
+			if ( false != $is_user_opt_out ) {
+				$index = array_search( $email_address, $email_addresses, true );
+				unset( $email_addresses[ $index ] );
+			}
+		}
+
+		return array_values( $email_addresses );
+	}
+
+	/**
 	 * Gets the project that the translated string belongs to.
 	 *
 	 * @since 0.0.2
@@ -557,7 +589,7 @@ class GP_Notifications {
 				array(
 					'meta_key'   => 'gp_opt_out',
 					'meta_value' => $post_id,
-					'user_login' => $user->user_login,
+					'include'    => array( $user->ID ),
 				)
 			)
 		);
