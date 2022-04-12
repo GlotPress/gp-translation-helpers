@@ -609,7 +609,7 @@ class GP_Notifications {
 		$nonce  = wp_create_nonce( 'gp-optin-optout-' . $post_id );
 
 		if ( $is_user_opt_out ) {  // opt-out user
-			$output .= __( 'You will not receive notifications for this discussion because you have not agreed to get notifications for it. ' );
+			$output .= __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
 			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
 		} elseif ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $post_id ) ) ) { // regular user with comments
 			$output .= __( 'You are going to receive notifications for the threads where you have participated. ' );
