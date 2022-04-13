@@ -72,6 +72,14 @@ class WPorg_GlotPress_Notifications {
 				}
 			);
 		}
+		add_filter(
+			'gp_get_optin_message_for_each_discussion',
+			function ( $message, $post_id ) {
+				return self::optin_message_for_each_discussion( $post_id );
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -394,9 +402,7 @@ class WPorg_GlotPress_Notifications {
 	 */
 	private static function get_opted_in_email_addresses( array $email_addresses ): array {
 		foreach ( $email_addresses as $email_address ) {
-			$user            = get_user_by( 'email', $email_address );
-			$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
-			if ( 'on' != gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ) {
+			if ( self::is_global_optout_email_address( $email_address ) ) {
 				$index = array_search( $email_address, $email_addresses, true );
 				if ( false !== $index ) {
 					unset( $email_addresses[ $index ] );
@@ -405,4 +411,81 @@ class WPorg_GlotPress_Notifications {
 		}
 		return array_values( $email_addresses );
 	}
+
+	/**
+	 * Indicates whether an e-mail address is globally opt-out.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $email_address
+	 *
+	 * @return bool
+	 */
+	private static function is_global_optout_email_address( string $email_address ): bool {
+		$user            = get_user_by( 'email', $email_address );
+		$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
+		if ( 'on' != gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	public static function is_user_an_wporg_gte_for_the_languages_of_the_comments( int $post_id, WP_User $user ): bool {
+		$comments = get_comments(
+			array(
+				'post_id' => $post_id,
+			)
+		);
+		$locales  = array();
+		foreach ( $comments as $comment ) {
+			$comment_meta = get_comment_meta( $comment->comment_ID, 'locale', true );
+			$locales[]    = $comment_meta;
+		}
+		$locales             = array_unique( $locales );
+		$gte_email_addresses = array();
+		foreach ( $locales as $locale ) {
+			$gte_email_addresses = array_merge( $gte_email_addresses, self::get_gte_email_addresses( $locale ) );
+		}
+		$gte_email_addresses = array_unique( $gte_email_addresses );
+		if ( empty( array_intersect( array( $user->user_email ), $gte_email_addresses ) ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	public static function is_user_an_wporg_pte_for_the_languages_of_the_comments( int $post_id ): bool {
+
+	}
+
+	public static function is_user_an_wporg_clpte_for_the_languages_of_the_comments( int $post_id ): bool {
+
+	}
+
+	public static function is_user_an_author_for_the_original( int $post_id ): bool {
+
+	}
+
+	public static function is_an_special_user():bool {
+
+	}
+
+
+	public static function optin_message_for_each_discussion( int $post_id ): string {
+		$user   = wp_get_current_user();
+		$output = '';
+		if ( self::is_global_optout_email_address( $user->user_email ) ) {
+			$output .= __( 'You will not receive notifications because you have not yet opted-in. ' );
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Start receiving notifications.' ) . '</a>';
+
+		} elseif ( GP_Notifications::is_user_opt_out_in_discussion( $post_id, $user ) ) {
+			$output .= __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
+			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
+		} elseif ( self::is_user_an_wporg_gte_for_the_languages_of_the_comments( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
+			$output .= __( 'You will not receive notifications if another GTE for your language participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+		}
+		return $output;
+	}
+
 }

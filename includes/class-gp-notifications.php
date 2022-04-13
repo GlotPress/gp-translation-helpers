@@ -563,6 +563,27 @@ class GP_Notifications {
 	}
 
 	/**
+	 * Indicates whether an e-mail address is opt-out in a discussion.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool
+	 */
+	public static function is_user_opt_out_in_discussion( int $post_id, WP_User $user ): bool {
+		return ! empty(
+			get_users(
+				array(
+					'meta_key'   => 'gp_opt_out',
+					'meta_value' => $post_id,
+					'include'    => array( $user->ID ),
+				)
+			)
+		);
+	}
+	/**
 	 * Gets the opt-in/oup-out message to show at the bottom of the discussions.
 	 *
 	 * @since 0.0.2
@@ -578,21 +599,14 @@ class GP_Notifications {
 		 * @since 0.0.2
 		 *
 		 * @param string $message The opt-in/oup-out message to show at the bottom of the discussions.
+		 * @param int    $post_id The id of the shadow post used for the discussion.
 		 */
-		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '' );
+		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '', $post_id );
 		if ( $message ) {
 			return $message;
 		}
 		$user            = wp_get_current_user();
-		$is_user_opt_out = ! empty(
-			get_users(
-				array(
-					'meta_key'   => 'gp_opt_out',
-					'meta_value' => $post_id,
-					'include'    => array( $user->ID ),
-				)
-			)
-		);
+		$is_user_opt_out = self::is_user_opt_out_in_discussion( $post_id, $user );
 
 		if ( ! $is_user_opt_out ) {
 			$comments = get_comments(
