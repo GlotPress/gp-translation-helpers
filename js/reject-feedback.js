@@ -64,7 +64,7 @@
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					if ( ! translationIds.length ) {
-						$( 'form.filters-toolbar.bulk-actions' ).submit();
+						$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 						return;
 					}
 
@@ -98,7 +98,7 @@
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
 				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
-					$( 'form.filters-toolbar.bulk-actions' ).submit();
+					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				}
 
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
@@ -166,7 +166,7 @@
 		).done(
 			function() {
 				if ( rejectData.is_bulk_reject ) {
-					$( 'form#bulk-actions-toolbar-top' ).submit();
+					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				} else {
 					$gp.editor.set_status( button, 'rejected' );
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
