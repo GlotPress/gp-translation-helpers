@@ -583,6 +583,7 @@ class GP_Notifications {
 			)
 		);
 	}
+
 	/**
 	 * Gets the opt-in/oup-out message to show at the bottom of the discussions.
 	 *

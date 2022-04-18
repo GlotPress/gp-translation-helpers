@@ -413,13 +413,13 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Indicates whether an e-mail address is globally opt-out.
+	 * Indicates whether a user is globally opt-out.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param string $email_address
+	 * @param string $email_address The user's email address.
 	 *
-	 * @return bool
+	 * @return bool Whether a user wis globally opt-out.
 	 */
 	private static function is_global_optout_email_address( string $email_address ): bool {
 		$user            = get_user_by( 'email', $email_address );
@@ -430,6 +430,16 @@ class WPorg_GlotPress_Notifications {
 		return false;
 	}
 
+	/**
+	 * Indicates if the given user is GTE for any of the languages to which the comments in the post belong.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
+	 */
 	public static function is_user_an_wporg_gte_for_the_languages_of_the_comments( int $post_id, WP_User $user ): bool {
 		$comments = get_comments(
 			array(
@@ -453,38 +463,177 @@ class WPorg_GlotPress_Notifications {
 		return true;
 	}
 
-	public static function is_user_an_wporg_pte_for_the_languages_of_the_comments( int $post_id ): bool {
-
+	/**
+	 * Indicates if the given user is PTE for the project and for any of the languages to which the comments in the post belong.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool Whether the user is PTE for the project and for any of the languages to which the comments in the post belong.
+	 */
+	public static function is_user_an_wporg_pte_for_the_languages_of_the_comments( int $post_id, WP_User $user ): bool {
+		$comments            = get_comments(
+			array(
+				'post_id' => $post_id,
+			)
+		);
+		$gte_email_addresses = array();
+		foreach ( $comments as $comment ) {
+			$locale              = get_comment_meta( $comment->comment_ID, 'locale', true );
+			$gte_email_addresses = array_merge( $gte_email_addresses, self::get_pte_email_addresses_by_project_and_locale( $comment, $locale ) );
+		}
+		$gte_email_addresses = array_unique( $gte_email_addresses );
+		if ( empty( array_intersect( array( $user->user_email ), $gte_email_addresses ) ) ) {
+			return false;
+		}
+		return true;
 	}
 
-	public static function is_user_an_wporg_clpte_for_the_languages_of_the_comments( int $post_id ): bool {
-
+	/**
+	 * Indicates if the given user is CLPTE for the project to which the post belong.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool Whether the user is a CLPTE for the project to which the post belong.
+	 */
+	public static function is_user_an_wporg_clpte_for_the_project( int $post_id, WP_User $user ): bool {
+		$comments            = get_comments(
+			array(
+				'post_id' => $post_id,
+			)
+		);
+		$gte_email_addresses = self::get_clpte_email_addresses_by_project( $comments[0] );
+		if ( empty( array_intersect( array( $user->user_email ), $gte_email_addresses ) ) ) {
+			return false;
+		}
+		return true;
 	}
 
-	public static function is_user_an_author_for_the_original( int $post_id ): bool {
-
+	/**
+	 * Indicates if the given user is the author for the project to which the post belong.
+	 *
+	 * Only works with plugins and themes.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool Whether the user is the author for the project to which the post belong.
+	 */
+	public static function is_user_an_author_for_the_original( int $post_id, WP_User $user ): bool {
+		$comments               = get_comments(
+			array(
+				'post_id' => $post_id,
+			)
+		);
+		$author_email_addresses = self::get_author_email_address( $comments[0], array() );
+		if ( empty( array_intersect( array( $user->user_email ), $author_email_addresses ) ) ) {
+			return false;
+		}
+		return true;
 	}
 
-	public static function is_an_special_user():bool {
-
+	/**
+	/**
+	 * Indicates if the given user is a special user for projects different than themes and plugins.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool Whether the user is a special user or not for projects different than themes and plugins.
+	 */
+	public static function is_an_special_user_in_a_special_project( int $post_id, WP_User $user ):bool {
+		$comments = get_comments(
+			array(
+				'post_id' => $post_id,
+			)
+		);
+		$project  = self::get_project_to_translate( $comments[0] );
+		if ( 'wp-themes' !== substr( $project->path, 0, 9 ) && ( 'wp-plugins' !== substr( $project->path, 0, 10 ) ) ) {
+			if ( empty( array_intersect( array( $user->user_email ), self::$i18n_email ) ) ) {
+				return false;
+			}
+		}
+		return false;
 	}
 
-
+	/**
+	 * Gets the opt-in/oup-out message to show at the bottom of the discussions at translate.wordpress.org.
+	 *
+	 * @param int $post_id The id of the shadow post used for the discussion.
+	 *
+	 * @return string The message to show at the bottom of the discussions at translate.wordpress.org.
+	 */
 	public static function optin_message_for_each_discussion( int $post_id ): string {
 		$user   = wp_get_current_user();
 		$output = '';
+
 		if ( self::is_global_optout_email_address( $user->user_email ) ) {
 			$output .= __( 'You will not receive notifications because you have not yet opted-in. ' );
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Start receiving notifications.' ) . '</a>';
-
-		} elseif ( GP_Notifications::is_user_opt_out_in_discussion( $post_id, $user ) ) {
+			return $output;
+		}
+		$comments = get_comments(
+			array(
+				'post_id' => $post_id,
+			)
+		);
+		if ( empty( $comments ) ) {
+			$output .= __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' );
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( GP_Notifications::is_user_opt_out_in_discussion( $post_id, $user ) ) {
 			$output .= __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
 			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
-		} elseif ( self::is_user_an_wporg_gte_for_the_languages_of_the_comments( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
-			$output .= __( 'You will not receive notifications if another GTE for your language participates in a thread where you do not take part. ' );
-			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
 		}
+		if ( self::is_user_an_wporg_gte_for_the_languages_of_the_comments( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
+			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( self::is_user_an_wporg_pte_for_the_languages_of_the_comments( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for the questions in your language because you are a PTE. ' );
+			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( self::is_user_an_wporg_clpte_for_the_project( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for the questions because you are a CLPTE. ' );
+			$output .= __( 'You will not receive notifications if another GTE or PTE for their language or CLPTE participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( self::is_user_an_author_for_the_original( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for the questions in your language because you are an author. ' );
+			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( self::is_an_special_user_in_a_special_project( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for the questions in your language because you are an author. ' );
+			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		$output .= __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' );
+		$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 		return $output;
 	}
 
