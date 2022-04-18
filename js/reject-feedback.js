@@ -1,19 +1,16 @@
+/* global $gp, $gp_reject_feedback_settings, document, tb_show */
 ( function( $, $gp ) {
-	// eslint-disable-next-line no-undef
 	$( document ).ready(
 		function() {
 			var rowIds = '';
+
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
 			'<form>' +
 			'<h3 class="feedback-reason-title">Reason</h3>' +
 			'<ul class="feedback-reason-list">' +
-			'<li><label><input type="checkbox" name="feedback_reason" value="style" />Style Guide</label></li>' +
-			'<li><label><input type="checkbox" name="feedback_reason" value="grammar" />Grammar</label></li>' +
-			'<li><label><input type="checkbox" name="feedback_reason" value="branding" />Branding</label></li>' +
-			'<li><label><input type="checkbox" name="feedback_reason" value="glossary" />Glossary</label></li>' +
-			'<li><label><input type="checkbox" name="feedback_reason" value="punctuation" />Punctuation</label></li>' +
-			'<li><label><input type="checkbox" name="feedback_reason" value="typo" />Typo</label></li></ul>' +
+			getReasonList( 'single' ) +
+			'</ul>' +
 			'<div class="feedback-comment">' +
 				'<label>Comment </label>' +
 				'<textarea name="feedback_comment"></textarea>' +
@@ -26,12 +23,7 @@
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
 			'<h3>Reason</h3>' +
-			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="style" />Style Guide </div></label>' +
-			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="grammar" />Grammar </div></label>' +
-			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="branding" />Branding </div></label>' +
-			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="glossary" />Glossary </div></label>' +
-			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="punctuation" />Punctuation </div></label>' +
-			'<div class="modal-item"><label><input type="checkbox" name="modal_feedback_reason" value="typo" />Typo </div></label>' +
+			getReasonList( 'bulk' ) +
 			'<div class="modal-comment">' +
 					'<label>Comment </label>' +
 					'<textarea name="modal_feedback_comment"></textarea>' +
@@ -47,14 +39,14 @@
 
 			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
 
-			$( '#bulk-actions-toolbar-top .button' ).click( function( e ) {
+			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					return $( this ).parents( 'tr.preview' ).attr( 'row' );
 				} ).get().join( ',' );
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
 					e.stopImmediatePropagation();
-					// eslint-disable-next-line no-undef
+
 					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
 				}
 			} );
@@ -86,7 +78,6 @@
 					$( 'form.filters-toolbar.bulk-actions' ).submit();
 				}
 
-				// eslint-disable-next-line no-undef
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
 				rejectData.reason = rejectReason;
 				rejectData.comment = comment;
@@ -115,10 +106,10 @@
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
 		if ( ! comment.trim().length && ! rejectReason.length ) {
+			$gp.editor.set_status( button, 'rejected' );
 			return;
 		}
 
-		// eslint-disable-next-line no-undef
 		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
 		rejectData.reason = rejectReason;
 		rejectData.comment = comment;
@@ -138,14 +129,14 @@
 		data = {
 			action: 'reject_with_feedback',
 			data: rejectData,
-			// eslint-disable-next-line no-undef
+
 			_ajax_nonce: $gp_reject_feedback_settings.nonce,
 		};
 
 		$.ajax(
 			{
 				type: 'POST',
-				// eslint-disable-next-line no-undef
+
 				url: $gp_reject_feedback_settings.url,
 				data: data,
 			}
@@ -161,6 +152,29 @@
 			}
 		);
 	}
-// eslint-disable-next-line no-undef
+
+	function getReasonList( displayType ) {
+		var rejectReasons = $gp_reject_feedback_settings.reject_reasons;
+
+		var rejectList = '';
+		var prefix = '';
+		var suffix = '';
+		var inputName = '';
+		if ( displayType === 'single' ) {
+			prefix = '<li><label>';
+			suffix = '</label></li>';
+			inputName = 'feedback_reason';
+		} else {
+			prefix = '<div class="modal-item"><label>';
+			suffix = '</div></label>';
+			inputName = 'modal_feedback_reason';
+		}
+
+		// eslint-disable-next-line vars-on-top
+		for ( var reason in rejectReasons ) {
+			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" />' + rejectReasons[ reason ] + suffix;
+		}
+		return rejectList;
+	}
 }( jQuery, $gp )
 );

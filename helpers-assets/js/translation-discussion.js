@@ -32,6 +32,8 @@ jQuery( function( $ ) {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 
+		$( 'input.submit' ).prop( 'disabled', true );
+
 		if ( ! formdata.meta.translation_id ) {
 			formdata.meta.translation_id = 0;
 		}
