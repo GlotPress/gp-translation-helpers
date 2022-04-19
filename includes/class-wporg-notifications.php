@@ -232,6 +232,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * Themes: only one email.
 	 * Plugins: all the plugin authors.
+	 * Other projects: the special users, available at $i18n_email.
 	 *
 	 * @param int $post_id The id of the shadow post used for the discussion.
 	 *
@@ -525,16 +526,12 @@ class WPorg_GlotPress_Notifications {
 	 * @return bool Whether the user is a special user or not for projects different than themes and plugins.
 	 */
 	public static function is_an_special_user_in_a_special_project( int $post_id, WP_User $user ):bool {
-		$comments = get_comments(
-			array(
-				'post_id' => $post_id,
-			)
-		);
-		$project  = self::get_project_to_translate( $comments[0]->comment_post_ID );
+		$project = self::get_project_to_translate( $post_id );
 		if ( 'wp-themes' !== substr( $project->path, 0, 9 ) && ( 'wp-plugins' !== substr( $project->path, 0, 10 ) ) ) {
 			if ( empty( array_intersect( array( $user->user_email ), self::$i18n_email ) ) ) {
 				return false;
 			}
+			return true;
 		}
 		return false;
 	}
@@ -582,15 +579,15 @@ class WPorg_GlotPress_Notifications {
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_author_of_the_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an author. ' );
-			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
+		if ( self::is_an_special_user_in_a_special_project( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an special user. ' );
+			$output .= __( 'You will not receive notifications if another special user participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_an_special_user_in_a_special_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for the questions in your language because you are an author. ' );
+		if ( self::is_user_an_author_of_the_project( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an author. ' );
 			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
