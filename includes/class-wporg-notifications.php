@@ -33,7 +33,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_admin_email_addresses',
 				function ( $email_addresses, $comment, $comment_meta ) {
-					return self::get_author_email_address( $comment, $comment_meta );
+					return self::get_author_email_address( $comment );
 				},
 				10,
 				3
@@ -233,16 +233,15 @@ class WPorg_GlotPress_Notifications {
 	 * Themes: only one email.
 	 * Plugins: all the plugin authors.
 	 *
-	 * @param WP_Comment $comment      The comment object.
-	 * @param array      $comment_meta The meta values for the comment.
+	 * @param int $post_id The id of the shadow post used for the discussion.
 	 *
 	 * @return array The email addresses for the author of a theme or a plugin.
 	 */
-	public static function get_author_email_address( WP_Comment $comment, array $comment_meta ): array {
+	public static function get_author_email_address( int $post_id ): array {
 		global $wpdb;
 
 		$email_addresses = array();
-		$project         = self::get_project_to_translate( $comment->comment_post_ID );
+		$project         = self::get_project_to_translate( $post_id );
 		if ( 'wp-themes' === substr( $project->path, 0, 9 ) ) {
 			$author = $wpdb->get_row(
 				$wpdb->prepare(
@@ -274,12 +273,13 @@ class WPorg_GlotPress_Notifications {
 		if ( ! ( ( 'wp-themes' === substr( $project->path, 0, 9 ) ) || ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) ) ) {
 			$email_addresses = self::$i18n_email;
 		}
-		$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
+		// todo: this logic should be outside of this function
+		// $parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
+		// $emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
 		// If one author has a comment in the thread or if one validator is the commenter, we don't need to inform any other validator.
-		if ( ( true !== empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
-			return array();
-		}
+		// if ( ( true !== empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
+		// return array();
+		// }
 		return $email_addresses;
 	}
 
@@ -505,13 +505,8 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return bool Whether the user is the author for the project to which the post belong.
 	 */
-	public static function is_user_an_author_for_the_original( int $post_id, WP_User $user ): bool {
-		$comments               = get_comments(
-			array(
-				'post_id' => $post_id,
-			)
-		);
-		$author_email_addresses = self::get_author_email_address( $comments[0], array() );
+	public static function is_user_an_author_of_the_project( int $post_id, WP_User $user ): bool {
+		$author_email_addresses = self::get_author_email_address( $post_id );
 		if ( empty( array_intersect( array( $user->user_email ), $author_email_addresses ) ) ) {
 			return false;
 		}
@@ -587,8 +582,8 @@ class WPorg_GlotPress_Notifications {
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_author_for_the_original( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for the questions in your language because you are an author. ' );
+		if ( self::is_user_an_author_of_the_project( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an author. ' );
 			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
