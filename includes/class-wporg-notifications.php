@@ -486,13 +486,8 @@ class WPorg_GlotPress_Notifications {
 	 * @return bool Whether the user is a CLPTE for the project to which the post belong.
 	 */
 	public static function is_user_an_wporg_clpte_for_the_project( int $post_id, WP_User $user ): bool {
-		$comments            = get_comments(
-			array(
-				'post_id' => $post_id,
-			)
-		);
-		$gte_email_addresses = self::get_clpte_email_addresses_by_project( $comments[0] );
-		if ( empty( array_intersect( array( $user->user_email ), $gte_email_addresses ) ) ) {
+		$clte_email_addresses = self::get_clpte_email_addresses_by_project( $post_id );
+		if ( empty( array_intersect( array( $user->user_email ), $clte_email_addresses ) ) ) {
 			return false;
 		}
 		return true;
