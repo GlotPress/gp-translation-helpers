@@ -431,32 +431,22 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Indicates if the given user is GTE for any of the languages to which the comments in the post belong.
+	 * Indicates if the given user is a GTE at translate.wordpress.org.
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int     $post_id The id of the shadow post used for the discussion.
-	 * @param WP_User $user    A user object.
+	 * @todo Cache the GTE email address, because getting it made a lot of queries, slowing down the load time.
+	 *
+	 * @param WP_User $user A user object.
 	 *
 	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
 	 */
-	public static function is_user_an_wporg_gte_for_the_languages_of_the_comments( int $post_id, WP_User $user ): bool {
-		$comments = get_comments(
-			array(
-				'post_id' => $post_id,
-			)
-		);
-		$locales  = array();
-		foreach ( $comments as $comment ) {
-			$comment_meta = get_comment_meta( $comment->comment_ID, 'locale', true );
-			$locales[]    = $comment_meta;
-		}
-		$locales             = array_unique( $locales );
+	public static function is_user_an_wporg_gte( WP_User $user ): bool {
+		$locales             = GP_Locales::locales();
 		$gte_email_addresses = array();
 		foreach ( $locales as $locale ) {
-			$gte_email_addresses = array_merge( $gte_email_addresses, self::get_gte_email_addresses( $locale ) );
+			$gte_email_addresses = array_merge( $gte_email_addresses, self::get_gte_email_addresses( $locale->slug ) );
 		}
-		$gte_email_addresses = array_unique( $gte_email_addresses );
 		if ( empty( array_intersect( array( $user->user_email ), $gte_email_addresses ) ) ) {
 			return false;
 		}
@@ -581,23 +571,13 @@ class WPorg_GlotPress_Notifications {
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Start receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		$comments = get_comments(
-			array(
-				'post_id' => $post_id,
-			)
-		);
-		if ( empty( $comments ) ) {
-			$output .= __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' );
-			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
-			return $output;
-		}
 		if ( GP_Notifications::is_user_opt_out_in_discussion( $post_id, $user ) ) {
 			$output .= __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
 			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_wporg_gte_for_the_languages_of_the_comments( $post_id, $user ) ) {
+		if ( self::is_user_an_wporg_gte( $user ) ) {
 			$output .= __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
