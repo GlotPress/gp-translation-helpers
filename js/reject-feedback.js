@@ -41,7 +41,10 @@
 
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
-					return $( this ).parents( 'tr.preview' ).attr( 'row' );
+					var selectedRow = $( this ).parents( 'tr.preview' );
+					if( selectedRow.hasClass( 'status-current' ) ){
+						return selectedRow.attr( 'row' );
+					}
 				} ).get().join( ',' );
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
