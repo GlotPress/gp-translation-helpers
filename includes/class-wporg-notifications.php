@@ -33,7 +33,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_admin_email_addresses',
 				function ( $email_addresses, $comment, $comment_meta ) {
-					return self::get_author_email_address( $comment );
+					return self::get_author_email_address( $comment->comment_post_ID );
 				},
 				10,
 				3
@@ -98,8 +98,8 @@ class WPorg_GlotPress_Notifications {
 	public static function get_validator_email_addresses( WP_Comment $comment, array $comment_meta ): array {
 		$locale                 = $comment_meta['locale'][0];
 		$email_addresses        = self::get_gte_email_addresses( $locale );
-		$email_addresses        = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $comment, $locale ) );
-		$email_addresses        = array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $comment ) );
+		$email_addresses        = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $comment->comment_post_ID, $locale ) );
+		$email_addresses        = array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $comment->comment_post_ID ) );
 		$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
 		// Set the email addresses array as empty if one GTE/PTE/CLPTE has a comment in the thread.
@@ -296,7 +296,7 @@ class WPorg_GlotPress_Notifications {
 	 */
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
 		$project  = self::get_project_to_translate( $comment->comment_post_ID );
-		$original = self::get_original( $comment );
+		$original = self::get_original( $comment->comment_post_ID );
 		$output   = esc_html__( 'Hi:' );
 		$output  .= '<br><br>';
 		$output  .= esc_html__( 'There is a new comment in a discussion of the WordPress translation system that may be of interest to you.' );
@@ -334,9 +334,9 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @param int $post_id The id of the shadow post used for the discussion.
 	 *
-	 * @return GP_Project The project the translated string belongs to.
+	 * @return false|GP_Project The project the translated string belongs to.
 	 */
-	private static function get_project_to_translate( int $post_id ): GP_Project {
+	private static function get_project_to_translate( int $post_id ) {
 		$terms = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
@@ -366,9 +366,7 @@ class WPorg_GlotPress_Notifications {
 	private static function get_main_projects():array {
 		global $wpdb;
 
-		$main_projects = $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL" );
-
-		return $main_projects;
+		return $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL" );
 	}
 
 	/**
@@ -376,13 +374,12 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment The comment object.
+	 * @param int $post_id The id of the shadow post used for the discussion.
 	 *
 	 * @return GP_Thing|false The original string that the translated string belongs to.
 	 */
-	private static function get_original( WP_Comment $comment ) {
-		$post_id = $comment->comment_post_ID;
-		$terms   = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
+	private static function get_original( int $post_id ) {
+		$terms = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
 		}
@@ -515,7 +512,6 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	/**
 	 * Indicates if the given user is a special user for projects different than themes and plugins.
 	 *
 	 * @since 0.0.2
@@ -534,6 +530,33 @@ class WPorg_GlotPress_Notifications {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Indicates if the given user has made a comment in the discussion.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int     $post_id The id of the shadow post used for the discussion.
+	 * @param WP_User $user    A user object.
+	 *
+	 * @return bool Whether the user has made a comment in the discussion.
+	 */
+	private static function is_user_a_commenter_in_the_discussion( int $post_id, WP_User $user ):bool {
+		$comments = get_comments(
+			array(
+				'post_id'            => $post_id,
+				'user_id'            => $user->ID,
+				'status'             => 'approve',
+				'type'               => 'comment',
+				'include_unapproved' => array( get_current_user_id() ),
+			)
+		);
+		if ( empty( $comments ) ) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -580,7 +603,7 @@ class WPorg_GlotPress_Notifications {
 			return $output;
 		}
 		if ( self::is_an_special_user_in_a_special_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an special user. ' );
+			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are a special user. ' );
 			$output .= __( 'You will not receive notifications if another special user participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
@@ -589,6 +612,12 @@ class WPorg_GlotPress_Notifications {
 		if ( self::is_user_an_author_of_the_project( $post_id, $user ) ) {
 			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an author. ' );
 			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( self::is_user_a_commenter_in_the_discussion( $post_id, $user ) ) {
+			$output .= __( 'You are going to receive notifications for some threads where you have taken part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
