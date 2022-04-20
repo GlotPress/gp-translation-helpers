@@ -85,7 +85,6 @@
 
 				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form#bulk-actions-toolbar-top' ).submit();
-
 				}
 
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
