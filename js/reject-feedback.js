@@ -45,6 +45,7 @@
 					if( selectedRow.hasClass( 'status-current' ) ){
 						return selectedRow.attr( 'row' );
 					}
+					$( this ).prop( "checked", false );
 				} ).get().join( ',' );
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
