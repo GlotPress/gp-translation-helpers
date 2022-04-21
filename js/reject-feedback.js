@@ -2,8 +2,7 @@
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
-			var rowIds = '';
-
+			var rowIds = [];
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
 			'<form>' +
@@ -47,7 +46,7 @@
 					}
 					$( this ).prop( 'checked', false );
 					return null;
-				} ).get().join( ',' );
+				} ).get();
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
 					e.stopImmediatePropagation();
@@ -57,7 +56,6 @@
 			} );
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
-				var rowIdsArray = rowIds.split( ',' );
 				var translationIds = [];
 				var originalIds = [];
 				var comment = '';
@@ -65,7 +63,7 @@
 				var rejectData = {};
 				var form = $( this ).closest( 'form' );
 
-				rowIdsArray.forEach( function( rowId ) {
+				rowIds.forEach( function( rowId ) {
 					var originalId = $gp.editor.original_id_from_row_id( rowId );
 					var translationId = $gp.editor.translation_id_from_row_id( rowId );
 
