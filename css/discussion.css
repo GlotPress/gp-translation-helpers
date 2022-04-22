@@ -204,3 +204,22 @@ div#TB_ajaxWindowTitle {
 	margin-top: 2em;
 	float: none;
 }
+/* Override default rejected color */
+table.translations tr.preview.status-rejected,
+#legend .status-rejected {
+	background-color: #90c0eb !important;
+}
+
+.ct-chart-contributors .ct-series-c .ct-area { /* rejected */
+	fill: #90c0eb !important;
+	fill-opacity: .5;
+}
+
+.ct-legend .ct-series-2:before { /* rejected */
+	background-color: #90c0eb !important;
+	border-color: #90c0eb !important;
+}
+
+.ct-legend .ct-series-2:before { /* rejected */
+	background-color: #90c0eb !important;
+}
