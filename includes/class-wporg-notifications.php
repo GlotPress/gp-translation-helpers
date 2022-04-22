@@ -33,7 +33,14 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_admin_email_addresses',
 				function ( $email_addresses, $comment, $comment_meta ) {
-					return self::get_author_email_address( $comment->comment_post_ID );
+					$email_addresses        = self::get_author_email_address( $comment->comment_post_ID );
+					$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
+					$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
+					// If one author has a comment in the thread, we don't need to inform to any author, because this author will be notified in the thread.
+					if ( ( ! empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
+						return array();
+					}
+					return $email_addresses;
 				},
 				10,
 				3
@@ -41,7 +48,14 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_notification_validator_email_addresses',
 				function ( $email_addresses, $comment, $comment_meta ) {
-					return self::get_validator_email_addresses( $comment, $comment_meta );
+					$email_addresses        = self::get_validator_email_addresses( $comment, $comment_meta );
+					$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
+					$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
+					// If one validator (GTE/PTE/CLPTE) has a comment in the thread, we don't need to inform to any validator, because this validator will be notified in the thread.
+					if ( ! empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
+						return array();
+					}
+					return $email_addresses;
 				},
 				10,
 				3
@@ -96,17 +110,10 @@ class WPorg_GlotPress_Notifications {
 	 * @return array    The validators' emails.
 	 */
 	public static function get_validator_email_addresses( WP_Comment $comment, array $comment_meta ): array {
-		$locale                 = $comment_meta['locale'][0];
-		$email_addresses        = self::get_gte_email_addresses( $locale );
-		$email_addresses        = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $comment->comment_post_ID, $locale ) );
-		$email_addresses        = array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $comment->comment_post_ID ) );
-		$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
-		$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
-		// Set the email addresses array as empty if one GTE/PTE/CLPTE has a comment in the thread.
-		if ( ! empty( array_intersect( $email_addresses, $emails_from_the_thread, true ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
-			return array();
-		}
-		return $email_addresses;
+		$locale          = $comment_meta['locale'][0];
+		$email_addresses = self::get_gte_email_addresses( $locale );
+		$email_addresses = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $comment->comment_post_ID, $locale ) );
+		return array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $comment->comment_post_ID ) );
 	}
 
 	/**
@@ -274,13 +281,6 @@ class WPorg_GlotPress_Notifications {
 		if ( ! ( ( 'wp-themes' === substr( $project->path, 0, 9 ) ) || ( 'wp-plugins' === substr( $project->path, 0, 10 ) ) ) ) {
 			$email_addresses = self::$i18n_email;
 		}
-		// todo: this logic should be outside of this function
-		// $parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
-		// $emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
-		// If one author has a comment in the thread or if one validator is the commenter, we don't need to inform any other validator.
-		// if ( ( true !== empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
-		// return array();
-		// }
 		return $email_addresses;
 	}
 
@@ -350,7 +350,7 @@ class WPorg_GlotPress_Notifications {
 		// If the parent project is not a main project, get the parent project. We need to do this
 		// because we have 3 levels of projects. E.g. wp-plugins->akismet->stable and the PTE are
 		// assigned to the second level.
-		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! in_array( $project->parent_project_id, $main_projects, true ) ) ) {
+		if ( ( ! is_null( $project->parent_project_id ) ) && ( ! in_array( $project->parent_project_id, $main_projects, false ) ) ) {
 			$project = GP::$project->get( $project->parent_project_id );
 		}
 		return $project;
@@ -512,7 +512,7 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Indicates if the given user is a special user for projects different than themes and plugins.
+	 * Indicates if the given user is a special user for projects different that themes and plugins.
 	 *
 	 * @since 0.0.2
 	 *
@@ -567,62 +567,61 @@ class WPorg_GlotPress_Notifications {
 	 * @return string The message to show at the bottom of the discussions at translate.wordpress.org.
 	 */
 	public static function optin_message_for_each_discussion( int $post_id ): string {
-		$user   = wp_get_current_user();
-		$output = '';
+		$user = wp_get_current_user();
 
 		if ( self::is_global_optout_email_address( $user->user_email ) ) {
-			$output .= __( 'You will not receive notifications because you have not yet opted-in. ' );
+			$output  = __( 'You will not receive notifications because you have not yet opted-in. ' );
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Start receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( GP_Notifications::is_user_opt_out_in_discussion( $post_id, $user ) ) {
-			$output .= __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
+			$output  = __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
 			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( self::is_user_an_wporg_gte( $user ) ) {
-			$output .= __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
+			$output  = __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( self::is_user_an_wporg_pte_for_the_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for the questions in your language because you are a PTE. ' );
+			$output  = __( 'You are going to receive notifications for the questions in your language because you are a PTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( self::is_user_an_wporg_clpte_for_the_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for the questions because you are a CLPTE. ' );
+			$output  = __( 'You are going to receive notifications for the questions because you are a CLPTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for their language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( self::is_an_special_user_in_a_special_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are a special user. ' );
+			$output  = __( 'You are going to receive notifications for some questions (typos and more context) because you are a special user. ' );
 			$output .= __( 'You will not receive notifications if another special user participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( self::is_user_an_author_of_the_project( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for some questions (typos and more context) because you are an author. ' );
+			$output  = __( 'You are going to receive notifications for some questions (typos and more context) because you are an author. ' );
 			$output .= __( 'You will not receive notifications if another author participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
 		if ( self::is_user_a_commenter_in_the_discussion( $post_id, $user ) ) {
-			$output .= __( 'You are going to receive notifications for some threads where you have taken part. ' );
+			$output  = __( 'You are going to receive notifications for some threads where you have taken part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		$output .= __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' );
+		$output  = __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' );
 		$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 		return $output;
 	}
