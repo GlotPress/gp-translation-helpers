@@ -85,15 +85,15 @@ class WPorg_GlotPress_Notifications {
 					);
 				}
 			);
+			add_filter(
+				'gp_get_optin_message_for_each_discussion',
+				function ( $message, $post_id ) {
+					return self::optin_message_for_each_discussion( $post_id );
+				},
+				10,
+				2
+			);
 		}
-		add_filter(
-			'gp_get_optin_message_for_each_discussion',
-			function ( $message, $post_id ) {
-				return self::optin_message_for_each_discussion( $post_id );
-			},
-			10,
-			2
-		);
 	}
 
 	/**

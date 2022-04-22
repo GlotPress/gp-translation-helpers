@@ -624,34 +624,35 @@ class GP_Notifications {
 			);
 		}
 
-		if ( $is_user_opt_out ) {  // opt-out user
+		if ( $is_user_opt_out ) {  // Opt-out user.
 			$output  = __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
 			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $post_id ) ) ) { // regular user with comments
+		if ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $post_id ) ) ) { // Regular user with comments.
 			$output  = __( 'You are going to receive notifications for the threads where you have participated. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $post_id ) ) {  // admin and validator user
+		if ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $post_id ) ) {  // Admin and validator user.
 			$output  = __( 'You are going to receive notifications because you are a GlotPress administrator and a validator for this project and language. ' );
 			$output .= __( 'You will not receive notifications if another administrator or another validator participate in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_admin( $user ) ) {   // admin user
+		if ( self::is_user_an_gp_admin( $user ) ) {   // Admin user.
 			$output  = __( 'You are going to receive notifications because you are a GlotPress administrator. ' );
 			$output .= __( 'You will not receive notifications if another administrator participate in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_validator( $user, $post_id ) ) { // validator user
+		if ( self::is_user_an_gp_validator( $user, $post_id ) ) { // Validator user.
 			$output  = __( 'You are going to receive notifications because you are a GlotPress validator for this project and language. ' );
 			$output .= __( 'You will not receive notifications if another validator participate in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			return $output;
 		}
-		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // regular user without comments
+		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // Regular user without comments.
 
 	}
 }
