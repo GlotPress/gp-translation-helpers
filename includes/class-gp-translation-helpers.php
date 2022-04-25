@@ -77,7 +77,7 @@ class GP_Translation_Helpers {
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 
-		//Proof of concept: changing occurrences of `rejected` to `changes requested` and `reject` to `request changes`
+		// Proof of concept: changing occurrences of `rejected` to `changes requested` and `reject` to `request changes`
 		WPorg_GlotPress_Customization::replace_with_changes_requested();
 
 		$this->helpers = self::load_helpers();

@@ -20,31 +20,41 @@ class WPorg_GlotPress_Customization {
 
     /**
 	 * Activates the filters that replaces 'rejected' with 'changes requested'
-     * and 'Reject' to 'Request changes'
+	 * and 'Reject' to 'Request changes'
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return void
 	 */
-    public static function replace_with_changes_requested(){
-        add_filter('gettext_glotpress', function( $translation, $text ) {
-			if ($text == 'Rejected'){
-				return 'Changes requested';
-			}
-            if ($text == 'Reject'){
-				return 'Request changes';
-			}
-			return $translation;
-		}, 10, 2); 
+	public static function replace_with_changes_requested() {
+		add_filter(
+			'gettext_glotpress',
+			function( $translation, $text ) {
+				if ( $text == 'Rejected' ) {
+					return 'Changes requested';
+				}
+				if ( $text == 'Reject' ) {
+					return 'Request changes';
+				}
+				return $translation;
+			},
+			10,
+			2
+		);
 
-        add_filter('gettext_with_context_glotpress', function( $translation, $text ) {
-			if ($text == 'rejected'){
-				return 'changes requested';
-			}
-            if ($text == 'Reject'){
-				return 'Request changes';
-			}
-			return $translation;
-		},10, 2);
-    }
+		add_filter(
+			'gettext_with_context_glotpress',
+			function( $translation, $text ) {
+				if ( $text == 'rejected' ) {
+					return 'changes requested';
+				}
+				if ( $text == 'Reject' ) {
+					return 'Request changes';
+				}
+				return $translation;
+			},
+			10,
+			2
+		);
+	}
 }
