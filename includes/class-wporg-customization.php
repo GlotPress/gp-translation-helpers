@@ -36,6 +36,9 @@ class WPorg_GlotPress_Customization {
 				if ( 'Reject' === $text ) {
 					return 'Request changes';
 				}
+                if ( 'Rejected by:' === $text ) {
+					return 'Changes requested by:';
+				}
 				return $translation;
 			},
 			10,
@@ -50,6 +53,9 @@ class WPorg_GlotPress_Customization {
 				}
 				if ( 'Reject' === $text ) {
 					return 'Request changes';
+				}
+                if ( 'Rejected by:' === $text ) {
+					return 'Changes requested by:';
 				}
 				return $translation;
 			},
