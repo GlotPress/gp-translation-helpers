@@ -36,7 +36,7 @@ class WPorg_GlotPress_Customization {
 				if ( 'Reject' === $text ) {
 					return 'Request changes';
 				}
-                if ( 'Rejected by:' === $text ) {
+				if ( 'Rejected by:' === $text ) {
 					return 'Changes requested by:';
 				}
 				return $translation;
@@ -54,7 +54,7 @@ class WPorg_GlotPress_Customization {
 				if ( 'Reject' === $text ) {
 					return 'Request changes';
 				}
-                if ( 'Rejected by:' === $text ) {
+				if ( 'Rejected by:' === $text ) {
 					return 'Changes requested by:';
 				}
 				return $translation;
