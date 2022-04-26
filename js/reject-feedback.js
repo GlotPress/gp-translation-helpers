@@ -79,16 +79,6 @@
 				var rejectData = {};
 				var form = $( this ).closest( 'form' );
 
-				rowIds.forEach( function( rowId ) {
-					var originalId = $gp.editor.original_id_from_row_id( rowId );
-					var translationId = $gp.editor.translation_id_from_row_id( rowId );
-
-					if ( originalId && translationId ) {
-						originalIds.push( originalId );
-						translationIds.push( translationId );
-					}
-				} );
-
 				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
 						rejectReason.push( this.value );
