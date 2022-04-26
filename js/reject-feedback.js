@@ -2,8 +2,7 @@
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
-			var rowIds = '';
-
+			var rowIds = [];
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
 			'<form>' +
@@ -41,8 +40,13 @@
 
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
-					return $( this ).parents( 'tr.preview' ).attr( 'row' );
-				} ).get().join( ',' );
+					var selectedRow = $( this ).parents( 'tr.preview' );
+					if ( selectedRow.hasClass( 'status-current' ) ) {
+						return selectedRow.attr( 'row' );
+					}
+					$( this ).prop( 'checked', false );
+					return null;
+				} ).get();
 				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
 					e.preventDefault();
 					e.stopImmediatePropagation();
@@ -52,19 +56,22 @@
 			} );
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
-				var rowIdsArray = rowIds.split( ',' );
-
-				var originalIds = rowIdsArray.map( function( rowId ) {
-					return $gp.editor.original_id_from_row_id( rowId );
-				} );
-				var translationIds = rowIdsArray.map( function( rowId ) {
-					return $gp.editor.translation_id_from_row_id( rowId );
-				} );
-
+				var translationIds = [];
+				var originalIds = [];
 				var comment = '';
 				var rejectReason = [];
 				var rejectData = {};
 				var form = $( this ).closest( 'form' );
+
+				rowIds.forEach( function( rowId ) {
+					var originalId = $gp.editor.original_id_from_row_id( rowId );
+					var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+					if ( originalId && translationId ) {
+						originalIds.push( originalId );
+						translationIds.push( translationId );
+					}
+				} );
 
 				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
@@ -74,7 +81,7 @@
 
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
-				if ( ! comment.trim().length && ! rejectReason.length ) {
+				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form#bulk-actions-toolbar-top' ).submit();
 				}
 
