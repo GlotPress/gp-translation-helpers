@@ -320,7 +320,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return null;
 	}
 
-	public static function get_or_create_shadow_post( int $original_id ) {
+	public static function get_or_create_shadow_post_id( int $original_id ) {
 		return self::get_shadow_post_id( $original_id, true );
 	}
 
@@ -645,7 +645,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		check_ajax_referer( 'wp_rest', 'nonce' );
 
 		$original_id = self::get_original_id_from_temporary_post_id( $_POST['data']['post'] );
-		$post_id     = self::get_or_create_shadow_post( $original_id );
+		$post_id     = self::get_or_create_shadow_post_id( $original_id );
 		wp_send_json_success( $post_id );
 	}
 

@@ -421,7 +421,7 @@ class GP_Translation_Helpers {
 	 * @return false|int
 	 */
 	private function insert_reject_comment( $reject_comment, $original_id, $reject_reason, $translation_id, $locale_slug, $server ) {
-		$post_id = Helper_Translation_Discussion::get_shadow_post_id( $original_id, true ); // here we need to create a post if it doesn't exist.
+		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original_id );
 		$user    = wp_get_current_user();
 		return wp_insert_comment(
 			array(
