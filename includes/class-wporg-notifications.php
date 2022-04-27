@@ -95,7 +95,7 @@ class WPorg_GlotPress_Notifications {
 		$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
 		$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
 		// Set the email addresses array as empty if one GTE/PTE/CLPTE has a comment in the thread.
-		if ( ! empty( array_intersect( $email_addresses, $emails_from_the_thread, true ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
+		if ( ! empty( array_intersect( $email_addresses, $emails_from_the_thread ) ) || in_array( $comment->comment_author_email, $email_addresses, true ) ) {
 			return array();
 		}
 		return $email_addresses;
