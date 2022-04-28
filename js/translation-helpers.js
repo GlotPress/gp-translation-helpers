@@ -41,7 +41,9 @@ $gp.translation_helpers = (
 				}
 				requestUrl = requestUrl + '&replytocom=' + replytocom;
 
-				$helpers.addClass( 'loading' );
+				if ( $helpers.find( 'div:first .async-content' ).length ) {
+					$helpers.addClass( 'loading' );
+				}
 
 				$.getJSON(
 					requestUrl,
