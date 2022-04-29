@@ -6,3 +6,7 @@
 #TB_ajaxContent form {
     margin-left: 40px;
 }
+
+div#TB_window {
+    padding-bottom: 20px;
+}
