@@ -228,7 +228,10 @@ class GP_Translation_Helper {
 	 * @return string
 	 */
 	public function get_output(): string {
-		return '<div class="loading">Loading&hellip;</div>';
+		if ( $this->has_async_content ) {
+			return '<div class="loading">Loading&hellip;</div>';
+		}
+		return $this->async_output_callback( $this->get_async_content() );
 	}
 
 	/**
