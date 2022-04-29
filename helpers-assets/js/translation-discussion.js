@@ -1,23 +1,26 @@
+/* global $gp, document, wpApiSettings */
 jQuery( function( $ ) {
-	$( '.helper-translation-discussion' ).on( 'click', '.comments-selector a', function( e ) {
+	$( document ).on( 'click', '.helper-translation-discussion .comments-selector a', function( e ) {
+		var $comments, $selector;
+
 		e.preventDefault();
 		$( '.comments-selector a' ).removeClass( 'active-link' );
 		$( this ).addClass( 'active-link' );
-		var $comments = jQuery( e.target ).parents( 'h6' ).next( '.discussion-list' ); // eslint-disable-line vars-on-top
-		var selector = $( e.target ).data( 'selector' ); // eslint-disable-line vars-on-top
-		if ( 'all' === selector ) {
+		$comments = jQuery( e.target ).parents( 'h6' ).next( '.discussion-list' );
+		$selector = $( e.target ).data( 'selector' );
+		if ( 'all' === $selector ) {
 			$comments.children().show();
-		} else if ( 'rejection-feedback' === selector ) {
+		} else if ( 'rejection-feedback' === $selector ) {
 			$comments.children().hide();
 			$comments.children( '.rejection-feedback' ).show();
 		} else {
 			$comments.children().hide();
-			$comments.children( '.comment-locale-' + selector ).show();
-			$comments.children( '.comment-locale-' + selector ).next( 'ul' ).show();
+			$comments.children( '.comment-locale-' + $selector ).show();
+			$comments.children( '.comment-locale-' + $selector ).next( 'ul' ).show();
 		}
 		return false;
 	} );
-	$( '.helper-translation-discussion' ).on( 'submit', '.comment-form', function( e ) {
+	$( document ).on( 'submit', '.helper-translation-discussion .comment-form', function( e ) {
 		var $commentform = $( e.target );
 		var formdata = {
 			content: $commentform.find( 'textarea[name=comment]' ).val(),
@@ -49,10 +52,10 @@ jQuery( function( $ ) {
 		}
 
 		$.ajax( {
-			url: wpApiSettings.root + 'wp/v2/comments', // eslint-disable-line no-undef
+			url: wpApiSettings.root + 'wp/v2/comments',
 			method: 'POST',
 			beforeSend: function( xhr ) {
-				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce ); // eslint-disable-line no-undef
+				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
 			data: formdata,
 		} ).done( function( response ) {
@@ -61,7 +64,7 @@ jQuery( function( $ ) {
 				// TODO: error handling.
 			} else {
 				$commentform.find( 'textarea[name=comment]' ).val( '' );
-				$gp.translation_helpers.fetch( 'discussion' ); // eslint-disable-line no-undef
+				$gp.translation_helpers.fetch( 'discussion' );
 			}
 		} );
 

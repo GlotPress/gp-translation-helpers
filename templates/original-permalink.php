@@ -139,17 +139,10 @@ gp_tmpl_header();
 	foreach ( $sections as $section ) {
 		printf( '<div class="%s helper %s" id="%s">', esc_attr( $section['classname'] ), esc_attr( $is_first_class ), esc_attr( $section['id'] ) );
 		if ( $section['has_async_content'] ) {
-			if ( 'helper-translation-discussion' == $section['classname'] ) {
-				echo '<div class="async-content">';
-				gp_tmpl_load( 'translation-discussion-comments', get_defined_vars(), dirname( dirname( __FILE__ ) ) . '/helpers-assets/templates' );
-				echo '</div>';
-				$section['content'] = '';
-			} else {
-				echo '<div class="async-content"></div>';
-			}
+			echo '<div class="async-content"></div>';
 		}
 
-		echo wp_kses_post( $section['content'] );
+		echo $section['content']; // WPCS: XSS OK.
 		echo '</div>';
 		$is_first_class = '';
 	}

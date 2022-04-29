@@ -75,64 +75,18 @@ class GP_Route_Translation_Helpers extends GP_Route {
 
 		$all_translation_sets = GP::$translation_set->by_project_id( $project->id );
 
-		if ( isset( $this->helpers['discussion'] ) ) {
-			$translation_helper = $this->helpers['discussion'];
-			$translation_helper->set_data( $args );
-
-			$post_id               = $translation_helper::get_shadow_post( $original_id );
-			$comments              = get_comments(
-				array(
-					'post_id'            => $post_id,
-					'status'             => 'approve',
-					'type'               => 'comment',
-					'include_unapproved' => array( get_current_user_id() ),
-				)
-			);
-			$locales_with_comments = $this->get_locales_with_comments( $comments );
-		}
 		$row_id      = $original_id;
 		$translation = null;
 		if ( $translation_id ) {
 			$row_id     .= '-' . $translation_id;
 			$translation = GP::$translation->get( $translation_id );
 		}
-		$original_permalink             = gp_url_project( $project, array( 'filters[original_id]' => $original_id ) );
+		$original_permalink = gp_url_project( $project, array( 'filters[original_id]' => $original_id ) );
+
 		$original_translation_permalink = false;
 		if ( $translation_set ) {
 			$original_translation_permalink = gp_url_project_locale( $project, $locale_slug, $translation_set->slug, array( 'filters[original_id]' => $original_id ) );
 		}
-
-		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), '', '0.0.1' ); // todo: add the version as global element.
-
-		wp_register_script( 'gp-translation-discussion-js', plugins_url( '/../js/discussion.js', __FILE__ ), '', '0.0.1', true ); // todo: add the version as global element.
-
-		add_filter(
-			'comment_form_logged_in',
-			function( $logged_in_as, $commenter, $user_identity ) {
-				/* translators: Username with which the user is logged in */
-				return sprintf( '<p class="logged-in-as">%s</p>', sprintf( __( 'Logged in as %s.' ), $user_identity ) );
-			},
-			10,
-			3
-		);
-
-		add_filter(
-			'comment_form_fields',
-			function( $comment_fields ) {
-				$comment_fields['comment'] = str_replace( '>Comment<', '>Please leave your comment about this string here:<', $comment_fields['comment'] );
-				return $comment_fields;
-			}
-		);
-
-		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
-
-		add_filter(
-			'get_comment_author_link',
-			function() {
-				$comment_author = get_comment_author();
-				return '<a href="https://profiles.wordpress.org/' . $comment_author . '">' . $comment_author . '</a>';
-			}
-		);
 
 		/** Get translation for this original */
 		$existing_translations = array();
@@ -169,7 +123,8 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$priorities_key_value = $original->get_static( 'priorities' );
 		$priority             = $priorities_key_value[ $original->priority ];
 
-		$sections = $this->get_translation_helper_sections( $project->id, $original_id, $locale_slug, $translation_set_slug, $translation_id, $translation );
+		$args     = compact( 'project', 'locale_slug', 'translation_set_slug', 'original_id', 'translation_id', 'translation', 'original_permalink' );
+		$sections = $this->get_translation_helper_sections( $args );
 
 		$translations       = GP::$translation->find_many_no_map(
 			array(
@@ -192,22 +147,14 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	/**
 	 * Gets the sections of each active helper.
 	 *
-	 * @since 0.0.2
+	 * @param      array $data   The data to be passed on to the sections.
 	 *
-	 * @param int           $project_id             The project id. E.g. "11".
-	 * @param int           $original_id            The original id. E.g. "2440".
-	 * @param string|null   $locale_slug            Optional. The locale slug. E.g. "es".
-	 * @param string|null   $translation_set_slug   The translation set slug. E.g. "default".
-	 * @param int|null      $translation_id         Optional. The translation id. E.g. "4525".
-	 * @param stdClass|null $translation            Optional. The translation object.
-	 *
-	 * @return array
+	 * @return     array   The translation helper sections.
 	 */
-	public function get_translation_helper_sections( $project_id, $original_id, $locale_slug = null, $translation_set_slug = null, $translation_id = null, $translation = null ) {
-		$args     = compact( 'project_id', 'locale_slug', 'translation_set_slug', 'original_id', 'translation_id', 'translation' );
+	public function get_translation_helper_sections( $data ) {
 		$sections = array();
 		foreach ( $this->helpers as $translation_helper ) {
-			$translation_helper->set_data( $args );
+			$translation_helper->set_data( $data );
 
 			if ( ! $translation_helper->activate() ) {
 				continue;

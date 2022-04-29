@@ -39,7 +39,7 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 	 * @return bool
 	 */
 	public function activate(): bool {
-		if ( ! $this->data['project_id'] ) {
+		if ( ! $this->data['project'] ) {
 			return false;
 		}
 
@@ -58,7 +58,7 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 	 * @return array|void
 	 */
 	public function get_async_content() {
-		if ( ! $this->data['project_id'] ) {
+		if ( ! $this->data['project'] ) {
 			return;
 		}
 		$translation_set = null;

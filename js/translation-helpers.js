@@ -1,18 +1,19 @@
-$gp.translation_helpers = ( // eslint-disable-line no-undef
+/* global $gp, window */
+$gp.translation_helpers = (
 	function( $ ) {
 		return {
 			init: function( table, fetchNow ) {
-				$gp.translation_helpers.table = table; // eslint-disable-line no-undef
-				$gp.translation_helpers.install_hooks(); // eslint-disable-line no-undef
+				$gp.translation_helpers.table = table;
+				$gp.translation_helpers.install_hooks();
 				if ( fetchNow ) {
-					$gp.translation_helpers.fetch( false, $( '.translations' ) ); // eslint-disable-line no-undef
+					$gp.translation_helpers.fetch( false, $( '.translations' ) );
 				}
 			},
 			install_hooks: function() {
-				$( $gp.translation_helpers.table ) // eslint-disable-line no-undef
-					.on( 'beforeShow', '.editor', $gp.translation_helpers.hooks.initial_fetch ) // eslint-disable-line no-undef
-					.on( 'click', '.helpers-tabs li', $gp.translation_helpers.hooks.tab_select ) // eslint-disable-line no-undef
-					.on( 'click', 'a.comment-reply-link', $gp.translation_helpers.hooks.reply_comment_form ); // eslint-disable-line no-undef
+				$( $gp.translation_helpers.table )
+					.on( 'beforeShow', '.editor', $gp.translation_helpers.hooks.initial_fetch )
+					.on( 'click', '.helpers-tabs li', $gp.translation_helpers.hooks.tab_select )
+					.on( 'click', 'a.comment-reply-link', $gp.translation_helpers.hooks.reply_comment_form );
 			},
 			initial_fetch: function( $element ) {
 				var $helpers = $element.find( '.translation-helpers' );
@@ -21,7 +22,7 @@ $gp.translation_helpers = ( // eslint-disable-line no-undef
 					return;
 				}
 
-				$gp.translation_helpers.fetch( false, $element ); // eslint-disable-line no-undef
+				$gp.translation_helpers.fetch( false, $element );
 			},
 			fetch: function( which, $element ) {
 				var $helpers;
@@ -40,7 +41,9 @@ $gp.translation_helpers = ( // eslint-disable-line no-undef
 				}
 				requestUrl = requestUrl + '&replytocom=' + replytocom;
 
-				$helpers.addClass( 'loading' );
+				if ( $helpers.find( 'div:first .async-content' ).length ) {
+					$helpers.addClass( 'loading' );
+				}
 
 				$.getJSON(
 					requestUrl,
@@ -75,16 +78,16 @@ $gp.translation_helpers = ( // eslint-disable-line no-undef
 			},
 			hooks: {
 				initial_fetch: function() {
-					$gp.translation_helpers.initial_fetch( $( this ) ); // eslint-disable-line no-undef
+					$gp.translation_helpers.initial_fetch( $( this ) );
 					return false;
 				},
 				tab_select: function() {
-					$gp.translation_helpers.tab_select( $( this ) ); // eslint-disable-line no-undef
+					$gp.translation_helpers.tab_select( $( this ) );
 					return false;
 				},
 				reply_comment_form: function( event ) {
 					event.preventDefault();
-					$gp.translation_helpers.reply_comment_form( $( this ) ); // eslint-disable-line no-undef
+					$gp.translation_helpers.reply_comment_form( $( this ) );
 					return false;
 				},
 			},
@@ -93,10 +96,10 @@ $gp.translation_helpers = ( // eslint-disable-line no-undef
 );
 
 jQuery( function( $ ) {
-	$gp.translation_helpers.init( $( '.translations' ), true ); // eslint-disable-line no-undef
-	if ( typeof window.newShowFunctionAttached === 'undefined' ) { // eslint-disable-line
-		window.newShowFunctionAttached = true; // eslint-disable-line
-		var _oldShow = $.fn.show; // eslint-disable-line vars-on-top
+	var _oldShow = $.fn.show;
+	$gp.translation_helpers.init( $( '.translations' ), true );
+	if ( typeof window.newShowFunctionAttached === 'undefined' ) {
+		window.newShowFunctionAttached = true;
 		$.fn.show = function( speed, oldCallback ) {
 			return $( this ).each( function() {
 				var obj = $( this ),
