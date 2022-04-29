@@ -387,13 +387,21 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		// Disable subscribe to comments for now.
 		add_filter( 'option_stc_disabled', '__return_true' );
 
-		// Link comment author to WordPress.org profile.
+		// Link comment author to their profile.
 		add_filter(
 			'get_comment_author_link',
-			function() {
-					$comment_author = get_comment_author();
-					return '<a href="https://profiles.wordpress.org/' . $comment_author . '">' . $comment_author . '</a>';
-			}
+			function( $return, $author, $comment_id ) {
+				$comment = get_comment( $comment_id );
+				if ( ! empty( $comment->user_id ) ) {
+					$user = get_userdata( $comment->user_id );
+					if ( $user ) {
+						return gp_link_user( $user );
+					}
+				}
+				return $return;
+			},
+			10,
+			3
 		);
 
 		add_filter(
