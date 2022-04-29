@@ -3,6 +3,8 @@
 	$( document ).ready(
 		function() {
 			var rowIds = [];
+			var translationIds = [];
+			var originalIds = [];
 			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
 			'<div id="feedback-form">' +
 			'<form>' +
@@ -47,21 +49,6 @@
 					$( this ).prop( 'checked', false );
 					return null;
 				} ).get();
-				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
-					e.preventDefault();
-					e.stopImmediatePropagation();
-
-					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
-				}
-			} );
-
-			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
-				var translationIds = [];
-				var originalIds = [];
-				var comment = '';
-				var rejectReason = [];
-				var rejectData = {};
-				var form = $( this ).closest( 'form' );
 
 				rowIds.forEach( function( rowId ) {
 					var originalId = $gp.editor.original_id_from_row_id( rowId );
@@ -73,6 +60,25 @@
 					}
 				} );
 
+				if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
+					e.preventDefault();
+					e.stopImmediatePropagation();
+					if ( ! translationIds.length ) {
+						$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
+						return;
+					}
+
+					// eslint-disable-next-line no-undef
+					tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
+				}
+			} );
+
+			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
+				var comment = '';
+				var rejectReason = [];
+				var rejectData = {};
+				var form = $( this ).closest( 'form' );
+
 				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
 						rejectReason.push( this.value );
@@ -82,7 +88,7 @@
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
 				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
-					$( 'form#bulk-actions-toolbar-top' ).submit();
+					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				}
 
 				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
@@ -150,7 +156,7 @@
 		).done(
 			function() {
 				if ( rejectData.is_bulk_reject ) {
-					$( 'form#bulk-actions-toolbar-top' ).submit();
+					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				} else {
 					$gp.editor.set_status( button, 'rejected' );
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
