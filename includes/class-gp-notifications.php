@@ -171,8 +171,8 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param array  $comments        Array with the parent comments to the posted comment.
-	 * @param string $email_address_to_ignore Email from the posted comment.
+	 * @param array       $comments                Array with the parent comments to the posted comment.
+	 * @param string|null $email_address_to_ignore Email from the posted comment.
 	 *
 	 * @return array The emails to be notified from the thread comments.
 	 */
@@ -298,8 +298,9 @@ class GP_Notifications {
 		if ( ( null === $comment ) || ( null === $comment_meta ) || ( empty( $email_addresses ) ) ) {
 			return false;
 		}
+		$original        = self::get_original( $comment );
 		$email_addresses = self::remove_commenter_email_address( $comment, $email_addresses );
-		$email_addresses = self::remove_optout_discussion_email_addresses( $comment, $email_addresses );
+		$email_addresses = self::remove_optout_discussion_email_addresses( $original->id, $email_addresses );
 
 		$headers = array(
 			'Content-Type: text/html; charset=UTF-8',
@@ -443,19 +444,19 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment         The comment object.
-	 * @param array      $email_addresses A list of emails.
+	 * @param int   $original_id     The id of the original string used for the discussion.
+	 * @param array $email_addresses A list of emails.
 	 *
 	 * @return array
 	 */
-	public static function remove_optout_discussion_email_addresses( WP_Comment $comment, array $email_addresses ): array {
+	public static function remove_optout_discussion_email_addresses( int $original_id, array $email_addresses ): array {
 		foreach ( $email_addresses as $email_address ) {
 			$user            = get_user_by( 'email', $email_address );
 			$is_user_opt_out = ! empty(
 				get_users(
 					array(
 						'meta_key'   => 'gp_opt_out',
-						'meta_value' => $comment->comment_post_ID,
+						'meta_value' => $original_id,
 						'include'    => array( $user->ID ),
 					)
 				)
@@ -492,6 +493,20 @@ class GP_Notifications {
 	}
 
 	/**
+	 * Gets the project the original_id belongs to.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int $original_id The id of the original string used for the discussion.
+	 *
+	 * @return GP_Project The project the original_id belongs to.
+	 */
+	private static function get_project_from_original_id( int $original_id ): GP_Project {
+		$original = GP::$original->get( $original_id );
+		return GP::$project->get( $original->project_id );
+	}
+
+	/**
 	 * Gets the original string that the translated string belongs to.
 	 *
 	 * @since 0.0.2
@@ -511,6 +526,39 @@ class GP_Notifications {
 	}
 
 	/**
+	 * Gets the post_id for the discussion of an original_id.
+	 *
+	 * If the post doesn't exist, the result is 0.
+	 *
+	 * @param int $original_id The id of the original string used for the discussion.
+	 *
+	 * @return int The post_id for the discussion of an original_id.
+	 */
+	private static function get_post_id( int $original_id ): int {
+			$gp_posts = get_posts(
+				array(
+					'tax_query'        => array(
+						array(
+							'taxonomy' => Helper_Translation_Discussion::LINK_TAXONOMY,
+							'terms'    => $original_id,
+							'field'    => 'slug',
+						),
+					),
+					'post_type'        => Helper_Translation_Discussion::POST_TYPE,
+					'posts_per_page'   => 1,
+					'post_status'      => Helper_Translation_Discussion::POST_STATUS,
+					'suppress_filters' => false,
+				)
+			);
+
+		if ( ! empty( $gp_posts ) ) {
+			return $gp_posts[0]->ID;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Returns if the given user is an GlotPress admin or not.
 	 *
 	 * @since 0.0.2
@@ -523,13 +571,11 @@ class GP_Notifications {
 		global $wpdb;
 		try {
 			$db_email_addresses = $wpdb->get_results(
-				$wpdb->prepare(
-					"
+				"
 			SELECT user_email FROM {$wpdb->users} 
 			INNER JOIN {$wpdb->gp_permissions}
 			ON {$wpdb->users}.ID = {$wpdb->gp_permissions}.user_id 
-			WHERE action='admin'"
-				),
+			WHERE action='admin'",
 				ARRAY_N
 			);
 			foreach ( $db_email_addresses as $email_address ) {
@@ -538,7 +584,7 @@ class GP_Notifications {
 		} catch ( Exception $e ) {
 			$email_addresses = array();
 		}
-		if ( empty( array_intersect( array( $user->user_email ), $email_addresses ) ) ) {
+		if ( empty( $email_addresses ) || empty( array_intersect( array( $user->user_email ), $email_addresses ) ) ) {
 			return false;
 		}
 		return true;
@@ -549,17 +595,15 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_User $user    A user object.
-	 * @param int     $post_id The ID of the post to which the project for which the role is being evaluated belongs for the given user.
+	 * @param WP_User $user        A user object.
+	 * @param int     $original_id The id of the original string used for the discussion.
 	 *
 	 * @return bool
 	 */
-	public static function is_user_an_gp_validator( WP_User $user, int $post_id ): bool {
-		$email_addresses = array();
-		$post            = get_post( $post_id );
-		$project         = self::get_project_to_translate( $post );
+	public static function is_user_an_gp_validator( WP_User $user, int $original_id ): bool {
+		$project         = self::get_project_from_original_id( $original_id );
 		$email_addresses = self::get_validators_email_addresses( $project->path );
-		if ( empty( array_intersect( array( $user->user_email ), $email_addresses ) ) ) {
+		if ( empty( $email_addresses ) || empty( array_intersect( array( $user->user_email ), $email_addresses ) ) ) {
 			return false;
 		}
 		return true;
@@ -570,17 +614,17 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int     $post_id The id of the shadow post used for the discussion.
-	 * @param WP_User $user    A user object.
+	 * @param int     $original_id The id of the original string used for the discussion.
+	 * @param WP_User $user        A user object.
 	 *
 	 * @return bool True if the user has opt-out, otherwise false.
 	 */
-	public static function is_user_opt_out_in_discussion( int $post_id, WP_User $user ): bool {
+	public static function is_user_opt_out_in_discussion( int $original_id, WP_User $user ): bool {
 		return ! empty(
 			get_users(
 				array(
 					'meta_key'   => 'gp_opt_out',
-					'meta_value' => $post_id,
+					'meta_value' => $original_id,
 					'include'    => array( $user->ID ),
 				)
 			)
@@ -592,26 +636,26 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $post_id The id of the shadow post used for the discussion.
+	 * @param int $original_id The id of the original string used for the discussion.
 	 *
-	 * @return string
+	 * @return string The opt-in/oup-out message to show at the bottom of the discussions.
 	 */
-	public static function optin_message_for_each_discussion( int $post_id ): string {
+	public static function optin_message_for_each_discussion( int $original_id ): string {
+		$post_id = self::get_post_id( $original_id );
 		/**
 		 * Filters the optin message that will be showed in each discussion.
 		 *
 		 * @since 0.0.2
 		 *
-		 * @param string $message The opt-in/oup-out message to show at the bottom of the discussions.
-		 * @param int    $post_id The id of the shadow post used for the discussion.
+		 * @param string $message     The opt-in/oup-out message to show at the bottom of the discussions.
+		 * @param int    $original_id The id of the original string used for the discussion.
 		 */
-		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '', $post_id );
+		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '', $original_id );
 		if ( $message ) {
 			return $message;
 		}
 		$user            = wp_get_current_user();
-		$is_user_opt_out = self::is_user_opt_out_in_discussion( $post_id, $user );
-
+		$is_user_opt_out = self::is_user_opt_out_in_discussion( $original_id, $user );
 		if ( ! $is_user_opt_out ) {
 			$comments = get_comments(
 				array(
@@ -624,35 +668,35 @@ class GP_Notifications {
 			);
 		}
 
-		if ( $is_user_opt_out ) {  // Opt-out user.
+		if ( $is_user_opt_out ) {  // opt-out user
 			$output  = __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
-			$output .= ' <a href="#" class="opt-in-discussion" data-postid="' . $post_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="#" class="opt-in-discussion" data-original-id="' . $original_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $post_id ) ) ) { // Regular user with comments.
+		if ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $original_id ) ) ) { // regular user with comments
 			$output  = __( 'You are going to receive notifications for the threads where you have participated. ' );
-			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $post_id ) ) {  // Admin and validator user.
+		if ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $original_id ) ) {  // admin and validator user
 			$output  = __( 'You are going to receive notifications because you are a GlotPress administrator and a validator for this project and language. ' );
 			$output .= __( 'You will not receive notifications if another administrator or another validator participate in a thread where you do not take part. ' );
-			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_admin( $user ) ) {   // Admin user.
+		if ( self::is_user_an_gp_admin( $user ) ) {   // admin user
 			$output  = __( 'You are going to receive notifications because you are a GlotPress administrator. ' );
 			$output .= __( 'You will not receive notifications if another administrator participate in a thread where you do not take part. ' );
-			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_validator( $user, $post_id ) ) { // Validator user.
+		if ( self::is_user_an_gp_validator( $user, $original_id ) ) { // validator user
 			$output  = __( 'You are going to receive notifications because you are a GlotPress validator for this project and language. ' );
 			$output .= __( 'You will not receive notifications if another validator participate in a thread where you do not take part. ' );
-			$output .= ' <a href="#" class="opt-out-discussion" data-postid="' . $post_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // Regular user without comments.
+		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // regular user without comments
 
 	}
 }

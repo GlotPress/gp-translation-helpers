@@ -80,7 +80,7 @@ $gp.translation_helpers = (
 					action: 'optout_discussion_notifications',
 					data: {
 						nonce: $gp_translation_helpers_settings.nonce,
-						postId: $link.attr( 'data-postid' ),
+						originalId: $link.attr( 'data-original-id' ),
 						optType: $link.attr( 'data-opt-type' ),
 					},
 				};

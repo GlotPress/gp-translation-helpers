@@ -107,13 +107,13 @@
 		);
 		echo '<div class="optin-message-for-each-discussion">';
 		echo wp_kses(
-			GP_Notifications::optin_message_for_each_discussion( $post_id ),
+			GP_Notifications::optin_message_for_each_discussion( $original_id ),
 			array(
 				'a' => array(
-					'href'          => array(),
-					'class'         => array(),
-					'data-postid'   => array(),
-					'data-opt-type' => array(),
+					'href'             => array(),
+					'class'            => array(),
+					'data-original-id' => array(),
+					'data-opt-type'    => array(),
 				),
 			)
 		);

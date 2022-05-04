@@ -416,7 +416,7 @@ class GP_Translation_Helpers {
 	 *
 	 * It receives thought Ajax this data:
 	 * - nonce.
-	 * - postId. The id of the post in whose comments the discussion is stored.
+	 * - originalId. The id of the original string related with the discussion.
 	 * - optType:
 	 *   - optout. Add the metadata, to opt-out from the notifications.
 	 *   - optin. Removes the metadata, to opt-in from the notifications. Default status.
@@ -430,13 +430,13 @@ class GP_Translation_Helpers {
 		if ( ! wp_verify_nonce( $nonce, 'gp_optin_optout' ) ) {
 			wp_send_json_error( esc_html__( 'Invalid nonce.' ), 403 );
 		} else {
-			$user_id  = get_current_user_id();
-			$post_id  = sanitize_text_field( $_POST['data']['postId'] );
-			$opt_type = sanitize_text_field( $_POST['data']['optType'] );
+			$user_id     = get_current_user_id();
+			$original_id = sanitize_text_field( $_POST['data']['originalId'] );
+			$opt_type    = sanitize_text_field( $_POST['data']['optType'] );
 			if ( 'optout' === $opt_type ) {
-				add_user_meta( $user_id, 'gp_opt_out', $post_id );
+				add_user_meta( $user_id, 'gp_opt_out', $original_id );
 			} elseif ( 'optin' === $opt_type ) {
-				delete_user_meta( $user_id, 'gp_opt_out', $post_id );
+				delete_user_meta( $user_id, 'gp_opt_out', $original_id );
 			}
 			 wp_send_json_success();
 		}
