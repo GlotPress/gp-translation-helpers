@@ -167,6 +167,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 				'id'                => $translation_helper->get_div_id(),
 				'priority'          => $translation_helper->get_priority(),
 				'has_async_content' => $translation_helper->has_async_content(),
+				'load_inline'       => $translation_helper->load_inline(),
 			);
 		}
 

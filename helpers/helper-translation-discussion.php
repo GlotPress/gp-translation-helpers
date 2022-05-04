@@ -29,7 +29,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @since 0.0.1
 	 * @var bool
 	 */
-	public $has_async_content = false;
+	public $has_async_content = true;
+
+	/**
+	 * Indicates whether the helper should be loaded inline.
+	 *
+	 * @since 0.0.1
+	 * @var bool
+	 */
+	public $load_inline = true;
 
 	/**
 	 * The post type used to store the comments.

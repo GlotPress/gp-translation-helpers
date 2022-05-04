@@ -139,10 +139,13 @@ gp_tmpl_header();
 	foreach ( $sections as $section ) {
 		printf( '<div class="%s helper %s" id="%s">', esc_attr( $section['classname'] ), esc_attr( $is_first_class ), esc_attr( $section['id'] ) );
 		if ( $section['has_async_content'] ) {
-			echo '<div class="async-content"></div>';
+			echo '<div class="async-content">';
 		}
 
-		echo $section['content']; // WPCS: XSS OK.
+		echo $section['content']; // phpcs:ignore XSS OK.
+		if ( ! $section['has_async_content'] ) {
+			echo '</div>';
+		}
 		echo '</div>';
 		$is_first_class = '';
 	}

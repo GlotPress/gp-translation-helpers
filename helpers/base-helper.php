@@ -86,6 +86,16 @@ class GP_Translation_Helper {
 	public function has_async_content(): bool {
 		return $this->has_async_content ?? false;
 	}
+	/**
+	 * Indicates whether the helper should initally load inline
+	 *
+	 * @since 0.0.1
+	 *
+	 * @return bool
+	 */
+	public function load_inline(): bool {
+		return $this->load_inline ?? false;
+	}
 
 	/**
 	 * Gets the class name for the helper div.
@@ -228,7 +238,7 @@ class GP_Translation_Helper {
 	 * @return string
 	 */
 	public function get_output(): string {
-		if ( $this->has_async_content ) {
+		if ( ! $this->load_inline() ) {
 			return '<div class="loading">Loading&hellip;</div>';
 		}
 		return $this->async_output_callback( $this->get_async_content() );
