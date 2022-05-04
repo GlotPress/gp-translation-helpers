@@ -69,7 +69,8 @@ class GP_Translation_Helpers {
 		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), '0.0.1' );
 		gp_enqueue_style( 'gp-discussion-css' );
 
-		if ( 'Rosetta' !== wp_get_theme()->Name ) {
+		$active_theme = wp_get_theme()->Name;
+		if ( 'Rosetta' !== $active_theme ) {
 			wp_register_style( 'wporg-translation-discussion-css', plugins_url( '/../helpers-assets/css/wporg-translation-discussion.css', __FILE__ ), array(), '0.0.1' );
 			gp_enqueue_style( 'wporg-translation-discussion-css' );
 		}
