@@ -119,7 +119,7 @@ class GP_Notifications {
 	 */
 	public static function send_emails_to_validators( WP_Comment $comment, array $comment_meta ) {
 		$post    = get_post( $comment->comment_post_ID );
-		$project = self::get_project_to_translate( $post );
+		$project = self::get_project_from_post( $post );
 
 		$email_addresses = self::get_validators_email_addresses( $project->path );
 		/**
@@ -334,7 +334,7 @@ class GP_Notifications {
 	 */
 	public static function get_email_body( WP_Comment $comment, array $comment_meta ): string {
 		$post     = get_post( $comment->comment_post_ID );
-		$project  = self::get_project_to_translate( $post );
+		$project  = self::get_project_from_post( $post );
 		$original = self::get_original( $comment );
 		$output   = '';
 		/**
@@ -479,7 +479,7 @@ class GP_Notifications {
 	 *
 	 * @return GP_Project|bool The project that the translated string belongs to.
 	 */
-	private static function get_project_to_translate( WP_Post $post ) {
+	private static function get_project_from_post( WP_Post $post ) {
 		$terms = wp_get_object_terms( $post->ID, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
 			return false;
@@ -501,7 +501,7 @@ class GP_Notifications {
 	 *
 	 * @return GP_Project The project the original_id belongs to.
 	 */
-	private static function get_project_from_original_id( int $original_id ): GP_Project {
+	public static function get_project_from_original_id( int $original_id ): GP_Project {
 		$original = GP::$original->get( $original_id );
 		return GP::$project->get( $original->project_id );
 	}
@@ -515,7 +515,7 @@ class GP_Notifications {
 	 *
 	 * @return GP_Thing|false The original string that the translated string belongs to.
 	 */
-	private static function get_original( WP_Comment $comment ) {
+	public static function get_original( WP_Comment $comment ) {
 		$post_id = $comment->comment_post_ID;
 		$terms   = wp_get_object_terms( $post_id, Helper_Translation_Discussion::LINK_TAXONOMY, array( 'number' => 1 ) );
 		if ( empty( $terms ) ) {
@@ -534,7 +534,7 @@ class GP_Notifications {
 	 *
 	 * @return int The post_id for the discussion of an original_id.
 	 */
-	private static function get_post_id( int $original_id ): int {
+	public static function get_post_id( int $original_id ): int {
 			$gp_posts = get_posts(
 				array(
 					'tax_query'        => array(
@@ -668,35 +668,35 @@ class GP_Notifications {
 			);
 		}
 
-		if ( $is_user_opt_out ) {  // opt-out user
+		if ( $is_user_opt_out ) {  // Opt-out user.
 			$output  = __( 'You will not receive notifications for this discussion because you have opt-out to get notifications for it. ' );
 			$output .= ' <a href="#" class="opt-in-discussion" data-original-id="' . $original_id . '" data-opt-type="optin">' . __( 'Start receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $original_id ) ) ) { // regular user with comments
+		if ( $comments && ( ! self::is_user_an_gp_admin( $user ) ) && ( ! self::is_user_an_gp_validator( $user, $original_id ) ) ) { // Regular user with comments.
 			$output  = __( 'You are going to receive notifications for the threads where you have participated. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $original_id ) ) {  // admin and validator user
+		if ( self::is_user_an_gp_admin( $user ) && self::is_user_an_gp_validator( $user, $original_id ) ) {  // Admin and validator user.
 			$output  = __( 'You are going to receive notifications because you are a GlotPress administrator and a validator for this project and language. ' );
 			$output .= __( 'You will not receive notifications if another administrator or another validator participate in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_admin( $user ) ) {   // admin user
+		if ( self::is_user_an_gp_admin( $user ) ) {   // Admin user.
 			$output  = __( 'You are going to receive notifications because you are a GlotPress administrator. ' );
 			$output .= __( 'You will not receive notifications if another administrator participate in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_gp_validator( $user, $original_id ) ) { // validator user
+		if ( self::is_user_an_gp_validator( $user, $original_id ) ) { // Validator user.
 			$output  = __( 'You are going to receive notifications because you are a GlotPress validator for this project and language. ' );
 			$output .= __( 'You will not receive notifications if another validator participate in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			return $output;
 		}
-		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // regular user without comments
+		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // Regular user without comments.
 
 	}
 }
