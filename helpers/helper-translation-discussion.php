@@ -447,6 +447,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @return false|string
 	 */
 	public function async_output_callback( array $comments ) {
+		$this->set_count( $comments );
+
 		// Remove comment likes for now (or forever :) ).
 		remove_filter( 'comment_text', 'comment_like_button', 12 );
 
