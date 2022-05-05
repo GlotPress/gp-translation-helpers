@@ -375,8 +375,8 @@ class GP_Translation_Helpers {
 
 		$helper_discussion    = new Helper_Translation_Discussion();
 		$locale_slug          = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
-		$translation_id_array = array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] );
-		$original_id_array    = array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] );
+		$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
+		$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
 		$reject_reason        = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
 		$all_reject_reasons   = array_keys( Helper_Translation_Discussion::get_reject_reasons() );
 		$reject_reason        = array_filter(

@@ -29,7 +29,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @since 0.0.1
 	 * @var bool
 	 */
-	public $has_async_content = true;
+	public $has_async_content = false;
 
 	/**
 	 * The post type used to store the comments.
@@ -364,7 +364,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'status'             => 'approve',
 				'type'               => 'comment',
 				'include_unapproved' => array( get_current_user_id() ),
-				'order'              => 'ASC',
 			)
 		);
 	}
@@ -388,14 +387,42 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		// Disable subscribe to comments for now.
 		add_filter( 'option_stc_disabled', '__return_true' );
 
-		// Link comment author to WordPress.org profile.
+		// Link comment author to their profile.
 		add_filter(
 			'get_comment_author_link',
-			function() {
-					$comment_author = get_comment_author();
-					return '<a href="https://profiles.wordpress.org/' . $comment_author . '">' . $comment_author . '</a>';
+			function( $return, $author, $comment_id ) {
+				$comment = get_comment( $comment_id );
+				if ( ! empty( $comment->user_id ) ) {
+					$user = get_userdata( $comment->user_id );
+					if ( $user ) {
+						return gp_link_user( $user );
+					}
+				}
+				return $return;
+			},
+			10,
+			3
+		);
+
+		add_filter(
+			'comment_form_logged_in',
+			function( $logged_in_as, $commenter, $user_identity ) {
+				/* translators: Username with which the user is logged in */
+				return sprintf( '<p class="logged-in-as">%s</p>', sprintf( __( 'Logged in as %s.' ), $user_identity ) );
+			},
+			10,
+			3
+		);
+
+		add_filter(
+			'comment_form_fields',
+			function( $comment_fields ) {
+				$comment_fields['comment'] = str_replace( '>Comment<', '>Please leave your comment about this string here:<', $comment_fields['comment'] );
+				return $comment_fields;
 			}
 		);
+
+		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
@@ -404,7 +431,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'post_id'              => self::get_shadow_post( $this->data['original_id'] ),
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['permalink'],
+				'original_permalink'   => $this->data['original_permalink'],
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],

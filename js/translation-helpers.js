@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_settings  */
+/* global $gp, window, $gp_translation_helpers_settings */
 $gp.translation_helpers = (
 	function( $ ) {
 		return {
@@ -42,7 +42,9 @@ $gp.translation_helpers = (
 				}
 				requestUrl = requestUrl + '&replytocom=' + replytocom;
 
-				$helpers.addClass( 'loading' );
+				if ( $helpers.find( 'div:first .async-content' ).length ) {
+					$helpers.addClass( 'loading' );
+				}
 
 				$.getJSON(
 					requestUrl,
@@ -121,10 +123,10 @@ $gp.translation_helpers = (
 );
 
 jQuery( function( $ ) {
-	$gp.translation_helpers.init( $( '.translations' ), true ); // eslint-disable-line no-undef
-	if ( typeof window.newShowFunctionAttached === 'undefined' ) { // eslint-disable-line
-		window.newShowFunctionAttached = true; // eslint-disable-line
-		var _oldShow = $.fn.show; // eslint-disable-line vars-on-top
+	var _oldShow = $.fn.show;
+	$gp.translation_helpers.init( $( '.translations' ), true );
+	if ( typeof window.newShowFunctionAttached === 'undefined' ) {
+		window.newShowFunctionAttached = true;
 		$.fn.show = function( speed, oldCallback ) {
 			return $( this ).each( function() {
 				var obj = $( this ),

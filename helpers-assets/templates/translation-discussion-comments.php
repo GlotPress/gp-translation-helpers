@@ -4,38 +4,40 @@
  */
 ?>
 <div class="discussion-wrapper">
-	<?php if ( $number = count( $comments ) ) : ?>
+	<?php if ( $comments ) : ?>
 
 		<h6>
 			<?php
 			/* translators: number of comments. */
-			printf( _n( '%s Comment', '%s Comments', $number ), number_format_i18n( $number ) );
+			printf( _n( '%s Comment', '%s Comments', count( $comments ) ), number_format_i18n( count( $comments ) ) );
 			?>
 		<?php if ( $locale_slug ) : ?>
 			(<?php echo esc_html( $locale_slug ); ?>)
 			<?php
-			$count_locale_comments    = 0;
+			$locale_comments_count = 0;
 			$count_rejection_feedback = 0;
 			foreach ( $comments as $_comment ) {
 				$comment_locale = get_comment_meta( $_comment->comment_ID, 'locale', true );
 				if ( $locale_slug == $comment_locale ) {
-					$count_locale_comments++;
 
 					$reject_reason = get_comment_meta( $_comment->comment_ID, 'reject_reason', true );
 					if ( ! empty( $reject_reason ) ) {
 						$count_rejection_feedback++;
 					}
+					$locale_comments_count++;
 				}
 			}
 			?>
-		
+
 			<span class="comments-selector">
-				<a href="#" class="active-link" data-selector="all">Show all (<?php echo esc_html( $number ); ?>)</a> | 
-				<a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $count_locale_comments ); ?>)</a> | 
+				<a href="#" class="active-link" data-selector="all">Show all (<?php echo esc_html( count( $comments ) ); ?>)</a> |
+				<a href="#" data-selector="<?php echo esc_attr( $locale_slug ); ?>"><?php echo esc_html( $locale_slug ); ?> only (<?php echo esc_html( $locale_comments_count ); ?>)</a> |
 				<a href="#" data-selector="rejection-feedback">Rejection Feedback (<?php echo esc_html( $count_rejection_feedback ); ?>)</a>
 			</span>
 		<?php endif; ?>
 		</h6>
+	<?php else : ?>
+		<?php esc_html_e( 'No comments have been made on this yet.' ); ?>
 	<?php endif; ?>
 	<ul class="discussion-list">
 		<?php

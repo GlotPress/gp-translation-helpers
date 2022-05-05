@@ -8,7 +8,7 @@
  * Plugin URI:      https://github.com/GlotPress/gp-translation-helpers
  * Description:     GlotPress plugin to discuss the strings that are being translated in GlotPress.
  * Version:         0.0.2
- * Requires PHP:    7.2
+ * Requires PHP:    7.4
  * Author:          the GlotPress team
  * Author URI:      https://glotpress.blog
  * License:         GPLv2 or later
