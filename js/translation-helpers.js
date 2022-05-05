@@ -45,7 +45,7 @@ $gp.translation_helpers = (
 				}
 				requestUrl = requestUrl + '&replytocom=' + replytocom;
 
-				if ( $helpers.find( 'div:first .async-content' ).length ) {
+				if ( $helpers.find( 'div:first' ).is( ':not(.loaded)' ) ) {
 					$helpers.addClass( 'loading' );
 				}
 
