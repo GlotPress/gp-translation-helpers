@@ -312,6 +312,18 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return $terms[0]->slug;
 	}
 
+	/**
+	 * Indicates whether the post is temporal or not.
+	 *
+	 * True if is temporal.
+	 * False if is not temporal.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int|string $post_id The post ID.
+	 *
+	 * @return bool
+	 */
 	public static function is_temporary_post_id( $post_id ) {
 		return self::get_original_id_from_temporary_post_id( $post_id ) > 0;
 	}
