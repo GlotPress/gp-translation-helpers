@@ -27,6 +27,9 @@ class GP_Notifications {
 				if ( ( '0' !== $comment->comment_parent ) ) { // Notify to the thread only if the comment is in a thread.
 					self::send_emails_to_thread_commenters( $comment, $comment_meta );
 				}
+				if ( ( '0' === $comment->comment_parent ) && array_key_exists( 'reject_reason', $comment_meta ) && ( ! empty( $comment_meta['reject_reason'] ) ) ) {  // Notify a rejection without parent comments.
+					self::send_rejection_email_to_translator( $comment, $comment_meta );
+				}
 				$root_comment      = self::get_root_comment_in_a_thread( $comment );
 				$root_comment_meta = get_comment_meta( $root_comment->comment_ID );
 				if ( array_key_exists( 'comment_topic', $root_comment_meta ) ) {
@@ -90,6 +93,23 @@ class GP_Notifications {
 		 */
 		$email_addresses = apply_filters( 'gp_notification_commenter_email_addresses', $email_addresses, $comment, $comment_meta );
 		self::send_emails( $comment, $comment_meta, $email_addresses );
+	}
+
+	/**
+	 * Sends the reject notification to the translator.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment      The comment object.
+	 * @param array      $comment_meta The meta values for the comment.
+	 *
+	 * @return void
+	 */
+	public static function send_rejection_email_to_translator( WP_Comment $comment, array $comment_meta ) {
+		$translation_id = $comment_meta['translation_id'];
+		$translation    = GP::$translation->get( $translation_id );
+		$translator     = get_user_by( 'id', $translation->user_id_last_modified );
+		self::send_emails( $comment, $comment_meta, array( $translator->user_email ) );
 	}
 
 	/**
