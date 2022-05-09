@@ -20,12 +20,54 @@ jQuery( function( $ ) {
 		}
 		return false;
 	} );
+
+	function createShadowPost( formdata, submitComment ) {
+		var data = {
+			action: 'create_shadow_post',
+			data: formdata,
+			_ajax_nonce: wpApiSettings.nonce,
+		};
+
+		$.ajax(
+			{
+				type: 'POST',
+				url: wpApiSettings.admin_ajax_url,
+				data: data,
+			}
+		).done(
+			function( response ) {
+				formdata.post = response.data;
+				submitComment( formdata );
+			}
+		);
+	}
+
 	$( document ).on( 'submit', '.helper-translation-discussion .comment-form', function( e ) {
 		var $commentform = $( e.target );
+		var postId = $commentform.attr( 'id' ).split( '-' )[ 1 ];
+		var submitComment = function( formdata ) {
+			$.ajax( {
+				url: wpApiSettings.root + 'wp/v2/comments',
+				method: 'POST',
+				beforeSend: function( xhr ) {
+					xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
+				},
+				data: formdata,
+			} ).done( function( response ) {
+				if ( 'undefined' !== typeof ( response.data ) ) {
+					// There's probably a better way, but response.data is only set for errors.
+					// TODO: error handling.
+				} else {
+					$commentform.find( 'textarea[name=comment]' ).val( '' );
+					$gp.translation_helpers.fetch( 'discussion' );
+				}
+			} );
+		};
+
 		var formdata = {
 			content: $commentform.find( 'textarea[name=comment]' ).val(),
 			parent: $commentform.find( 'input[name=comment_parent]' ).val(),
-			post: $commentform.attr( 'id' ).split( '-' )[ 1 ],
+			post: postId,
 			meta: {
 				translation_id: $commentform.find( 'input[name=translation_id]' ).val(),
 				locale: $commentform.find( 'input[name=comment_locale]' ).val(),
@@ -51,22 +93,11 @@ jQuery( function( $ ) {
 			}
 		}
 
-		$.ajax( {
-			url: wpApiSettings.root + 'wp/v2/comments',
-			method: 'POST',
-			beforeSend: function( xhr ) {
-				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
-			},
-			data: formdata,
-		} ).done( function( response ) {
-			if ( 'undefined' !== typeof ( response.data ) ) {
-				// There's probably a better way, but response.data is only set for errors.
-				// TODO: error handling.
-			} else {
-				$commentform.find( 'textarea[name=comment]' ).val( '' );
-				$gp.translation_helpers.fetch( 'discussion' );
-			}
-		} );
+		if ( isNaN( Number( postId ) ) ) {
+			createShadowPost( formdata, submitComment );
+		} else {
+			submitComment( formdata );
+		}
 
 		return false;
 	} );
