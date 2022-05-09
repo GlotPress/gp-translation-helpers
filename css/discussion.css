@@ -112,8 +112,8 @@ h6 {
 }
 .modal-item {
 	display: inline-block;
-	width: 30%;
-	margin-top: 11px;
+	width: 33%;
+	margin-top: 7px;
 }
 .modal-item label {
 	display: inherit;
@@ -121,15 +121,15 @@ h6 {
 	cursor: pointer;
 }
 .modal-item input[type="checkbox"] {
+	transform: scale(1.5);
 	margin-right: 5px;
 }
 .modal-comment {
 	margin-top: 27px;
 }
 .modal-comment textarea {
-	width: 97%;
+	width: 100%;
 	height: 170px;
-	font-family: "Helvetica", "Arial", sans-serif;
 }
 .modal-btn {
 	float: right;
@@ -153,13 +153,17 @@ h6 {
     padding-bottom: 10px;
 }
 #TB_title {
-	background: #fcfcfc;
-	border-bottom: 1px solid #ddd;
-	height: 29px;
-	padding: 13px 0;
+    background: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+    height: 45px !important;
+}
+div#TB_ajaxContent {
+	margin-left: auto;
+	margin-right: auto;
 }
 div#TB_ajaxWindowTitle {
-	font-size: 1.3em;
+	font-size: 1.2em;
+    padding: 8px;
 }
 .meta summary.feedback-summary{
 	font-size: 1.2em;
