@@ -31,6 +31,7 @@
 
 require_once __DIR__ . '/includes/class-gp-route-translation-helpers.php';
 require_once __DIR__ . '/includes/class-gp-translation-helpers.php';
+require_once __DIR__ . '/includes/class-gth-temporary-post.php';
 require_once __DIR__ . '/includes/class-gp-notifications.php';
 require_once __DIR__ . '/includes/class-wporg-notifications.php';
 require_once __DIR__ . '/includes/class-wporg-customization.php';
