@@ -18,7 +18,7 @@ class WPorg_GlotPress_Customization {
 		gp_enqueue_style( 'wporg-translation-discussion-css' );
 	}
 
-    /**
+	/**
 	 * Activates the filters that replaces 'rejected' with 'changes requested'
 	 * and 'Reject' to 'Request changes'
 	 *
@@ -30,14 +30,11 @@ class WPorg_GlotPress_Customization {
 		add_filter(
 			'gettext_glotpress',
 			function( $translation, $text ) {
-				if ( 'Rejected' === $text ) {
+				if ( $text == 'Rejected' ) {
 					return 'Changes requested';
 				}
-				if ( 'Reject' === $text ) {
+				if ( $text == 'Reject' ) {
 					return 'Request changes';
-				}
-				if ( 'Rejected by:' === $text ) {
-					return 'Changes requested by:';
 				}
 				return $translation;
 			},
@@ -48,14 +45,11 @@ class WPorg_GlotPress_Customization {
 		add_filter(
 			'gettext_with_context_glotpress',
 			function( $translation, $text ) {
-				if ( 'rejected' === $text ) {
+				if ( $text == 'rejected' ) {
 					return 'changes requested';
 				}
-				if ( 'Reject' === $text ) {
+				if ( $text == 'Reject' ) {
 					return 'Request changes';
-				}
-				if ( 'Rejected by:' === $text ) {
-					return 'Changes requested by:';
 				}
 				return $translation;
 			},
