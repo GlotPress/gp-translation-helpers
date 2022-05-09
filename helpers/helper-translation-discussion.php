@@ -348,7 +348,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	/**
 	 * Gets the post id of the shadow post and ensure its or create shadow post identifier.
 	 *
-	 * @param      int     $original_id  The original identifier
+	 * @param      int $original_id  The original identifier
 	 *
 	 * @return     <type>  The or create shadow post identifier.
 	 */

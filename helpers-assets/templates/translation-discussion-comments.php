@@ -14,7 +14,7 @@
 		<?php if ( $locale_slug ) : ?>
 			(<?php echo esc_html( $locale_slug ); ?>)
 			<?php
-			$locale_comments_count = 0;
+			$locale_comments_count    = 0;
 			$count_rejection_feedback = 0;
 			foreach ( $comments as $_comment ) {
 				$comment_locale = get_comment_meta( $_comment->comment_ID, 'locale', true );
