@@ -366,7 +366,7 @@ class GP_Translation_Helpers {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @return string|void
+	 * @return void
 	 */
 	public function reject_with_feedback() {
 		check_ajax_referer( 'gp_reject_feedback', 'nonce' );

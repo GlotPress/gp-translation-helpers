@@ -34,7 +34,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	/**
 	 * Indicates whether the helper should be loaded inline.
 	 *
-	 * @since 0.0.1
+	 * @since 0.0.2
 	 * @var bool
 	 */
 	public $load_inline = true;
@@ -250,6 +250,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		return $cache[ $post->ID ];
 	}
+
 	/**
 	 * Updates the comment's approval status before it is set.
 	 *
@@ -313,10 +314,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Indicates whether the post is temporal or not.
-	 *
-	 * True if is temporal.
-	 * False if is not temporal.
+	 * Indicates whether the post id is a real one or a temporary one.
 	 *
 	 * @since 0.0.2
 	 *
@@ -328,6 +326,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return self::get_original_id_from_temporary_post_id( $post_id ) > 0;
 	}
 
+	/**
+	 * Extract the original_id from the temporary post_id.
+	 *
+	 * @param      int|string $post_id The post ID.
+	 *
+	 * @return     int|null The original_id or null if the post_id is not a temporary one.
+	 */
 	public static function get_original_id_from_temporary_post_id( $post_id ) {
 		if ( self::POST_TYPE !== substr( $post_id, 0, strlen( self::POST_TYPE ) ) ) {
 			return null;
@@ -340,10 +345,24 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return null;
 	}
 
+	/**
+	 * Gets the post id of the shadow post and ensure its or create shadow post identifier.
+	 *
+	 * @param      int     $original_id  The original identifier
+	 *
+	 * @return     <type>  The or create shadow post identifier.
+	 */
 	public static function get_or_create_shadow_post_id( int $original_id ) {
 		return self::get_shadow_post_id( $original_id, true );
 	}
 
+	/**
+	 * Get a Gth_Temporary_Post or a WP_Post, depending on the given post_id.
+	 *
+	 * @param      int|string $post_id  The post ID (could be a temporary one).
+	 *
+	 * @return     WP_Post|Gth_Temporary_Post  An object for use in wp_list_comments.
+	 */
 	public static function maybe_get_temporary_post( $post_id ) {
 		if ( self::is_temporary_post_id( $post_id ) ) {
 			return new Gth_Temporary_Post( $post_id );
@@ -362,14 +381,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return int|WP_Error
 	 */
-	/**
-	 * Gets the shadow post id.
-	 *
-	 * @param      int  $original_id  The original identifier
-	 * @param      bool $create       The create
-	 *
-	 * @return     <type>  The shadow post.
-	 */
 	public static function get_shadow_post_id( int $original_id, $create = false ) {
 		$cache_key = self::LINK_TAXONOMY . '_' . $original_id;
 
@@ -384,8 +395,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			}
 		}
 
-		$development = true;
-		if ( $development || false === $post_id ) {
+		if ( 'production' !== wp_get_environment_type() || false === $post_id ) {
 			$post_id  = null;
 			$gp_posts = get_posts(
 				array(
@@ -663,6 +673,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return $args['before'] . $link . $args['after'];
 	}
 
+	/**
+	 * Ajax callback for creating the shadow post.
+	 *
+	 * Returns the $post_id back to JS.
+	 *
+	 * @since 0.0.2
+	 */
 	public function ajax_create_shadow_post() {
 		check_ajax_referer( 'wp_rest', 'nonce' );
 

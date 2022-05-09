@@ -89,7 +89,7 @@ class GP_Translation_Helper {
 	/**
 	 * Indicates whether the helper should initally load inline
 	 *
-	 * @since 0.0.1
+	 * @since 0.0.2
 	 *
 	 * @return bool
 	 */
