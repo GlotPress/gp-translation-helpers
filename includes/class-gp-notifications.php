@@ -9,6 +9,13 @@
  */
 class GP_Notifications {
 	/**
+	 * Stores the related comments to the first one when the validator makes a bulk rejection.
+	 *
+	 * @since 0.0.2
+	 * @var array
+	 */
+	private static array $related_comments = array();
+	/**
 	 * Sends notifications when a new comment in the discussion is stored using the WP REST API.
 	 *
 	 * @since 0.0.2
@@ -377,34 +384,63 @@ class GP_Notifications {
 				'a' => array( 'href' => array() ),
 			)
 		) . '<br/>';
+		if ( ! empty( self::$related_comments ) ) {
+			$output .= wp_kses(
+			/* translators: The number of different translations related with the comment. */
+				sprintf( __( 'This comment affects to <strong>%1$d different translations</strong>.', 'glotpress' ), count( self::$related_comments ) + 1 ),
+				array(
+					'a'      => array( 'href' => array() ),
+					'strong' => array(),
+				)
+			) . '<br/>';
+		}
 		$output .= '<br>';
 		$output .= esc_html__( 'It would be nice if you have some time to review this comment and reply to it if needed.', 'glotpress' );
 		$output .= '<br><br>';
-		$output .= '- ' . wp_kses(
+		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
+			/* translators: The translation locale for the comment. */
+			$output .= '- ' . wp_kses( sprintf( __( '<strong>Locale:</strong> %s', 'glotpress' ), $comment_meta['locale'][0] ), array( 'strong' => array() ) ) . '<br/>';
+		}
+		if ( empty( self::$related_comments ) ) { // Only show original and translation strings if we don't have related comments (bulk rejection).
+			/* translators: The original string to translate. */
+			$output .= '- ' . wp_kses( sprintf( __( '<strong>Original string:</strong> %s', 'glotpress' ), $original->singular ), array( 'strong' => array() ) ) . '<br/>';
+			if ( array_key_exists( 'translation_id', $comment_meta ) && $comment_meta['translation_id'][0] ) {
+				$translation_id = $comment_meta['translation_id'][0];
+				$translation    = GP::$translation->get( $translation_id );
+				// todo: add the plurals.
+				if ( ! is_null( $translation ) ) {
+					/* translators: The translation string. */
+					$output .= '- ' . wp_kses( sprintf( __( '<strong>Translation string:</strong> %s', 'glotpress' ), $translation->translation_0 ), array( 'strong' => array() ) ) . '<br/>';
+				}
+			}
+		}
+		/* translators: The comment made. */
+		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) ) . '<br/>';
+		if ( empty( self::$related_comments ) ) {
+			$output .= '- ' . __( '<strong>Discussion URL:</strong>' ) . '<br/>';
+		} else {
+			$output .= '- ' . __( '<strong>Discussion URLs:</strong>' ) . '<br/>';
+		}
+		$output .= '&nbsp;&nbsp;&nbsp; - ' . wp_kses(
 			/* translators: The discussion URL where the user can find the comment. */
-			sprintf( __( '<strong>Discussion URL:</strong> <a href="%1$s">%1$s</a>', 'glotpress' ), $url ),
+			sprintf( __( '<a href="%1$s">%1$s</a>', 'glotpress' ), $url ),
 			array(
 				'strong' => array(),
 				'a'      => array( 'href' => array() ),
 			)
 		) . '<br/>';
-		if ( array_key_exists( 'locale', $comment_meta ) && ( ! empty( $comment_meta['locale'][0] ) ) ) {
-			/* translators: The translation locale for the comment. */
-			$output .= '- ' . wp_kses( sprintf( __( '<strong>Locale:</strong> %s', 'glotpress' ), $comment_meta['locale'][0] ), array( 'strong' => array() ) ) . '<br/>';
+		foreach ( self::$related_comments as $related_comment ) {
+			$original = self::get_original( $related_comment );
+			$url      = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
+			$output  .= '&nbsp;&nbsp;&nbsp; - ' . wp_kses(
+				/* translators: The discussion URL where the user can find the comment. */
+				sprintf( __( '<a href="%1$s">%1$s</a>', 'glotpress' ), $url ),
+				array(
+					'strong' => array(),
+					'a'      => array( 'href' => array() ),
+				)
+			) . '<br/>';
 		}
-		/* translators: The original string to translate. */
-		$output .= '- ' . wp_kses( sprintf( __( '<strong>Original string:</strong> %s', 'glotpress' ), $original->singular ), array( 'strong' => array() ) ) . '<br/>';
-		if ( array_key_exists( 'translation_id', $comment_meta ) && $comment_meta['translation_id'][0] ) {
-			$translation_id = $comment_meta['translation_id'][0];
-			$translation    = GP::$translation->get( $translation_id );
-			// todo: add the plurals.
-			if ( ! is_null( $translation ) ) {
-				/* translators: The translation string. */
-				$output .= '- ' . wp_kses( sprintf( __( '<strong>Translation string:</strong> %s', 'glotpress' ), $translation->translation_0 ), array( 'strong' => array() ) ) . '<br/>';
-			}
-		}
-		/* translators: The comment made. */
-		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) );
 		$output .= '<br><br>';
 		$output .= esc_html__( 'Have a nice day!', 'glotpress' );
 		$output .= '<br><br>';
@@ -510,6 +546,19 @@ class GP_Notifications {
 		$project    = GP::$project->get( $project_id );
 
 		return $project;
+	}
+
+	/**
+	 * Adds a related comment (to the first one) when the validator makes a bulk rejection.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param WP_Comment $comment The related comment to add.
+	 *
+	 * @return void
+	 */
+	public static function add_related_comment( WP_Comment $comment ) {
+		self::$related_comments[] = $comment;
 	}
 
 	/**

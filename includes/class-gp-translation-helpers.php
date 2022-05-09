@@ -403,8 +403,10 @@ class GP_Translation_Helpers {
 			// For other strings post link to the comment.
 			$reject_comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$post_id = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
-				$this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$post_id    = Helper_Translation_Discussion::get_shadow_post( $single_original_id );
+				$comment_id = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment    = get_comment( $comment_id );
+				GP_Notifications::add_related_comment( $comment );
 			}
 		}
 
