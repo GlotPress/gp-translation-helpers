@@ -14,7 +14,7 @@
 		<?php if ( $locale_slug ) : ?>
 			(<?php echo esc_html( $locale_slug ); ?>)
 			<?php
-			$locale_comments_count = 0;
+			$locale_comments_count    = 0;
 			$count_rejection_feedback = 0;
 			foreach ( $comments as $_comment ) {
 				$comment_locale = get_comment_meta( $_comment->comment_ID, 'locale', true );
@@ -85,15 +85,22 @@
 		2
 	);
 
-	if ( is_user_logged_in() ) {
+	if ( is_user_logged_in() && isset( $post ) ) {
+		if ( $post instanceof Gth_Temporary_Post ) {
+			$_post_id = $post->ID;
+			$post_obj = $post;
+		} else {
+			$post_obj = $post->ID;
+			$_post_id = $post->ID;
+		}
 		comment_form(
-			$args = array(
+			array(
 				'title_reply'         => __( 'Discuss this string' ),
 				/* translators: username */
 				'title_reply_to'      => __( 'Reply to %s' ),
 				'title_reply_before'  => '<h5 id="reply-title" class="discuss-title">',
 				'title_reply_after'   => '</h5>',
-				'id_form'             => 'commentform-' . $post_id,
+				'id_form'             => 'commentform-' . $_post_id,
 				'cancel_reply_link'   => '<span></span>',
 				'format'              => 'html5',
 				'comment_notes_after' => implode(
@@ -105,7 +112,7 @@
 					)
 				),
 			),
-			$post_id
+			$post_obj
 		);
 	} else {
 		/* translators: Log in URL. */

@@ -153,7 +153,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 */
 	public function get_translation_helper_sections( $data ) {
 		$sections = array();
-		foreach ( $this->helpers as $translation_helper ) {
+		foreach ( $this->helpers as $helper => $translation_helper ) {
 			$translation_helper->set_data( $data );
 
 			if ( ! $translation_helper->activate() ) {
@@ -167,6 +167,9 @@ class GP_Route_Translation_Helpers extends GP_Route {
 				'id'                => $translation_helper->get_div_id(),
 				'priority'          => $translation_helper->get_priority(),
 				'has_async_content' => $translation_helper->has_async_content(),
+				'count'             => $translation_helper->get_count(),
+				'load_inline'       => $translation_helper->load_inline(),
+				'helper'            => $helper,
 			);
 		}
 
@@ -228,10 +231,17 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			'project'              => $project,
 		);
 
-		$single_helper = gp_get( 'helper' );
-		$helpers       = $this->helpers;
-		if ( isset( $this->helpers[ $single_helper ] ) ) {
-			$helpers = array( $this->helpers[ $single_helper ] );
+		$selected = gp_get( 'helpers' );
+		if ( ! empty( $selected ) ) {
+			$helpers = array_filter(
+				$this->helpers,
+				function ( $key ) use ( $selected ) {
+					return in_array( $key, (array) $selected, true );
+				},
+				ARRAY_FILTER_USE_KEY
+			);
+		} else {
+			$helpers = $this->helpers;
 		}
 
 		$sections = array();

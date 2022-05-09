@@ -37,11 +37,15 @@ $gp.translation_helpers = (
 				var requestUrl = $gp_translation_helpers_settings.th_url + originalId + '?nohc'; // eslint-disable-line
 
 				if ( which ) {
-					requestUrl = requestUrl + '&helper=' + which;
+					requestUrl = requestUrl + '&helpers[]=' + which;
+				} else {
+					$helpers.find( 'div.helper:not(.loaded) ' ).each( function() {
+						requestUrl = requestUrl + '&helpers[]=' + $( this ).data( 'helper' );
+					} );
 				}
 				requestUrl = requestUrl + '&replytocom=' + replytocom;
 
-				if ( $helpers.find( 'div:first .async-content' ).length ) {
+				if ( $helpers.find( 'div:first' ).is( ':not(.loaded)' ) ) {
 					$helpers.addClass( 'loading' );
 				}
 

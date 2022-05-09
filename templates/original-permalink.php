@@ -128,7 +128,7 @@ gp_tmpl_header();
 			$is_first_class = 'current';
 			foreach ( $sections as $section ) {
 				// TODO: printf.
-				echo "<li class='{$is_first_class}' data-tab='{$section['id']}'>" . esc_html( $section['title'] ) . '<span class="count"></span></li>'; // WPCS: XSS OK.
+				echo "<li class='{$is_first_class}' data-tab='{$section['id']}'>" . esc_html( $section['title'] ) . '<span class="count">' . esc_html( $section['count'] ? ( '(' . $section['count'] . ')' ) : '' ) . '</span></li>'; // phpcs:ignore: XSS OK.
 				$is_first_class = '';
 			}
 			?>
@@ -137,12 +137,15 @@ gp_tmpl_header();
 	<?php
 	$is_first_class = 'current';
 	foreach ( $sections as $section ) {
-		printf( '<div class="%s helper %s" id="%s">', esc_attr( $section['classname'] ), esc_attr( $is_first_class ), esc_attr( $section['id'] ) );
+		printf( '<div class="%s helper %s %s" id="%s" data-helper="%s">', esc_attr( $section['classname'] ), esc_attr( $is_first_class ), $section['load_inline'] ? 'loaded' : '', esc_attr( $section['id'] ), esc_attr( $section['helper'] ) );
 		if ( $section['has_async_content'] ) {
-			echo '<div class="async-content"></div>';
+			echo '<div class="async-content">';
 		}
 
-		echo $section['content']; // WPCS: XSS OK.
+		echo $section['content']; // phpcs:ignore XSS OK.
+		if ( $section['has_async_content'] ) {
+			echo '</div>';
+		}
 		echo '</div>';
 		$is_first_class = '';
 	}
