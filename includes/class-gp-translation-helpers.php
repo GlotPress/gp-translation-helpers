@@ -70,10 +70,10 @@ class GP_Translation_Helpers {
 		gp_enqueue_style( 'gp-discussion-css' );
 
 		$active_theme = wp_get_theme()->Template;
-		if ( 'rosetta' !== $active_theme && 'pub/wporg' !== $active_theme ) {
-			wp_register_style( 'wporg-translation-discussion-css', plugins_url( '/../helpers-assets/css/wporg-translation-discussion.css', __FILE__ ), array(), '0.0.1' );
-			gp_enqueue_style( 'wporg-translation-discussion-css' );
+		if ( 'rosetta' == $active_theme || 'pub/wporg' == $active_theme ) {
+			WPorg_GlotPress_Customization::load_dotorg_custom_css();
 		}
+
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 

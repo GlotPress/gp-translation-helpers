@@ -1,12 +1,13 @@
 #TB_title {
-	padding-top: 1em;
-    padding-bottom: 2.5em;
+	background: #fcfcfc;
+	border-bottom: 1px solid #ddd;
+	height: 29px;
+	padding: 13px 0;
+}
+div#TB_ajaxWindowTitle {
+	font-size: 1.3em;
 }
 
-#TB_ajaxContent form {
-    margin-left: 40px;
-}
-
-div#TB_window {
-    padding-bottom: 20px;
+.modal-comment textarea {
+	width: 97%;
 }
