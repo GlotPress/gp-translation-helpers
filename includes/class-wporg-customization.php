@@ -30,10 +30,10 @@ class WPorg_GlotPress_Customization {
 		add_filter(
 			'gettext_glotpress',
 			function( $translation, $text ) {
-				if ( $text == 'Rejected' ) {
+				if ( 'Rejected' === $text ) {
 					return 'Changes requested';
 				}
-				if ( $text == 'Reject' ) {
+				if ( 'Reject' === $text ) {
 					return 'Request changes';
 				}
 				return $translation;
@@ -45,10 +45,10 @@ class WPorg_GlotPress_Customization {
 		add_filter(
 			'gettext_with_context_glotpress',
 			function( $translation, $text ) {
-				if ( $text == 'rejected' ) {
+				if ( 'rejected' === $text ) {
 					return 'changes requested';
 				}
-				if ( $text == 'Reject' ) {
+				if ( 'Reject' === $text ) {
 					return 'Request changes';
 				}
 				return $translation;
