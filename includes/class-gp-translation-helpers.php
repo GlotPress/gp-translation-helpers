@@ -397,7 +397,7 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$first_comment_id = $this->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
+		$first_comment_id = $this->insert_reject_comment( $reject_comment, $first_original_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
