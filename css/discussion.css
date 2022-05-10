@@ -148,22 +148,21 @@ h6 {
 }
 .modal-reason-title{
 	margin-top: 12px;
-    margin-bottom: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+	margin-bottom: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 #TB_title {
-    background: #f1f1f1;
-    border-bottom: 1px solid #ddd;
-    height: 45px !important;
+	background: #f1f1f1;
+	border-bottom: 1px solid #ddd;
+	height: 45px !important;
 }
 div#TB_ajaxContent {
-	margin-left: auto;
-	margin-right: auto;
+	margin:0 auto;
 }
 div#TB_ajaxWindowTitle {
 	font-size: 1.2em;
-    padding: 8px;
+	padding: 8px;
 }
 .meta summary.feedback-summary{
 	font-size: 1.2em;
