@@ -70,7 +70,7 @@ class GP_Translation_Helpers {
 		gp_enqueue_style( 'gp-discussion-css' );
 
 		$active_theme = wp_get_theme()->Template;
-		if ( 'rosetta' == $active_theme || 'pub/wporg' == $active_theme ) {
+		if ( 'rosetta' == $active_theme ) {
 			WPorg_GlotPress_Customization::load_dotorg_custom_css();
 		}
 
