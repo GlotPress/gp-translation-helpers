@@ -159,6 +159,7 @@ h6 {
 }
 div#TB_ajaxContent {
 	margin:0 auto;
+	height: auto !important;
 }
 div#TB_ajaxWindowTitle {
 	font-size: 1.2em;
