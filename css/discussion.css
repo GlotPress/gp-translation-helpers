@@ -204,3 +204,8 @@ div#TB_ajaxWindowTitle {
 	margin-top: 2em;
 	float: none;
 }
+
+#TB_closeWindowButton:focus .tb-close-icon {
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
