@@ -100,4 +100,46 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 			)
 		);
 	}
+
+	/**
+	 * Test that admin gets an email when a comment is made on a translationby an author
+	 */
+	function test_notify_admin_of_comment() {
+		$admin_id = $this->factory->user->create();
+		$admin    = get_userdata( $admin_id );
+		$admin->set_role( 'administrator' );
+
+		$author_id = $this->factory->user->create();
+		$author    = get_userdata( $author_id );
+		$author->set_role( 'author' );
+
+		$permission = array(
+			'user_id'     => $admin_id,
+			'action'      => 'approve',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+
+		$this->assertEquals( 'administrator', $admin->roles[0] );
+		$this->assertEquals( 'author', $author->roles[0] );
+
+		$that = $this;
+		add_filter(
+			'pre_wp_mail',
+			function ( $empty, $atts ) use ( $that, $admin_id ) {
+				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
+
+				return true;
+			},
+			10,
+			2
+		);
+
+		wp_set_current_user( $author_id);
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+
+		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
+	}
 }
