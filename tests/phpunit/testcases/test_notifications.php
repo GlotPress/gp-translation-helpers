@@ -88,33 +88,4 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 			)
 		);
 	}
-
-	function test_reject_notification() {
-
-		wp_set_current_user( $this->user2_id );
-
-		GP::$validator_permission->create(
-			array(
-				'user_id'     => $this->user2_id,
-				'action'      => 'approve',
-				'project_id'  => $this->set->project_id,
-				'locale_slug' => $this->set->locale,
-				'set_slug'    => $this->set->slug,
-			)
-		);
-		$this->translation->set_status( 'rejected' );
-
-		$translation_helpers = new GP_Translation_Helpers();
-
-		$reject_comment = 'Bad style';
-		$post_id        = Helper_Translation_Discussion::get_shadow_post( $this->translation->original_id );
-		$reject_reason  = '';
-		$locale_slug    = $this->set->locale;
-		$translation_id = $this->translation->id;
-
-		$comment_id = $translation_helpers->insert_reject_comment( $reject_comment, $post_id, $reject_reason, $translation_id, $locale_slug, $_SERVER );
-
-		$this->assertEquals( $this->user2_id, $this->translation->user_id_last_modified );
-
-	}
 }
