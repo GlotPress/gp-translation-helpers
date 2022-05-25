@@ -7,6 +7,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	private $user2_id;
 	private $user3_id;
 	private $translation;
+	private $post_id;
 
 	function setUp() {
 		parent::setUp();
@@ -37,10 +38,21 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 
 		$this->translation->set_status( 'current' );
 		$this->set->update_status_breakdown(); // Refresh the counts of the object but not the cache
+
+		$this->post_id = wp_insert_post(
+			array(
+				'post_type'      => Helper_Translation_Discussion::POST_TYPE,
+				'tax_input'      => array(
+					Helper_Translation_Discussion::LINK_TAXONOMY => array( strval( $this->translation->original_id ) ),
+				),
+				'post_status'    => Helper_Translation_Discussion::POST_STATUS,
+				'post_author'    => 0,
+				'comment_status' => 'open',
+			)
+		);
 	}
 
 	function test_reply_notification() {
-		$post_id = Helper_Translation_Discussion::get_shadow_post( $this->translation->original_id );
 		$that    = $this;
 		$counter = 0;
 		add_filter(
@@ -60,12 +72,12 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 			2
 		);
 
-		$comment_id = $this->create_comment( $this->user1_id, $post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0 );
 
 		wp_set_current_user( $this->user2_id );
-		$comment_reply_id = $this->create_comment( $this->user2_id, $post_id, 'Reply to first comment.', $comment_id );
+		$comment_reply_id = $this->create_comment( $this->user2_id, $this->post_id, 'Reply to first comment.', $comment_id );
 		wp_set_current_user( $this->user3_id );
-		$comment_reply_2_id = $this->create_comment( $this->user3_id, $post_id, 'Reply to first reply.', $comment_reply_id );
+		$comment_reply_2_id = $this->create_comment( $this->user3_id, $this->post_id, 'Reply to first reply.', $comment_reply_id );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_2_id ), null, null );
