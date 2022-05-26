@@ -137,9 +137,52 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 			2
 		);
 
-		wp_set_current_user( $author_id);
+		wp_set_current_user( $author_id );
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
+	}
+
+	/**
+	 * Test that admin and author gets an email when a comment is made on a translationby an author
+	 */
+	function test_notify_admin_author_of_comment_by_subscriber() {
+		$admin_id = $this->user1_id;
+		$admin    = get_user_by( 'id', $admin_id );
+		$admin->set_role( 'administrator' );
+		$this->assertEquals( 'administrator', $admin->roles[0] );
+
+		$author_id = $this->user2_id;
+		$author    = get_user_by( 'id', $author_id );
+		$author->set_role( 'author' );
+		$this->assertEquals( 'author', $author->roles[0] );
+
+		$subscriber_id = $this->user3_id;
+		$subscriber    = get_user_by( 'id', $subscriber_id );
+		$subscriber->set_role( 'subscriber' );
+		$this->assertEquals( 'subscriber', $subscriber->roles[0] );
+
+		$that = $this;
+
+		add_filter(
+			'pre_wp_mail',
+			function ( $empty, $atts ) use ( $that, $admin_id, $author_id ) {
+				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
+				$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
+
+				return true;
+			},
+			10,
+			2
+		);
+
+		wp_set_current_user( $author_id );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+
+		wp_set_current_user( $subscriber_id );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id );
+
+		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
+
 	}
 }
