@@ -100,6 +100,14 @@
 				rejectWithFeedback( rejectData );
 				e.preventDefault();
 			} );
+
+			/**
+			 * Updates the 'Reject' button text in the Meta section when a validator
+			 * adds a comment in the 'Give feedback' area.
+			 *
+			 * If the textarea is empty, the value button text is "Reject". Otherwise,
+			 * is "Request changes"
+			 */
 			$( '.feedback-comment' ).on( 'input', function( e ) {
 				var form = $( this ).closest( 'form' );
 				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
@@ -111,7 +119,26 @@
 				} else {
 					button.html( '<strong>&minus;</strong> Reject' );
 				}
-				e.preventDefault();
+				e.stopImmediatePropagation();
+			} );
+
+			/**
+			 * Updates the 'Reject' button text in the popup window (bulk rejection) when
+			 * a validator adds a comment in the textarea.
+			 *
+			 * If the textarea is empty, the value button text is "Reject". Otherwise,
+			 * is "Request changes"
+			 */
+			$( 'textarea[name="modal_feedback_comment"]' ).on( 'input', function( e ) {
+				var commentText = $( this ).val();
+				var div = $( this ).closest( '#TB_ajaxContent' );
+				var button = $( '#modal-reject-btn', div );
+
+				if ( commentText.trim() !== '' ) {
+					button.html( 'Request changes' );
+				} else {
+					button.html( 'Reject' );
+				}
 				e.stopImmediatePropagation();
 			} );
 		}
