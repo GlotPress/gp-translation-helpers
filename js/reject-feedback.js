@@ -14,7 +14,7 @@
 			'</ul>' +
 			'<div class="feedback-comment">' +
 				'<label>Comment </label>' +
-				'<textarea name="feedback_comment"></textarea>' +
+				'<textarea name="feedback_comment" class="feedback-comment"></textarea>' +
 			'</div>' +
 			'</form>' +
 			'</div>' +
@@ -99,6 +99,20 @@
 				rejectData.is_bulk_reject = true;
 				rejectWithFeedback( rejectData );
 				e.preventDefault();
+			} );
+			$( '.feedback-comment' ).on( 'input', function( e ) {
+				var form = $( this ).closest( 'form' );
+				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
+				var div = $( this ).closest( '.meta' );
+				var button = $( '.reject', div );
+
+				if ( commentText.trim() !== '' ) {
+					button.html( '<strong>&minus;</strong> Request changes' );
+				} else {
+					button.html( '<strong>&minus;</strong> Reject' );
+				}
+				e.preventDefault();
+				e.stopImmediatePropagation();
 			} );
 		}
 	);
