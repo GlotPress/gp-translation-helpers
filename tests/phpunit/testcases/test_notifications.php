@@ -95,7 +95,8 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 				'comment_meta'         => array(
 					'reject_reason'  => 1,
 					'translation_id' => $this->translation->id,
-					'locale'         => 'es',
+					'locale'         => $this->set->locale,
+					'comment_topic'  => 'context',
 				),
 			)
 		);
@@ -152,6 +153,15 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
+		$permission = array(
+			'user_id'     => $admin_id,
+			'action'      => 'admin',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+
 		$author_id = $this->user2_id;
 		$author    = get_user_by( 'id', $author_id );
 		$author->set_role( 'author' );
@@ -162,15 +172,20 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$subscriber->set_role( 'subscriber' );
 		$this->assertEquals( 'subscriber', $subscriber->roles[0] );
 
-		$that = $this;
-
+		$that    = $this;
+		$counter = 0;
 		add_filter(
 			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, $admin_id, $author_id ) {
+			function ( $empty, $atts ) use ( $that, &$counter, $admin_id, $author_id ) {
+				if ( $counter === 0 ) {
+					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
+					$counter++;
+					return true;
+				}
 				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
-				$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
 
 				return true;
+
 			},
 			10,
 			2
