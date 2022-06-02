@@ -106,24 +106,24 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that admin gets an email when a comment is made on a translationby an author
 	 */
 	function test_notify_admin_of_comment() {
-		$admin_id = $this->factory->user->create();
-		$admin    = get_userdata( $admin_id );
+		$admin_id = $this->user1_id;
+		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
-
-		$author_id = $this->factory->user->create();
-		$author    = get_userdata( $author_id );
-		$author->set_role( 'author' );
+		$this->assertEquals( 'administrator', $admin->roles[0] );
 
 		$permission = array(
 			'user_id'     => $admin_id,
-			'action'      => 'approve',
+			'action'      => 'admin',
 			'project_id'  => $this->set->project_id,
 			'locale_slug' => $this->set->locale,
 			'set_slug'    => $this->set->slug,
 		);
 		GP::$validator_permission->create( $permission );
 
-		$this->assertEquals( 'administrator', $admin->roles[0] );
+		$author_id = $this->factory->user->create();
+		$author    = get_userdata( $author_id );
+		$author->set_role( 'author' );
+
 		$this->assertEquals( 'author', $author->roles[0] );
 
 		$that = $this;
