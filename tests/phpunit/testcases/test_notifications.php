@@ -180,12 +180,10 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 				if ( $counter === 0 ) {
 					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
 					$counter++;
-					return true;
+				} else {
+					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
 				}
-				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
-
 				return true;
-
 			},
 			10,
 			2
