@@ -198,4 +198,61 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
 	}
+
+	/**
+	 * Test that two admins get an email when a comment is made on a translation by an author
+	 */
+	function test_notify_two_admins_of_comment_by_author() {
+		$admin_1_id = $this->user1_id;
+		$admin      = get_user_by( 'id', $admin_1_id );
+		$admin->set_role( 'administrator' );
+		$this->assertEquals( 'administrator', $admin->roles[0] );
+
+		$permission = array(
+			'user_id'     => $admin_1_id,
+			'action'      => 'admin',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+
+		$admin_2_id = $this->user2_id;
+		$admin      = get_user_by( 'id', $admin_2_id );
+		$admin->set_role( 'administrator' );
+		$this->assertEquals( 'administrator', $admin->roles[0] );
+
+		$permission = array(
+			'user_id'     => $admin_2_id,
+			'action'      => 'admin',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+
+		$author_id = $this->user3_id;
+		$author    = get_user_by( 'id', $author_id );
+		$author->set_role( 'author' );
+		$this->assertEquals( 'author', $author->roles[0] );
+
+		$that = $this;
+		add_filter(
+			'pre_wp_mail',
+			function ( $empty, $atts ) use ( $that, $admin_1_id, $admin_2_id ) {
+					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_1_id )->data->user_email );
+					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $admin_2_id )->data->user_email );
+
+				return true;
+			},
+			10,
+			2
+		);
+
+		wp_set_current_user( $author_id );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+
+		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
+
+	}
 }
