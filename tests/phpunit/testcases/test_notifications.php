@@ -145,7 +145,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	}
 
 	/**
-	 * Test that admin and author gets an email when a comment is made on a translationby an author
+	 * Test that admin and author gets an email when a subscriber replies to a comment made by an author
 	 */
 	function test_notify_admin_author_of_comment_by_subscriber() {
 		$admin_id = $this->user1_id;
