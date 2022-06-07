@@ -255,4 +255,72 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
 
 	}
+
+	/**
+	 * Test that subscriber and author gets an email when an admin replies to a comment made by a subscriber
+	 */
+	function test_notify_comment_author_and_subscriber_of_reply_by_admin() {
+		$admin_id = $this->user1_id;
+		$admin    = get_user_by( 'id', $admin_id );
+		$admin->set_role( 'administrator' );
+		$this->assertEquals( 'administrator', $admin->roles[0] );
+
+		$permission = array(
+			'user_id'     => $admin_id,
+			'action'      => 'admin',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+
+		$author_id = $this->user2_id;
+		$author    = get_user_by( 'id', $author_id );
+		$author->set_role( 'author' );
+		$this->assertEquals( 'author', $author->roles[0] );
+
+		$subscriber_id = $this->user3_id;
+		$subscriber    = get_user_by( 'id', $subscriber_id );
+		$subscriber->set_role( 'subscriber' );
+		$this->assertEquals( 'subscriber', $subscriber->roles[0] );
+
+		$admin_2_id = $this->factory->user->create();
+		$admin_2    = get_user_by( 'id', $admin_2_id );
+		$admin_2->set_role( 'administrator' );
+		$this->assertEquals( 'administrator', $admin_2->roles[0] );
+
+		$permission = array(
+			'user_id'     => $admin_2_id,
+			'action'      => 'admin',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+
+		$that = $this;
+		add_filter(
+			'pre_wp_mail',
+			function ( $empty, $atts ) use ( $that, $author_id, $subscriber_id ) {
+					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
+					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $subscriber_id )->data->user_email );
+
+				return true;
+			},
+			10,
+			2
+		);
+
+		wp_set_current_user( $author_id );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+
+		wp_set_current_user( $subscriber_id );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id );
+
+		wp_set_current_user( $admin_id );
+		$subscriber_comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to subscriber\'s reply.', $comment_reply_id );
+
+		do_action( 'rest_after_insert_comment', get_comment( $subscriber_comment_reply_id ), null, null );
+
+	}
 }
