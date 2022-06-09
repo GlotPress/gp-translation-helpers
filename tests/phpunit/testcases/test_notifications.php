@@ -337,5 +337,5 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
 	}
-	
+
 }
