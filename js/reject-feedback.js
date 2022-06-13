@@ -101,26 +101,40 @@
 				e.preventDefault();
 			} );
 
-			/**
-			 * Updates the 'Reject' button text in the Meta section when a validator
-			 * adds a comment in the 'Give feedback' area.
-			 *
-			 * If the textarea is empty, the value button text is "Reject". Otherwise,
-			 * is "Request changes"
-			 */
-			$( '.feedback-comment' ).on( 'input', function( e ) {
-				var form = $( this ).closest( 'form' );
-				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
-				var div = $( this ).closest( '.meta' );
-				var button = $( '.reject', div );
-
-				if ( commentText.trim() !== '' ) {
-					button.html( '<strong>&minus;</strong> Request changes' );
-				} else {
-					button.html( '<strong>&minus;</strong> Reject' );
-				}
-				e.stopImmediatePropagation();
+			$( '.feedback-reason-list' ).on( 'click', function( e ) {
+				toggleButtons( $( this ), e );
 			} );
+			$( '.feedback-comment' ).on( 'input', function( e ) {
+				toggleButtons( $( this ), e );
+			} );
+
+			/**
+			 * Hide and show one of each two buttons: "Reject" and "Request changes".
+			 *
+			 * If the user has checked some reason or has entered some text in the textarea,
+			 * this function hides the "Reject" button and shows the "Request changes" one.
+			 * Otherwise, does the opposite.
+			 *
+			 * @param {Object}         thisObj The object that dispatches this call.
+			 * @param {document#event} event   The event.
+			 */
+			function toggleButtons( thisObj, event ) {
+				var form = thisObj.closest( 'form' );
+				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
+				var div = thisObj.closest( '.meta' );
+				var rejectButton = $( '.reject', div );
+				var changesRequestedtButton = $( '.changes_requested', div );
+				var numberOfCheckedReasons = form.find( 'input[name="feedback_reason"]:checked' ).length;
+
+				if ( commentText.trim() !== '' || numberOfCheckedReasons ) {
+					rejectButton.hide();
+					changesRequestedtButton.show();
+				} else {
+					rejectButton.show();
+					changesRequestedtButton.hide();
+				}
+				event.stopImmediatePropagation();
+			}
 
 			/**
 			 * Updates the 'Reject' button text in the popup window (bulk rejection) when
@@ -199,7 +213,7 @@
 				if ( rejectData.is_bulk_reject ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				} else {
-					$gp.editor.set_status( button, 'rejected' );
+					$gp.editor.set_status( button, 'changes_requested' );
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
 					div.find( 'textarea[name="feedback_comment"]' ).val( '' );
 				}
