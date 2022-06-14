@@ -859,7 +859,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( $reject_reason ) :
 				?>
-				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> was rejected with <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'a reason that is being discussed here' ); ?></a>.
+				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> was requested changes with <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'a reason that is being discussed here' ); ?></a>.
 			<?php else : ?>
 				<a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
 			<?php endif; ?>
@@ -867,7 +867,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 			<?php comment_text(); ?>
 			<?php if ( $reject_reason ) : ?>
 			<p>
-				<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
+				<?php echo esc_html( _n( 'Requested Changes Reason: ', 'Requested Changes Reasons: ', count( $reject_reason ) ) ); ?>
 				<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
 			</p>
 			<?php endif; ?>

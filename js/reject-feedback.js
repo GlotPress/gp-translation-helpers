@@ -30,6 +30,7 @@
 					'<textarea name="modal_feedback_comment"></textarea>' +
 			'</div>' +
 			'<button id="modal-reject-btn" class="modal-btn">Reject</button>' +
+			'<button id="modal-request_changes-btn"  style="display: none;" class="modal-btn">Request changes</button>' +
 			'</form>' +
 			'</div>';
 
@@ -40,7 +41,7 @@
 
 			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
 
-			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
+			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar-bottom .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					var selectedRow = $( this ).parents( 'tr.preview' );
 					if ( selectedRow.hasClass( 'status-current' ) ) {
@@ -73,7 +74,21 @@
 				}
 			} );
 
-			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
+			/**
+			 * Changes the value for the rejected status in the top toolbar to "changes requested"
+			 *
+			 * @param {Object} thisObj The object that dispatches this call.
+			 */
+			function updateBulkRejectStatus( thisObj ) {
+				var form = thisObj.closest( 'form' );
+				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
+				var numberOfCheckedReasons = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
+				if ( commentText || numberOfCheckedReasons ) {
+					$( 'form#bulk-actions-toolbar-top  option[value="reject"]' ).attr( 'value', 'changes_requested' ).text( 'Changes requested' );
+				}
+			}
+
+			$( 'body' ).on( 'click', '#modal-reject-btn, #modal-request_changes-btn', function( e ) {
 				var comment = '';
 				var rejectReason = [];
 				var rejectData = {};
@@ -86,7 +101,7 @@
 				);
 
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
-
+				updateBulkRejectStatus( $( this ) );
 				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				}
@@ -109,7 +124,7 @@
 			} );
 
 			/**
-			 * Hide and show one of each two buttons: "Reject" and "Request changes".
+			 * Hide and show one of each two buttons in the individual rejection: "Reject" and "Request changes".
 			 *
 			 * If the user has checked some reason or has entered some text in the textarea,
 			 * this function hides the "Reject" button and shows the "Request changes" one.
@@ -136,25 +151,40 @@
 				event.stopImmediatePropagation();
 			}
 
-			/**
-			 * Updates the 'Reject' button text in the popup window (bulk rejection) when
-			 * a validator adds a comment in the textarea.
-			 *
-			 * If the textarea is empty, the value button text is "Reject". Otherwise,
-			 * is "Request changes"
-			 */
-			$( 'textarea[name="modal_feedback_comment"]' ).on( 'input', function( e ) {
-				var commentText = $( this ).val();
-				var div = $( this ).closest( '#TB_ajaxContent' );
-				var button = $( '#modal-reject-btn', div );
-
-				if ( commentText.trim() !== '' ) {
-					button.html( 'Request changes' );
-				} else {
-					button.html( 'Reject' );
-				}
-				e.stopImmediatePropagation();
+			$( '.modal-item' ).on( 'click', function( e ) {
+				toggleModalButtons( $( this ), e );
 			} );
+			$( 'textarea[name="modal_feedback_comment"]' ).on( 'input', function( e ) {
+				toggleModalButtons( $( this ), e );
+			} );
+
+			/**
+			 * Hide and show one of each two buttons in the reject modal: "Reject" and "Request changes".
+			 *
+			 * In the modal, if the user has checked some reason or has entered some text in the textarea,
+			 * this function hides the "Reject" button and shows the "Request changes" one.
+			 * Otherwise, does the opposite.
+			 *
+			 * @param {Object}         thisObj The object that dispatches this call.
+			 * @param {document#event} event   The event.
+			 */
+			function toggleModalButtons( thisObj, event ) {
+				var form = thisObj.closest( 'form' );
+				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
+				var div = thisObj.closest( '#TB_ajaxContent' );
+				var rejectButton = $( '#modal-reject-btn', div );
+				var changesRequestedtButton = $( '#modal-request_changes-btn', div );
+				var numberOfCheckedReasons = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
+
+				if ( commentText.trim() !== '' || numberOfCheckedReasons ) {
+					rejectButton.hide();
+					changesRequestedtButton.show();
+				} else {
+					rejectButton.show();
+					changesRequestedtButton.hide();
+				}
+				event.stopImmediatePropagation();
+			}
 		}
 	);
 
