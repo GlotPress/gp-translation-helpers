@@ -116,6 +116,9 @@ class GP_Notifications {
 		$translation_id = $comment_meta['translation_id'];
 		$translation    = GP::$translation->get( $translation_id );
 		$translator     = get_user_by( 'id', $translation->user_id_last_modified );
+		if ( false === $translator ) {
+			$translator = get_user_by( 'id', $translation->user_id );
+		}
 		self::send_emails( $comment, $comment_meta, array( $translator->user_email ) );
 	}
 
