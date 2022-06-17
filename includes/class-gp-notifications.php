@@ -551,7 +551,7 @@ class GP_Notifications {
 				)
 			);
 
-	return ! empty( $gp_posts ) ? $gp_posts[0]->ID : 0;
+		return ! empty( $gp_posts ) ? $gp_posts[0]->ID : 0;
 	}
 
 	/**
