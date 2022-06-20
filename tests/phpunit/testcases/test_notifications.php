@@ -102,7 +102,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		);
 	}
 
-	function make_admin( $user_id ) {
+	function make_gp_admin( $user_id ) {
 		$permission = array(
 			'user_id'     => $user_id,
 			'action'      => 'admin',
@@ -122,7 +122,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
-		$this->make_admin( $admin_id );
+		$this->make_gp_admin( $admin_id );
 
 		$author_id = $this->factory->user->create();
 		$author    = get_userdata( $author_id );
@@ -157,7 +157,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
-		$this->make_admin( $admin_id );
+		$this->make_gp_admin( $admin_id );
 
 		$author_id = $this->user2_id;
 		$author    = get_user_by( 'id', $author_id );
@@ -205,14 +205,14 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
-		$this->make_admin( $admin_1_id );
+		$this->make_gp_admin( $admin_1_id );
 
 		$admin_2_id = $this->user2_id;
 		$admin      = get_user_by( 'id', $admin_2_id );
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
-		$this->make_admin( $admin_2_id );
+		$this->make_gp_admin( $admin_2_id );
 
 		$author_id = $this->user3_id;
 		$author    = get_user_by( 'id', $author_id );
@@ -248,7 +248,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
-		$this->make_admin( $admin_id );
+		$this->make_gp_admin( $admin_id );
 
 		$author_id = $this->user2_id;
 		$author    = get_user_by( 'id', $author_id );
@@ -265,7 +265,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin_2->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin_2->roles[0] );
 
-		$this->make_admin( $admin_2_id );
+		$this->make_gp_admin( $admin_2_id );
 
 		$that = $this;
 		add_filter(
@@ -302,14 +302,14 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$admin->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin->roles[0] );
 
-		$this->make_admin( $admin_id );
+		$this->make_gp_admin( $admin_id );
 
 		$admin_2_id = $this->factory->user->create();
 		$admin_2    = get_user_by( 'id', $admin_2_id );
 		$admin_2->set_role( 'administrator' );
 		$this->assertEquals( 'administrator', $admin_2->roles[0] );
 
-		$this->make_admin( $admin_2_id );
+		$this->make_gp_admin( $admin_2_id );
 
 		$author_id = $this->user2_id;
 		$author    = get_user_by( 'id', $author_id );
