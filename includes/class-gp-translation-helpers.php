@@ -397,14 +397,21 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$save_feedback = $this->insert_reject_comment( $reject_comment, $first_original_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
+		$first_comment_id = $this->insert_reject_comment( $reject_comment, $first_original_id, $reject_reason, $first_translation_id, $locale_slug, $_SERVER );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
-			$reject_comment = get_comment_link( $save_feedback );
+			$reject_comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$this->insert_reject_comment( $reject_comment, $single_original_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment_id = $this->insert_reject_comment( $reject_comment, $single_original_id, $reject_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER );
+				$comment    = get_comment( $comment_id );
+				GP_Notifications::add_related_comment( $comment );
 			}
+		}
+
+		if ( $first_comment_id ) {
+			$comment = get_comment( $first_comment_id );
+			GP_Notifications::init( $comment, null, null );
 		}
 
 		wp_send_json_success();
