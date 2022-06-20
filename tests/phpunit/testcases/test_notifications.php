@@ -52,6 +52,55 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * Create a comment on a post
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int    $user_id      The user ID.
+	 * @param int    $post_id  The post ID.
+	 * @param string $comment_content  Body of comment.
+	 * @param int    $comment_parent_id The ID of the parent comment or `0` if it doesn't exist.
+	 */
+	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id ) {
+		return wp_insert_comment(
+			array(
+				'comment_content'      => $comment_content,
+				'comment_post_ID'      => $post_id,
+				'comment_parent'       => $comment_parent_id,
+				'comment_author_email' => get_user_by( 'id', $user_id )->data->user_email,
+				'user_id'              => $user_id,
+				'comment_meta'         => array(
+					'reject_reason'  => 1,
+					'translation_id' => $this->translation->id,
+					'locale'         => $this->set->locale,
+					'comment_topic'  => 'context',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Make a user a GlotPress admin
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int $user_id    The user ID.
+	 */
+	function make_gp_admin( $user_id ) {
+		$permission = array(
+			'user_id'     => $user_id,
+			'action'      => 'admin',
+			'project_id'  => $this->set->project_id,
+			'locale_slug' => $this->set->locale,
+			'set_slug'    => $this->set->slug,
+		);
+		GP::$validator_permission->create( $permission );
+	}
+
+	/**
+	 * Test that users who participate in a comment thread gets notification for new replies
+	 */
 	function test_reply_notification() {
 		$that    = $this;
 		$counter = 0;
@@ -84,37 +133,8 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 
 	}
 
-	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id ) {
-		return wp_insert_comment(
-			array(
-				'comment_content'      => $comment_content,
-				'comment_post_ID'      => $post_id,
-				'comment_parent'       => $comment_parent_id,
-				'comment_author_email' => get_user_by( 'id', $user_id )->data->user_email,
-				'user_id'              => $user_id,
-				'comment_meta'         => array(
-					'reject_reason'  => 1,
-					'translation_id' => $this->translation->id,
-					'locale'         => $this->set->locale,
-					'comment_topic'  => 'context',
-				),
-			)
-		);
-	}
-
-	function make_gp_admin( $user_id ) {
-		$permission = array(
-			'user_id'     => $user_id,
-			'action'      => 'admin',
-			'project_id'  => $this->set->project_id,
-			'locale_slug' => $this->set->locale,
-			'set_slug'    => $this->set->slug,
-		);
-		GP::$validator_permission->create( $permission );
-	}
-
 	/**
-	 * Test that admin gets an email when a comment is made on a translationby an author
+	 * Test that admin gets an email when a comment is made on a translation by an author
 	 */
 	function test_notify_admin_of_comment() {
 		$admin_id = $this->user1_id;
