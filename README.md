@@ -79,17 +79,17 @@ npm run lint:js-fix
 ## Unit Testing
 Ensure you are in the gp-translation-helpers plugin directory.
 
-Install all dependencies 
+Install all dependencies by running;
 ```
 composer install
 ```
 
-Set up test database
+Run the command below up test database
 ```
 tests/phpunit/bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]
 ```
 
-To run the unit tests run 
+To run the unit tests run;
 ```
 composer test
 ```
