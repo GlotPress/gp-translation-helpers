@@ -76,7 +76,23 @@ To automatically try to resolve the JavaScript code standards errors, use:
 ```
 npm run lint:js-fix
 ```
+## Unit Testing
+Ensure you are in the gp-translation-helpers plugin directory.
 
+Install all dependencies 
+```
+composer install
+```
+
+Set up test database
+```
+tests/phpunit/bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]
+```
+
+To run the unit tests run 
+```
+composer test
+```
 ## Changelog
 
 ### [0.0.2] Not released
