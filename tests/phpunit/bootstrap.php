@@ -36,7 +36,12 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 // Give access to tests_add_filter() function.
 require_once "{$_tests_dir}/includes/functions.php";
 
-define( 'EXTERNAL_GP_PATH', dirname( __DIR__, 3 ) . '/GlotPress-WP/' );
+if ( getenv( 'GLOTPRESS_PATH' ) ) {
+	define( 'EXTERNAL_GP_PATH', getenv( 'GLOTPRESS_PATH' ) );
+} else {
+	define( 'EXTERNAL_GP_PATH', dirname( __DIR__, 3 ) . '/glotpress/' );
+}
+
 /**
  * Manually load the plugin being tested.
  */
