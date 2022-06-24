@@ -22,7 +22,7 @@ if ( ! defined( 'GP_TESTS_PERMALINK_STRUCTURE_WITH_TRAILING_SLASH' ) ) {
 	define( 'GP_TESTS_PERMALINK_STRUCTURE_WITH_TRAILING_SLASH', '/%postname%/' );
 }
 
-$_tests_dir = getenv( 'WP_TESTS_DIR' );
+$_tests_dir = getenv( 'WP_TESTS_DIR' ) . '/wordpress-tests-lib';
 
 if ( ! $_tests_dir ) {
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
