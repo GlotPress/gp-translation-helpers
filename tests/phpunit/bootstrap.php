@@ -42,7 +42,10 @@ if ( getenv( 'GLOTPRESS_PATH' ) ) {
 } else {
 	define( 'EXTERNAL_GP_PATH', dirname( __DIR__, 3 ) . '/glotpress/' );
 }
-
+if ( ! file_exists( EXTERNAL_GP_PATH . '/glotpress.php' ) ) {
+	echo 'Could not find ' . EXTERNAL_GP_PATH . '/glotpress.php Please specify the path to your GlotPress install with the GLOTPRESS_PATH environment variable.' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		exit( 1 );
+}
 /**
  * Manually load the plugin being tested.
  */
