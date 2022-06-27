@@ -84,14 +84,22 @@ Install all dependencies by running;
 composer install
 ```
 
-Run the command below up test database
+Run the command below up to setup default WordPress core and WordPress tests installation directories and test database.
 ```
 tests/phpunit/bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]
+```
+To define your own custom directories for the installation of WordPress Core and WordPress tests, use the command below, replacing the `/path/to/custom/directory` with the correct path for each variable ;
+```
+WP_TESTS_DIR=/path/to/custom/directory WP_CORE_DIR=/path/to/custom/directory tests/phpunit/bin/install-wp-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]
 ```
 
 To run the unit tests run;
 ```
 composer test
+```
+To define the path to your GlotPress installation if it's different from the default, run the command below and replace /path/to/GlotPress/installation with the correct path to your GlotPress installation ensure it ends with a `/`;
+```
+GLOTPRESS_PATH=/path/to/GlotPress/ composer test
 ```
 ## Changelog
 
