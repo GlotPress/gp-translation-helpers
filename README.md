@@ -97,9 +97,9 @@ To run the unit tests run;
 ```
 composer test
 ```
-To define the path to your GlotPress installation if it's different from the default, run the command below and replace /path/to/GlotPress/installation with the correct path to your GlotPress installation ensure it ends with a `/`;
+To define the path to your GlotPress installation if it's different from the default, run the command below and replace /path/to/GlotPress/installation with the correct path to your GlotPress installation;
 ```
-GLOTPRESS_PATH=/path/to/GlotPress/ composer test
+GLOTPRESS_PATH=/path/to/GlotPress composer test
 ```
 ## Changelog
 
