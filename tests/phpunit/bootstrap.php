@@ -50,7 +50,7 @@ if ( ! file_exists( EXTERNAL_GP_PATH . '/glotpress.php' ) ) {
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require trailingslashit( EXTERNAL_GP_PATH ) . 'glotpress.php';
+	require EXTERNAL_GP_PATH . '/glotpress.php';
 	require dirname( __DIR__, 2 ) . '/gp-translation-helpers.php';
 }
 
