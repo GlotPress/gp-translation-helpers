@@ -100,35 +100,33 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that users who participate in a comment thread gets notification for new replies
 	 */
 	function test_reply_notification() {
-		$that    = $this;
-		$counter = 0;
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, &$counter ) {
-				if ( $counter === 0 ) {
-					$counter++;
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
-				} else {
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
-					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $this->user2_id )->data->user_email );
-				}
-				return true;
-
-			},
-			10,
-			2
-		);
+		$pre_wp_mail = new MockAction;
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0 );
 
 		wp_set_current_user( $this->user2_id );
 		$comment_reply_id = $this->create_comment( $this->user2_id, $this->post_id, 'Reply to first comment.', $comment_id );
+		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
+
+		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
+		$all_args  = $pre_wp_mail->get_args();
+		$first_call_args = $all_args[0];
+		$atts = $first_call_args[1];
+
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
+
 		wp_set_current_user( $this->user3_id );
 		$comment_reply_2_id = $this->create_comment( $this->user3_id, $this->post_id, 'Reply to first reply.', $comment_reply_id );
-
-		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_2_id ), null, null );
 
+		$this->assertSame( 2, $pre_wp_mail->get_call_count() );
+		$all_args  = $pre_wp_mail->get_args();
+		$second_call_args = $all_args[1];
+		$atts = $second_call_args[1];
+
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
+		$this->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $this->user2_id )->data->user_email );
 	}
 
 	/**
