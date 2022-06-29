@@ -12,9 +12,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	function setUp() {
 		parent::setUp();
 
-		$object_type    = GP::$validator_permission->object_type;
 		$this->user1_id = $this->factory->user->create();
-		$user1_id_data  = get_user_by( 'id', $this->user1_id );
 
 		wp_set_current_user( $this->user1_id );
 
