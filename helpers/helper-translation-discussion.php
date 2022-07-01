@@ -94,6 +94,17 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 		add_filter( 'comment_reply_link', array( $this, 'comment_reply_link' ), 10, 4 );
 		add_filter( 'wp_ajax_create_shadow_post', array( $this, 'ajax_create_shadow_post' ) );
+		add_filter(
+			'gp_tmpl_load_locations',
+			function( $locations, $template, $args, $template_path ) {
+				if ( 'translation-row-editor-meta-status' === $template ) {
+					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/overrides/' );
+				}
+				return $locations;
+			},
+			60,
+			4
+		);
 	}
 
 	/**
