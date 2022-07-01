@@ -72,6 +72,20 @@ class GP_Translation_Helpers {
 
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
+		add_filter(
+			'gp_tmpl_load_locations',
+			function( $locations, $template, $args, $template_path ) {
+				if ( $template == 'translation-row-editor-meta-status' ) {
+					$template_path = $custom_template = dirname( dirname( __FILE__ ) ) . '/gp-templates/';
+					include_once $custom_template . 'translation-row-editor-meta-status.php';
+					$locations[] = $custom_template . 'translation-row-editor-meta-status.php';
+				}
+
+				return $locations;
+			},
+			10,
+			4
+		);
 
 		$this->helpers = self::load_helpers();
 	}
