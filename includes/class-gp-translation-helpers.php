@@ -76,14 +76,12 @@ class GP_Translation_Helpers {
 			'gp_tmpl_load_locations',
 			function( $locations, $template, $args, $template_path ) {
 				if ( 'translation-row-editor-meta-status' === $template ) {
-					$template_path = $custom_template = dirname( dirname( __FILE__ ) ) . '/gp-templates/';
-					include_once $custom_template . 'translation-row-editor-meta-status.php';
-					$locations[] = $custom_template . 'translation-row-editor-meta-status.php';
+					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
 				}
 
 				return $locations;
 			},
-			10,
+			60,
 			4
 		);
 
