@@ -100,7 +100,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that users who participate in a comment thread gets notification for new replies
 	 */
 	function test_reply_notification() {
-		$pre_wp_mail = new MockAction;
+		$pre_wp_mail = new MockAction();
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0 );
@@ -110,9 +110,9 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
 		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
-		$all_args  = $pre_wp_mail->get_args();
+		$all_args        = $pre_wp_mail->get_args();
 		$first_call_args = $all_args[0];
-		$atts = $first_call_args[1];
+		$atts            = $first_call_args[1];
 
 		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
 
@@ -121,9 +121,9 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_2_id ), null, null );
 
 		$this->assertSame( 2, $pre_wp_mail->get_call_count() );
-		$all_args  = $pre_wp_mail->get_args();
+		$all_args         = $pre_wp_mail->get_args();
 		$second_call_args = $all_args[1];
-		$atts = $second_call_args[1];
+		$atts             = $second_call_args[1];
 
 		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
 		$this->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $this->user2_id )->data->user_email );
@@ -146,22 +146,21 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 
 		$this->assertEquals( 'author', $author->roles[0] );
 
-		$that = $this;
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, $admin_id ) {
-				$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
-
-				return true;
-			},
-			10,
-			2
-		);
+		$pre_wp_mail = new MockAction();
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
+
+		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
+		$all_args        = $pre_wp_mail->get_args();
+		$first_call_args = $all_args[0];
+		$atts            = $first_call_args[1];
+
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
+
 	}
 
 	/**
@@ -185,22 +184,8 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$subscriber->set_role( 'subscriber' );
 		$this->assertEquals( 'subscriber', $subscriber->roles[0] );
 
-		$that    = $this;
-		$counter = 0;
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, &$counter, $admin_id, $author_id ) {
-				if ( $counter === 0 ) {
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
-					$counter++;
-				} else {
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
-				}
-				return true;
-			},
-			10,
-			2
-		);
+		$pre_wp_mail = new MockAction();
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
@@ -210,6 +195,16 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
+		$this->assertSame( 2, $pre_wp_mail->get_call_count() );
+		$all_args        = $pre_wp_mail->get_args();
+		$first_call_args = $all_args[0];
+		$atts            = $first_call_args[1];
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
+
+		$all_args         = $pre_wp_mail->get_args();
+		$second_call_args = $all_args[1];
+		$atts             = $second_call_args[1];
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_id )->data->user_email );
 	}
 
 	/**
@@ -235,24 +230,20 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$author->set_role( 'author' );
 		$this->assertEquals( 'author', $author->roles[0] );
 
-		$that = $this;
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, $admin_1_id, $admin_2_id ) {
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_1_id )->data->user_email );
-					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $admin_2_id )->data->user_email );
-
-				return true;
-			},
-			10,
-			2
-		);
+		$pre_wp_mail = new MockAction();
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
 
+		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
+		$all_args        = $pre_wp_mail->get_args();
+		$first_call_args = $all_args[0];
+		$atts            = $first_call_args[1];
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $admin_1_id )->data->user_email );
+		$this->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $admin_2_id )->data->user_email );
 	}
 
 	/**
@@ -283,18 +274,8 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 
 		$this->make_gp_admin( $admin_2_id );
 
-		$that = $this;
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, $author_id, $subscriber_id ) {
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
-					$that->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $subscriber_id )->data->user_email );
-
-				return true;
-			},
-			10,
-			2
-		);
+		$pre_wp_mail = new MockAction();
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
@@ -306,6 +287,14 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$subscriber_comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to subscriber\'s reply.', $comment_reply_id );
 
 		do_action( 'rest_after_insert_comment', get_comment( $subscriber_comment_reply_id ), null, null );
+
+		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
+		$all_args        = $pre_wp_mail->get_args();
+		$first_call_args = $all_args[0];
+		$atts            = $first_call_args[1];
+
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
+		$this->assertEquals( $atts['headers'][2], 'Bcc: ' . get_user_by( 'id', $subscriber_id )->data->user_email );
 
 	}
 
@@ -332,17 +321,8 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$author->set_role( 'author' );
 		$this->assertEquals( 'author', $author->roles[0] );
 
-		$that = $this;
-		add_filter(
-			'pre_wp_mail',
-			function ( $empty, $atts ) use ( $that, $author_id, $admin_id ) {
-					$that->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
-
-				return true;
-			},
-			10,
-			2
-		);
+		$pre_wp_mail = new MockAction();
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
@@ -351,6 +331,13 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to comment.', $comment_id );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
+
+		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
+		$all_args        = $pre_wp_mail->get_args();
+		$first_call_args = $all_args[0];
+		$atts            = $first_call_args[1];
+
+		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
 
 	}
 
