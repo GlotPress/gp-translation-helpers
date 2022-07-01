@@ -38,7 +38,7 @@
 			// Remove click event added to <summary> by wporg-gp-customizations plugin
 			$( $gp.editor.table ).off( 'click', 'summary' );
 
-			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
+			// $( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
 
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
