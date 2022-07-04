@@ -1,0 +1,15 @@
+<phpunit
+	bootstrap="tests/phpunit/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	verbose="true"
+	>
+	<testsuites>
+		<testsuite name="gp-translation-helpers">
+			<directory prefix="test_" suffix=".php">./tests/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
