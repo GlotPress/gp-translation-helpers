@@ -77,6 +77,8 @@ class GP_Translation_Helpers {
 			function( $locations, $template, $args, $template_path ) {
 				if ( 'translation-row-editor-meta-status' === $template ) {
 					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
+				} else {
+					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';
 				}
 
 				return $locations;

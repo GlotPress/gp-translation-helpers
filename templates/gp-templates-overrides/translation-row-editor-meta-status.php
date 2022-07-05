@@ -8,7 +8,7 @@
 
 ?>
 <dl>
-	<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars(), dirname( dirname( __FILE__ ) ) ); ?>
+	<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
 	<dt><?php _e( 'Status:', 'glotpress' ); ?></dt>
 	<dd>
 		<?php echo display_status( $translation->translation_status ); ?>
