@@ -1,4 +1,6 @@
-<?php if ( ! $can_approve_translation || ! $translation->translation_status ) return; ?>
+<?php if ( ! $can_approve_translation || ! $translation->translation_status ) {
+	return;
+}  ?>
 <details>
 	<summary class="feedback-summary">Give feedback</summary>
 	<div id="feedback-form">
