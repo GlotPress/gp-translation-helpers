@@ -11,7 +11,7 @@
 				$reject_reasons = Helper_Translation_Discussion::get_reject_reasons();
 			foreach ( $reject_reasons as $key => $reason ) :
 				?>
-					<li><label><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $reason ); ?></label></li>
+					<li><label><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>" /><?php echo esc_html( $reason ); ?></label></li>
 			<?php endforeach; ?>
 			</ul>
 			<div class="feedback-comment">
