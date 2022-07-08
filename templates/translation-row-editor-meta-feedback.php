@@ -7,12 +7,12 @@
 		<form>
 			<h3 class="feedback-reason-title">Reason</h3>
 			<ul class="feedback-reason-list">
-				<li><label><input type="checkbox" name="feedback_reason" value="style">Style Guide</label></li>
-				<li><label><input type="checkbox" name="feedback_reason" value="grammar">Grammar</label></li>
-				<li><label><input type="checkbox" name="feedback_reason" value="branding">Branding</label></li>
-				<li><label><input type="checkbox" name="feedback_reason" value="glossary">Glossary</label></li>
-				<li><label><input type="checkbox" name="feedback_reason" value="punctuation">Punctuation</label></li>
-				<li><label><input type="checkbox" name="feedback_reason" value="typo">Typo</label></li>
+			<?php
+				$reject_reasons = Helper_Translation_Discussion::get_reject_reasons();
+			foreach ( $reject_reasons as $key => $reason ) :
+				?>
+					<li><label><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $reason ); ?></label></li>
+			<?php endforeach; ?>
 			</ul>
 			<div class="feedback-comment">
 				<label>Comment </label>
