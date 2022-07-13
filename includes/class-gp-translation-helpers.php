@@ -289,7 +289,7 @@ class GP_Translation_Helpers {
 			}
 		);
 
-		gp_tmpl_load( 'translation-helpers', array( 'sections' => $sections ), dirname( __FILE__ ) . '/templates/' );
+		gp_tmpl_load( 'translation-helpers', array( 'sections' => $sections ) );
 	}
 
 	/**
