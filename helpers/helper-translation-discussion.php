@@ -510,7 +510,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter(
 			'comment_form_fields',
 			function( $comment_fields ) {
-				$comment_fields['comment'] = str_replace( '>Comment<', '>Please leave your comment about this string here:<', $comment_fields['comment'] );
+				$comment_fields['comment'] = str_replace( '</label>', ' (required)</label>', $comment_fields['comment'] );
 				return $comment_fields;
 			}
 		);
@@ -928,6 +928,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 							'title_reply_to'      => esc_html__( 'Reply to %s' ),
 							'title_reply_before'  => '<h5 id="reply-title" class="discuss-title">',
 							'title_reply_after'   => '</h5>',
+							'comment_field'       => '<p class="">',
 							'id_form'             => 'commentform-' . $comment->comment_post_ID,
 							'cancel_reply_link'   => '<span></span>',
 							'comment_notes_after' => implode(
