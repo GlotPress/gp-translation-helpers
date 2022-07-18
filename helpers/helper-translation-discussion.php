@@ -806,6 +806,10 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 
 	$reject_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	$reject_reason = array_map(
+		fn ( $reason) => Helper_Translation_Discussion::get_reject_reasons()[ $reason ],
+		$reject_reason
+	);
 
 	$classes = array( 'comment-locale-' . $comment_locale );
 	if ( ! empty( $reject_reason ) ) {
