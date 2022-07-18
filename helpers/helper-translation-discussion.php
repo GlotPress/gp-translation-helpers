@@ -744,8 +744,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public static function get_reject_reason_explanations(): array {
 		return array(
-			'style'       => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for you locale in the comment.' ),
-			'grammar'     => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for you locale in the comment.' ),
+			'style'       => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
+			'grammar'     => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for your locale in the comment.' ),
 			'branding'    => __( 'The translation is using incorrectly some brand. E.g. WordPress without the capital P.' ),
 			'glossary'    => __( 'The translation is not using the glossary correctly. It will be interesting to provide some link to the glossary for your locale in the comment.' ),
 			'punctuation' => __( 'The translation is not using the punctuation marks correctly.' ),
