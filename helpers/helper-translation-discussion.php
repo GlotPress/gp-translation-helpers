@@ -886,7 +886,16 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 			<?php if ( $reject_reason ) : ?>
 			<p>
 				<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
-				<span><?php echo wp_kses( implode( '</span> | <span>', $reject_reason ), array( 'span' => array() ) ); ?></span>
+				<?php
+				$number_of_items = count( $reject_reason );
+				$counter         = 0;
+				foreach ( $reject_reason as $reason ) {
+					echo '<span title="' . Helper_Translation_Discussion::get_reject_reason_explanations()[ $reason ] . '">' . $reason . '</span>';
+					if ( ++$counter < $number_of_items ) {
+						echo ' | ';
+					}
+				}
+				?>
 			</p>
 			<?php endif; ?>
 		<?php endif; ?>
