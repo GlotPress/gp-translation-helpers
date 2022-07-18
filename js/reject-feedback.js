@@ -168,23 +168,23 @@
 
 	function getReasonList( displayType ) {
 		var rejectReasons = $gp_reject_feedback_settings.reject_reasons;
-
+		var rejectReasonExplanations = $gp_reject_feedback_settings.reject_reason_explanations;
 		var rejectList = '';
 		var prefix = '';
 		var suffix = '';
 		var inputName = '';
-		if ( displayType === 'single' ) {
-			prefix = '<li><label>';
-			suffix = '</label></li>';
-			inputName = 'feedback_reason';
-		} else {
-			prefix = '<div class="modal-item"><label>';
-			suffix = '</div></label>';
-			inputName = 'modal_feedback_reason';
-		}
 
 		// eslint-disable-next-line vars-on-top
 		for ( var reason in rejectReasons ) {
+			if ( displayType === 'single' ) {
+				prefix = '<li><label title="' + rejectReasonExplanations[ reason ] + '">';
+				suffix = '</label></li>';
+				inputName = 'feedback_reason';
+			} else {
+				prefix = '<div class="modal-item"><label title="' + rejectReasonExplanations[ reason ] + '">';
+				suffix = '</div></label>';
+				inputName = 'modal_feedback_reason';
+			}
 			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" />' + rejectReasons[ reason ] + suffix;
 		}
 		return rejectList;
