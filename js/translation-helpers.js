@@ -145,4 +145,6 @@ jQuery( function( $ ) {
 			} );
 		};
 	}
+
+	$( '.tooltip' ).tooltip();
 } );
