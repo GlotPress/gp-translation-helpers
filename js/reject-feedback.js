@@ -5,21 +5,6 @@
 			var rowIds = [];
 			var translationIds = [];
 			var originalIds = [];
-			var feedbackForm = '<details><summary class="feedback-summary">Give feedback</summary>' +
-			'<div id="feedback-form">' +
-			'<form>' +
-			'<h3 class="feedback-reason-title">Reason</h3>' +
-			'<ul class="feedback-reason-list">' +
-			getReasonList( 'single' ) +
-			'</ul>' +
-			'<div class="feedback-comment">' +
-				'<label>Comment </label>' +
-				'<textarea name="feedback_comment"></textarea>' +
-			'</div>' +
-			'</form>' +
-			'</div>' +
-			'</details>';
-
 			var modalFeedbackForm =
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
@@ -37,8 +22,6 @@
 
 			// Remove click event added to <summary> by wporg-gp-customizations plugin
 			$( $gp.editor.table ).off( 'click', 'summary' );
-
-			$( 'button.reject' ).closest( 'dl,div.status-actions' ).prepend( feedbackForm );
 
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar .button' ).click( function( e ) {
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
