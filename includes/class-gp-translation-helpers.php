@@ -370,11 +370,10 @@ class GP_Translation_Helpers {
 			'gp-reject-feedback-js',
 			'$gp_reject_feedback_settings',
 			array(
-				'url'                        => admin_url( 'admin-ajax.php' ),
-				'nonce'                      => wp_create_nonce( 'gp_reject_feedback' ),
-				'locale_slug'                => $translation_set['locale_slug'],
-				'reject_reasons'             => Helper_Translation_Discussion::get_reject_reasons(),
-				'reject_reason_explanations' => Helper_Translation_Discussion::get_reject_reason_explanations(),
+				'url'            => admin_url( 'admin-ajax.php' ),
+				'nonce'          => wp_create_nonce( 'gp_reject_feedback' ),
+				'locale_slug'    => $translation_set['locale_slug'],
+				'reject_reasons' => Helper_Translation_Discussion::get_reject_reasons(),
 			)
 		);
 	}

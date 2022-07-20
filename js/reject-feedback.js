@@ -153,7 +153,6 @@
 
 	function getReasonList( displayType ) {
 		var rejectReasons = $gp_reject_feedback_settings.reject_reasons;
-		var rejectReasonExplanations = $gp_reject_feedback_settings.reject_reason_explanations;
 		var rejectList = '';
 		var prefix = '';
 		var suffix = '';
@@ -162,15 +161,15 @@
 		// eslint-disable-next-line vars-on-top
 		for ( var reason in rejectReasons ) {
 			if ( displayType === 'single' ) {
-				prefix = '<li><label class="tooltip" title="' + rejectReasonExplanations[ reason ] + '">';
-				suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + rejectReasonExplanations[ reason ] + '"></span></li>';
+				prefix = '<li><label class="tooltip" title="' + rejectReasons[ reason ].explanation + '">';
+				suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + rejectReasons[ reason ].explanation + '"></span></li>';
 				inputName = 'feedback_reason';
 			} else {
-				prefix = '<div class="modal-item"><label class="tooltip" title="' + rejectReasonExplanations[ reason ] + '">';
-				suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + rejectReasonExplanations[ reason ] + '"></span></div>';
+				prefix = '<div class="modal-item"><label class="tooltip" title="' + rejectReasons[ reason ].explanation + '">';
+				suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + rejectReasons[ reason ].explanation + '"></span></div>';
 				inputName = 'modal_feedback_reason';
 			}
-			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" />' + rejectReasons[ reason ] + suffix;
+			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" />' + rejectReasons[ reason ].name + suffix;
 		}
 		return rejectList;
 	}

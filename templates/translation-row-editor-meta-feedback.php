@@ -8,16 +8,15 @@
 			<h3 class="feedback-reason-title">Reason</h3>
 			<ul class="feedback-reason-list">
 			<?php
-				$reject_reasons             = Helper_Translation_Discussion::get_reject_reasons();
-				$reject_reason_explanations = Helper_Translation_Discussion::get_reject_reason_explanations();
+				$reject_reasons = Helper_Translation_Discussion::get_reject_reasons();
 			foreach ( $reject_reasons as $key => $reason ) :
 				?>
 					<li>
-						<label class="tooltip" title="<?php echo esc_attr( $reject_reason_explanations[ $key ], 'glotpress' ); ?>">
+						<label class="tooltip" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>">
 							<input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key, 'glotpress' ); ?>" />
-							<?php echo esc_html( $reason, 'glotpress' ); ?>
+							<?php echo esc_html( $reason['name'], 'glotpress' ); ?>
 						</label>
-						<span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reject_reason_explanations[ $key ], 'glotpress' ); ?>"></span>
+						<span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>"></span>
 					</li>
 			<?php endforeach; ?>
 			</ul>

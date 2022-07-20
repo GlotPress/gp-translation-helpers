@@ -718,7 +718,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Return an array of allowed rejection reasons
+	 * Return an array of allowed rejection reasons and explanation of each reason.
 	 *
 	 * @since 0.0.2
 	 *
@@ -726,33 +726,33 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public static function get_reject_reasons(): array {
 		return array(
-			'style'       => __( 'Style Guide' ),
-			'grammar'     => __( 'Grammar' ),
-			'branding'    => __( 'Branding' ),
-			'glossary'    => __( 'Glossary' ),
-			'punctuation' => __( 'Punctuation' ),
-			'typo'        => __( 'Typo' ),
+			'style'       => array(
+				'name'        => __( 'Style Guide' ),
+				'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
+			),
+			'grammar'     => array(
+				'name'        => __( 'Grammar' ),
+				'explanation' => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for your locale in the comment.' ),
+			),
+			'branding'    => array(
+				'name'        => __( 'Branding' ),
+				'explanation' => __( 'The translation is using incorrectly some brand. E.g. WordPress without the capital P.' ),
+			),
+			'glossary'    => array(
+				'name'        => __( 'Glossary' ),
+				'explanation' => __( 'The translation is not using the glossary correctly. It will be interesting to provide some link to the glossary for your locale in the comment.' ),
+			),
+			'punctuation' => array(
+				'name'        => __( 'Punctuation' ),
+				'explanation' =>
+					__( 'The translation is not using the punctuation marks correctly.' ),
+			),
+			'typo'        => array(
+				'name'        => __( 'Typo' ),
+				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
+			),
 		);
 	}
-
-	/**
-	 * Return an array with the explanations for the allowed rejection reasons
-	 *
-	 * @since 0.0.2
-	 *
-	 * @return array
-	 */
-	public static function get_reject_reason_explanations(): array {
-		return array(
-			'style'       => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
-			'grammar'     => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for your locale in the comment.' ),
-			'branding'    => __( 'The translation is using incorrectly some brand. E.g. WordPress without the capital P.' ),
-			'glossary'    => __( 'The translation is not using the glossary correctly. It will be interesting to provide some link to the glossary for your locale in the comment.' ),
-			'punctuation' => __( 'The translation is not using the punctuation marks correctly.' ),
-			'typo'        => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
-		);
-	}
-
 }
 
 /**
@@ -894,7 +894,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 						sprintf(
 						/* translators: 1: Title with the explanation of the reject reason , 2: The reject reason */
 							__( '<span title="%1$s" class="tooltip">%2$s</span> <span class="tooltip dashicons dashicons-info" title="%1$s"></span>', 'glotpress' ),
-							Helper_Translation_Discussion::get_reject_reason_explanations()[ $reason ],
+							Helper_Translation_Discussion::get_reject_reasons()[ $reason ]['explanation'],
 							$reason
 						),
 						array(
