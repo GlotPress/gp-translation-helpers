@@ -889,13 +889,14 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				<?php
 				$number_of_items = count( $reject_reason );
 				$counter         = 0;
+				$reject_reasons  = Helper_Translation_Discussion::get_reject_reasons();
 				foreach ( $reject_reason as $reason ) {
 					echo wp_kses(
 						sprintf(
 						/* translators: 1: Title with the explanation of the reject reason , 2: The reject reason */
 							__( '<span title="%1$s" class="tooltip">%2$s</span> <span class="tooltip dashicons dashicons-info" title="%1$s"></span>', 'glotpress' ),
-							Helper_Translation_Discussion::get_reject_reasons()[ $reason ]['explanation'],
-							$reason
+							$reject_reasons[ $reason ]['explanation'],
+							$reject_reasons[ $reason ]['name'],
 						),
 						array(
 							'span' => array(
