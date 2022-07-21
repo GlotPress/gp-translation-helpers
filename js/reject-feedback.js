@@ -171,7 +171,7 @@
 				suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + rejectReasons[ reason ].explanation + '"></span></div>';
 				inputName = 'modal_feedback_reason';
 			}
-			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" />' + rejectReasons[ reason ].name + suffix;
+			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + rejectReasons[ reason ].name + suffix;
 		}
 		return rejectList;
 	}
