@@ -12,11 +12,7 @@
 			foreach ( $reject_reasons as $key => $reason ) :
 				?>
 					<li>
-						<label class="tooltip" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>">
-							<input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key, 'glotpress' ); ?>" />
-							<?php echo esc_html( $reason['name'], 'glotpress' ); ?><span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>"></span>
-						</label>
-
+						<label class="tooltip" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>"><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key, 'glotpress' ); ?>" /><?php echo esc_html( $reason['name'], 'glotpress' ); ?></label><span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>"></span>
 					</li>
 			<?php endforeach; ?>
 			</ul>

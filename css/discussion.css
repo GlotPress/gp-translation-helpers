@@ -71,6 +71,11 @@ article.comment time {
 .feedback-reason-list span.dashicons.dashicons-info,
 #TB_window span.dashicons.dashicons-info {
 	color: #D3D3D3;
+	font-size:16px;
+}
+.feedback-reason-list li {
+	white-space:nowrap;
+	padding-right: 2px;
 }
 .ui-tooltip {
 	z-index: 100051 !important;
