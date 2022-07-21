@@ -217,3 +217,7 @@ div#TB_ajaxWindowTitle {
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
+
+.hoverTooltip {
+	position: fixed !important;
+}

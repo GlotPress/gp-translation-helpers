@@ -146,5 +146,7 @@ jQuery( function( $ ) {
 		};
 	}
 
-	$( '.tooltip' ).tooltip();
+	$( '.tooltip' ).tooltip( {
+		tooltipClass: 'hoverTooltip',
+	} );
 } );
