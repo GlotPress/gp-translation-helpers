@@ -11,7 +11,9 @@
 				$reject_reasons = Helper_Translation_Discussion::get_reject_reasons();
 			foreach ( $reject_reasons as $key => $reason ) :
 				?>
-					<li><label><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key ); ?>" /><?php echo esc_html( $reason ); ?></label></li>
+					<li>
+						<label class="tooltip" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>"><input type="checkbox" name="feedback_reason" value="<?php echo esc_attr( $key, 'glotpress' ); ?>" /><?php echo esc_html( $reason['name'], 'glotpress' ); ?></label><span class="tooltip dashicons dashicons-info" title="<?php echo esc_attr( $reason['explanation'], 'glotpress' ); ?>"></span>
+					</li>
 			<?php endforeach; ?>
 			</ul>
 			<div class="feedback-comment">
