@@ -73,7 +73,7 @@ article.comment time {
 	color: #D3D3D3;
 }
 .ui-tooltip {
-	z-index: 100051;
+	z-index: 100051 !important;
 }
 .comment-form-comment label{
 	display: block;
