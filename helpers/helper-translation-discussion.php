@@ -663,7 +663,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$data_attribute_string = trim( $data_attribute_string );
 
 		$link = sprintf(
-			"<a rel='nofollow' class='comment-reply-link' href='%s' %s aria-label='%s'>%s</a>",
+			"<a rel='nofollow' class='comment-reply-link button is-primary' href='%s' %s aria-label='%s'>%s</a>",
 			esc_url(
 				add_query_arg(
 					array(
