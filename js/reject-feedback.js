@@ -14,7 +14,7 @@
 					'<label>Comment </label>' +
 					'<textarea name="modal_feedback_comment"></textarea>' +
 			'</div>' +
-			'<button id="modal-reject-btn" class="modal-btn">Reject</button>' +
+			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject</button>' +
 			'</form>' +
 			'</div>';
 

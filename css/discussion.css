@@ -146,6 +146,15 @@ h6 {
 }
 .modal-btn {
 	float: right;
+	
+}
+.gp-btn-style:hover, #respond form .form-submit .submit:hover {
+	background-color: var(--gp-color-btn-primary-hover-bg);
+    border-color: var(--gp-color-btn-primary-hover-border);
+    color: var(--gp-color-btn-primary-hover-text);
+    box-shadow: 0 0 0 1px var(--gp-color-canvas-default),0 0 0 2px var(--gp-color-btn-primary-hover-border);
+}
+.gp-btn-style, #respond form .form-submit .submit{
 	background-color: var(--gp-color-btn-primary-bg);
     border-color: var(--gp-color-btn-primary-border);
     color: var(--gp-color-btn-primary-text);
@@ -168,18 +177,14 @@ h6 {
     white-space: nowrap;
     vertical-align: middle;
 }
-.modal-btn:hover {
-	background-color: var(--gp-color-btn-primary-hover-bg);
-    border-color: var(--gp-color-btn-primary-hover-border);
-    color: var(--gp-color-btn-primary-hover-text);
-    box-shadow: 0 0 0 1px var(--gp-color-canvas-default),0 0 0 2px var(--gp-color-btn-primary-hover-border);
-}
+
 .modal-reason-title{
 	margin-top: 12px;
 	margin-bottom: 10px;
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
+
 #TB_title {
 	background: #f1f1f1;
 	border-bottom: 1px solid #ddd;
