@@ -89,6 +89,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function after_constructor() {
 		$this->register_post_type_and_taxonomy();
 		add_filter( 'pre_comment_approved', array( $this, 'comment_moderation' ), 10, 2 );
+		add_filter( 'comments_open', array( $this, 'comments_open_override' ), 10, 2 );
 		add_filter( 'map_meta_cap', array( $this, 'map_comment_meta_caps' ), 10, 4 );
 		add_filter( 'user_has_cap', array( $this, 'give_user_read_cap' ), 10, 3 );
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
@@ -249,6 +250,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id );
 
 		return $cache[ $post->ID ];
+	}
+
+	public function comments_open_override( $open, $post_id ) {
+		if ( 0 === $post_id || self::is_temporary_post_id( $post_id ) ) {
+			return true;
+		}
+		return $open;
 	}
 
 	/**
