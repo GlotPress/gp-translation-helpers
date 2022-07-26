@@ -59,26 +59,55 @@
 		?>
 	</ul><!-- .discussion-list -->
 	<?php
+	$option_typo     = '<option value="typo">Typo in the English text (admins will be notified)</option>';
+	$option_context  = '<option value="context">Where does this string appear? (more context) (admins will be notified)</option>';
+	$option_question = '';
+	if ( $locale_slug ) {
+		$gp_locale = GP_Locales::by_slug( $locale_slug );
+		if ( $gp_locale ) {
+			$option_question = '<option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . ' (validators will be notified)</option>';
+		}
+	}
 	add_action(
 		'comment_form_logged_in_after',
-		function () use ( $locale_slug ) {
-			$language_question = '';
+		function () use ( $locale_slug, $option_typo, $option_context, $option_question ) {
 
-			if ( $locale_slug ) {
-				$gp_locale = GP_Locales::by_slug( $locale_slug );
-				if ( $gp_locale ) {
-					$language_question = '<option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . '</option>';
-				}
-			}
+			/**
+			 * Filters the content of the typo option.
+			 *
+			 * @since 0.0.2
+			 *
+			 * @param string $option_typo The content of the typo option.
+			 */
+			$option_typo = apply_filters( 'gp_discussion_new_comment_typo', $option_typo );
+
+			/**
+			 * Filters the content of the context option.
+			 *
+			 * @since 0.0.2
+			 *
+			 * @param string $option_context The content of the context option.
+			 */
+			$option_context = apply_filters( 'gp_discussion_new_comment_context', $option_context );
+
+			/**
+			 * Filters the content of the language question option.
+			 *
+			 * @param string $option_question The content of the language question option.
+			 * @param string $locale_slug     The slug of the current locale.
+			 *
+			 *@since 0.0.2
+			 */
+			$option_question = apply_filters( 'gp_discussion_new_comment_language_question', $option_question, $locale_slug );
 
 			echo '<p class="comment-form-topic">
 					<label for="comment_topic">Topic <span class="required" aria-hidden="true">*</span> (required)</label>
 					<select required name="comment_topic" id="comment_topic">
-						<option value="">Select topic</option>
-						<option value="typo">Typo in the English text</option>
-    					<option value="context">Where does this string appear? (more context)</option>' .
-						wp_kses( $language_question, array( 'option' => array( 'value' => true ) ) ) .
-					'</select>
+						<option value="">Select a topic</option>' .
+						wp_kses( $option_typo, array( 'option' => array( 'value' => true ) ) ) .
+						wp_kses( $option_context, array( 'option' => array( 'value' => true ) ) ) .
+						wp_kses( $option_question, array( 'option' => array( 'value' => true ) ) ) .
+				 '</select>
     			</p>';
 		},
 		10,
@@ -103,7 +132,7 @@
 				'id_form'             => 'commentform-' . $_post_id,
 				'cancel_reply_link'   => '<span></span>',
 				'format'              => 'html5',
-				'class_submit' => 'button is-primary',
+				'class_submit'        => 'button is-primary',
 				'comment_notes_after' => implode(
 					"\n",
 					array(
