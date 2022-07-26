@@ -158,7 +158,8 @@
 				}
 				msg += '. Please, take a screenshot, send it to the developers, and reload the page to see if it still worked.';
 				$gp.notices.error( msg );
-			} );
+			}
+		);
 	}
 
 	function getReasonList( ) {
