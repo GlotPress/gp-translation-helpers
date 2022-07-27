@@ -59,56 +59,62 @@
 		?>
 	</ul><!-- .discussion-list -->
 	<?php
-	$option_typo     = '<option value="typo">Typo in the English text (admins will be notified)</option>';
-	$option_context  = '<option value="context">Where does this string appear? (more context) (admins will be notified)</option>';
-	$option_question = '';
+	// $option_typo     = '<option value="typo">Typo in the English text (admins will be notified)</option>';
+	// $option_context  = '<option value="context">Where does this string appear? (more context) (admins will be notified)</option>';
+	$optgroup_question = '';
 	if ( $locale_slug ) {
 		$gp_locale = GP_Locales::by_slug( $locale_slug );
 		if ( $gp_locale ) {
-			$option_question = '<option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . ' (validators will be notified)</option>';
+			$optgroup_question = '
+					<optgroup label="Notify validators">
+					    <option value="question">Question about translating to ' . esc_html( $gp_locale->english_name ) . '</option>
+					</optgroup>';
 		}
 	}
+	$options = '<select required="" name="comment_topic" id="comment_topic">
+					<option value="">Select a topic</option>
+					<optgroup label="Notify admins">
+						<option value="typo">Typo in the English text</option>
+						<option value="context">Where does this string appear? (more context)</option>
+					</optgroup>' .
+			   $optgroup_question .
+			   '</select>';
+
 	add_action(
 		'comment_form_logged_in_after',
-		function () use ( $locale_slug, $option_typo, $option_context, $option_question ) {
-
+		function () use ( $locale_slug, $options ) {
 			/**
-			 * Filters the content of the typo option.
+			 * Filters the options.
 			 *
-			 * @since 0.0.2
-			 *
-			 * @param string $option_typo The content of the typo option.
-			 */
-			$option_typo = apply_filters( 'gp_discussion_new_comment_typo', $option_typo );
-
-			/**
-			 * Filters the content of the context option.
-			 *
-			 * @since 0.0.2
-			 *
-			 * @param string $option_context The content of the context option.
-			 */
-			$option_context = apply_filters( 'gp_discussion_new_comment_context', $option_context );
-
-			/**
-			 * Filters the content of the language question option.
-			 *
-			 * @param string $option_question The content of the language question option.
-			 * @param string $locale_slug     The slug of the current locale.
+			 * @param string $options     The options for the select element.
+			 * @param string $locale_slug The slug of the current locale.
 			 *
 			 *@since 0.0.2
 			 */
-			$option_question = apply_filters( 'gp_discussion_new_comment_language_question', $option_question, $locale_slug );
+			$options = apply_filters( 'gp_discussion_new_comment_options', $options, $locale_slug );
 
 			echo '<p class="comment-form-topic">
-					<label for="comment_topic">Topic <span class="required" aria-hidden="true">*</span> (required)</label>
-					<select required name="comment_topic" id="comment_topic">
-						<option value="">Select a topic</option>' .
-						wp_kses( $option_typo, array( 'option' => array( 'value' => true ) ) ) .
-						wp_kses( $option_context, array( 'option' => array( 'value' => true ) ) ) .
-						wp_kses( $option_question, array( 'option' => array( 'value' => true ) ) ) .
-				 '</select>
-    			</p>';
+					<label for="comment_topic">Topic <span class="required" aria-hidden="true">*</span> (required)</label> ' .
+						wp_kses(
+							$options,
+							array(
+								'select'   =>
+										   array(
+											   'required' => true,
+											   'name'     => true,
+											   'id'       => true,
+										   ),
+								'optgroup' =>
+										array(
+											'label' => true,
+										),
+								'option'   =>
+										array(
+											'value' => true,
+										),
+							)
+						) .
+				'</p>';
 		},
 		10,
 		2
