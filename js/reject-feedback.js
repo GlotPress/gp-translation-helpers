@@ -1,4 +1,4 @@
-/* global $gp, $gp_reject_feedback_settings, document, tb_show */
+/* global $gp, $gp_update_feedback_settings, document, tb_show */
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
@@ -58,29 +58,29 @@
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
 				var comment = '';
-				var rejectReason = [];
-				var rejectData = {};
+				var updateReason = [];
+				var updateData = {};
 				var form = $( this ).closest( 'form' );
 
 				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
-						rejectReason.push( this.value );
+						updateReason.push( this.value );
 					}
 				);
 
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
-				if ( ( ! comment.trim().length && ! rejectReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
+				if ( ( ! comment.trim().length && ! updateReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				}
 
-				rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
-				rejectData.reason = rejectReason;
-				rejectData.comment = comment;
-				rejectData.original_id = originalIds;
-				rejectData.translation_id = translationIds;
-				rejectData.is_bulk_reject = true;
-				rejectWithFeedback( rejectData );
+				updateData.locale_slug = $gp_update_feedback_settings.locale_slug;
+				updateData.reason = updateReason;
+				updateData.comment = comment;
+				updateData.original_id = originalIds;
+				updateData.translation_id = translationIds;
+				updateData.is_bulk_reject = true;
+				updateWithFeedback( updateData, false, 'rejected' );
 				e.preventDefault();
 			} );
 
@@ -91,92 +91,47 @@
 	);
 
 	$gp.editor.hooks.set_status_current = function() {
-		var button = $( this );
-		var rejectData = {};
-		var rejectReason = [];
-		var comment = '';
-		var div = button.closest( 'div.meta' );
-
-		div.find( 'input[name="feedback_reason"]:checked' ).each(
-			function() {
-				rejectReason.push( this.value );
-			}
-		);
-
-		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
-
-		if ( ! comment.trim().length && ! rejectReason.length ) {
-			$gp.editor.set_status( button, 'current' );
-			return;
-		}
-
-		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
-		rejectData.reason = rejectReason;
-		rejectData.comment = comment;
-		rejectData.original_id = [ $gp.editor.current.original_id ];
-		rejectData.translation_id = [ $gp.editor.current.translation_id ];
-
-		rejectWithFeedback( rejectData, button, 'current' );
+		setStatus( $( this ), 'current' );
 	};
+
 	$gp.editor.hooks.set_status_fuzzy = function() {
-		var button = $( this );
-		var rejectData = {};
-		var rejectReason = [];
-		var comment = '';
-		var div = button.closest( 'div.meta' );
-
-		div.find( 'input[name="feedback_reason"]:checked' ).each(
-			function() {
-				rejectReason.push( this.value );
-			}
-		);
-
-		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
-
-		if ( ! comment.trim().length && ! rejectReason.length ) {
-			$gp.editor.set_status( button, 'fuzzy' );
-			return;
-		}
-
-		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
-		rejectData.reason = rejectReason;
-		rejectData.comment = comment;
-		rejectData.original_id = [ $gp.editor.current.original_id ];
-		rejectData.translation_id = [ $gp.editor.current.translation_id ];
-
-		rejectWithFeedback( rejectData, button, 'fuzzy' );
+		setStatus( $( this ), 'fuzzy' );
 	};
 
 	$gp.editor.hooks.set_status_rejected = function() {
-		var button = $( this );
-		var rejectData = {};
-		var rejectReason = [];
+		setStatus( $( this ), 'rejected' );
+	};
+
+	function setStatus( that, status ) {
+		var button = $( that );
+		var feedbackData = {};
+		var updateReason = [];
 		var comment = '';
 		var div = button.closest( 'div.meta' );
 
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
-				rejectReason.push( this.value );
+				updateReason.push( this.value );
 			}
 		);
 
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
-		if ( ! comment.trim().length && ! rejectReason.length ) {
-			$gp.editor.set_status( button, 'rejected' );
+		if ( ! comment.trim().length && ! updateReason.length ) {
+			$gp.editor.set_status( button, status );
 			return;
 		}
 
-		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
-		rejectData.reason = rejectReason;
-		rejectData.comment = comment;
-		rejectData.original_id = [ $gp.editor.current.original_id ];
-		rejectData.translation_id = [ $gp.editor.current.translation_id ];
+		feedbackData.locale_slug = $gp_update_feedback_settings.locale_slug;
+		feedbackData.reason = updateReason;
+		feedbackData.comment = comment;
+		feedbackData.original_id = [ $gp.editor.current.original_id ];
+		feedbackData.translation_id = [ $gp.editor.current.translation_id ];
 
-		rejectWithFeedback( rejectData, button, 'rejected' );
-	};
+		updateWithFeedback( feedbackData, button, status );
+	}
 
-	function rejectWithFeedback( rejectData, button, status ) {
+	function updateWithFeedback( feedbackData, button, status ) {
 		var data = {};
 		var div = {};
 		if ( button ) {
@@ -184,22 +139,22 @@
 		}
 
 		data = {
-			action: 'reject_with_feedback',
-			data: rejectData,
+			action: 'update_with_feedback',
+			data: feedbackData,
 
-			_ajax_nonce: $gp_reject_feedback_settings.nonce,
+			_ajax_nonce: $gp_update_feedback_settings.nonce,
 		};
 
 		$.ajax(
 			{
 				type: 'POST',
 
-				url: $gp_reject_feedback_settings.url,
+				url: $gp_update_feedback_settings.url,
 				data: data,
 			}
 		).done(
 			function() {
-				if ( rejectData.is_bulk_reject ) {
+				if ( feedbackData.is_bulk_reject ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				} else {
 					$gp.editor.set_status( button, status );
@@ -220,20 +175,20 @@
 	}
 
 	function getReasonList( ) {
-		var rejectReasons = $gp_reject_feedback_settings.reject_reasons;
-		var rejectList = '';
+		var updateReasons = $gp_update_feedback_settings.update_reasons;
+		var updateList = '';
 		var prefix = '';
 		var suffix = '';
 		var inputName = '';
 
 		// eslint-disable-next-line vars-on-top
-		for ( var reason in rejectReasons ) {
-			prefix = '<div class="modal-item"><label class="tooltip" title="' + rejectReasons[ reason ].explanation + '">';
-			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + rejectReasons[ reason ].explanation + '"></span></div>';
+		for ( var reason in updateReasons ) {
+			prefix = '<div class="modal-item"><label class="tooltip" title="' + updateReasons[ reason ].explanation + '">';
+			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + updateReasons[ reason ].explanation + '"></span></div>';
 			inputName = 'modal_feedback_reason';
-			rejectList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + rejectReasons[ reason ].name + suffix;
+			updateList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + updateReasons[ reason ].name + suffix;
 		}
-		return rejectList;
+		return updateList;
 	}
 }( jQuery, $gp )
 );

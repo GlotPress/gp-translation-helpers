@@ -699,11 +699,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	/**
 	 * Throws an exception with an error message if the original id is incorrect.
 	 *
-	 * Used as callback to validate the original_id passed on rejecting a string with feedback
+	 * Used as callback to validate the original_id passed on updating a string with feedback
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int|string $original_id   The id of the original for the rejected translation.
+	 * @param int|string $original_id   The id of the original for the updated translation.
 	 *
 	 * @return int|string
 	 *
@@ -718,13 +718,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Return an array of allowed rejection reasons and explanation of each reason.
+	 * Return an array of allowed updated reasons and explanation of each reason.
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return array
 	 */
-	public static function get_reject_reasons(): array {
+	public static function get_update_reasons(): array {
 		return array(
 			'style'       => array(
 				'name'        => __( 'Style Guide' ),
@@ -823,10 +823,10 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 
-	$reject_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	$update_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
 
 	$classes = array( 'comment-locale-' . $comment_locale );
-	if ( ! empty( $reject_reason ) ) {
+	if ( ! empty( $update_reason ) ) {
 		$classes[] = 'rejection-feedback';
 		$classes[] = 'rejection-feedback-' . $comment_locale;
 	}
@@ -875,7 +875,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				$linked_comment = str_replace( $parts['path'], $parts['path'] . '/' . $current_locale . '/default', $linked_comment );
 			}
 
-			if ( $reject_reason ) :
+			if ( $update_reason ) :
 				?>
 				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.
 			<?php else : ?>
@@ -883,20 +883,20 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 			<?php endif; ?>
 		<?php else : ?>
 			<?php comment_text(); ?>
-			<?php if ( $reject_reason ) : ?>
+			<?php if ( $update_reason ) : ?>
 			<p>
-				<?php echo esc_html( _n( 'Comment Reason: ', 'Comment Reasons: ', count( $reject_reason ) ) ); ?>
+				<?php echo esc_html( _n( 'Comment Reason: ', 'Comment Reasons: ', count( $update_reason ) ) ); ?>
 				<?php
-				$number_of_items = count( $reject_reason );
+				$number_of_items = count( $update_reason );
 				$counter         = 0;
-				$reject_reasons  = Helper_Translation_Discussion::get_reject_reasons();
-				foreach ( $reject_reason as $reason ) {
+				$update_reasons  = Helper_Translation_Discussion::get_update_reasons();
+				foreach ( $update_reason as $reason ) {
 					echo wp_kses(
 						sprintf(
-						/* translators: 1: Title with the explanation of the reject reason , 2: The reject reason */
+						/* translators: 1: Title with the explanation of the update reason , 2: The update reason */
 							__( '<span title="%1$s" class="tooltip">%2$s</span> <span class="tooltip dashicons dashicons-info" title="%1$s"></span>', 'glotpress' ),
-							$reject_reasons[ $reason ]['explanation'],
-							$reject_reasons[ $reason ]['name'],
+							$update_reasons[ $reason ]['explanation'],
+							$update_reasons[ $reason ]['name'],
 						),
 						array(
 							'span' => array(
