@@ -1,4 +1,4 @@
-/* global $gp, $gp_update_feedback_settings, document, tb_show */
+/* global $gp, $gp_comment_feedback_settings, document, tb_show */
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
@@ -58,29 +58,29 @@
 
 			$( 'body' ).on( 'click', '#modal-reject-btn', function( e ) {
 				var comment = '';
-				var updateReason = [];
-				var updateData = {};
+				var commentReason = [];
+				var commentData = {};
 				var form = $( this ).closest( 'form' );
 
 				form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 					function() {
-						updateReason.push( this.value );
+						commentReason.push( this.value );
 					}
 				);
 
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 
-				if ( ( ! comment.trim().length && ! updateReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
+				if ( ( ! comment.trim().length && ! commentReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				}
 
-				updateData.locale_slug = $gp_update_feedback_settings.locale_slug;
-				updateData.reason = updateReason;
-				updateData.comment = comment;
-				updateData.original_id = originalIds;
-				updateData.translation_id = translationIds;
-				updateData.is_bulk_reject = true;
-				updateWithFeedback( updateData, false, 'rejected' );
+				commentData.locale_slug = $gp_comment_feedback_settings.locale_slug;
+				commentData.reason = commentReason;
+				commentData.comment = comment;
+				commentData.original_id = originalIds;
+				commentData.translation_id = translationIds;
+				commentData.is_bulk_reject = true;
+				commentWithFeedback( commentData, false, 'rejected' );
 				e.preventDefault();
 			} );
 
@@ -105,33 +105,33 @@
 	function setStatus( that, status ) {
 		var button = $( that );
 		var feedbackData = {};
-		var updateReason = [];
+		var commentReason = [];
 		var comment = '';
 		var div = button.closest( 'div.meta' );
 
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
-				updateReason.push( this.value );
+				commentReason.push( this.value );
 			}
 		);
 
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
 
-		if ( ! comment.trim().length && ! updateReason.length ) {
+		if ( ! comment.trim().length && ! commentReason.length ) {
 			$gp.editor.set_status( button, status );
 			return;
 		}
 
-		feedbackData.locale_slug = $gp_update_feedback_settings.locale_slug;
-		feedbackData.reason = updateReason;
+		feedbackData.locale_slug = $gp_comment_feedback_settings.locale_slug;
+		feedbackData.reason = commentReason;
 		feedbackData.comment = comment;
 		feedbackData.original_id = [ $gp.editor.current.original_id ];
 		feedbackData.translation_id = [ $gp.editor.current.translation_id ];
 
-		updateWithFeedback( feedbackData, button, status );
+		commentWithFeedback( feedbackData, button, status );
 	}
 
-	function updateWithFeedback( feedbackData, button, status ) {
+	function commentWithFeedback( feedbackData, button, status ) {
 		var data = {};
 		var div = {};
 		if ( button ) {
@@ -139,17 +139,17 @@
 		}
 
 		data = {
-			action: 'update_with_feedback',
+			action: 'comment_with_feedback',
 			data: feedbackData,
 
-			_ajax_nonce: $gp_update_feedback_settings.nonce,
+			_ajax_nonce: $gp_comment_feedback_settings.nonce,
 		};
 
 		$.ajax(
 			{
 				type: 'POST',
 
-				url: $gp_update_feedback_settings.url,
+				url: $gp_comment_feedback_settings.url,
 				data: data,
 			}
 		).done(
@@ -175,20 +175,20 @@
 	}
 
 	function getReasonList( ) {
-		var updateReasons = $gp_update_feedback_settings.update_reasons;
-		var updateList = '';
+		var commentReasons = $gp_comment_feedback_settings.comment_reasons;
+		var commentList = '';
 		var prefix = '';
 		var suffix = '';
 		var inputName = '';
 
 		// eslint-disable-next-line vars-on-top
-		for ( var reason in updateReasons ) {
-			prefix = '<div class="modal-item"><label class="tooltip" title="' + updateReasons[ reason ].explanation + '">';
-			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + updateReasons[ reason ].explanation + '"></span></div>';
+		for ( var reason in commentReasons ) {
+			prefix = '<div class="modal-item"><label class="tooltip" title="' + commentReasons[ reason ].explanation + '">';
+			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + commentReasons[ reason ].explanation + '"></span></div>';
 			inputName = 'modal_feedback_reason';
-			updateList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + updateReasons[ reason ].name + suffix;
+			commentList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + commentReasons[ reason ].name + suffix;
 		}
-		return updateList;
+		return commentList;
 	}
 }( jQuery, $gp )
 );

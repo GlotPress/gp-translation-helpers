@@ -718,13 +718,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
-	 * Return an array of allowed updated reasons and explanation of each reason.
+	 * Return an array of allowed comment reasons and explanation of each reason.
 	 *
 	 * @since 0.0.2
 	 *
 	 * @return array
 	 */
-	public static function get_update_reasons(): array {
+	public static function get_comment_reasons(): array {
 		return array(
 			'style'       => array(
 				'name'        => __( 'Style Guide' ),
@@ -823,10 +823,10 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	$current_translation_id = $args['translation_id'];
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 
-	$update_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+	$comment_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
 
 	$classes = array( 'comment-locale-' . $comment_locale );
-	if ( ! empty( $update_reason ) ) {
+	if ( ! empty( $comment_reason ) ) {
 		$classes[] = 'rejection-feedback';
 		$classes[] = 'rejection-feedback-' . $comment_locale;
 	}
@@ -875,7 +875,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				$linked_comment = str_replace( $parts['path'], $parts['path'] . '/' . $current_locale . '/default', $linked_comment );
 			}
 
-			if ( $update_reason ) :
+			if ( $comment_reason ) :
 				?>
 				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.
 			<?php else : ?>
@@ -883,20 +883,20 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 			<?php endif; ?>
 		<?php else : ?>
 			<?php comment_text(); ?>
-			<?php if ( $update_reason ) : ?>
+			<?php if ( $comment_reason ) : ?>
 			<p>
-				<?php echo esc_html( _n( 'Comment Reason: ', 'Comment Reasons: ', count( $update_reason ) ) ); ?>
+				<?php echo esc_html( _n( 'Comment Reason: ', 'Comment Reasons: ', count( $comment_reason ) ) ); ?>
 				<?php
-				$number_of_items = count( $update_reason );
+				$number_of_items = count( $comment_reason );
 				$counter         = 0;
-				$update_reasons  = Helper_Translation_Discussion::get_update_reasons();
-				foreach ( $update_reason as $reason ) {
+				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+				foreach ( $comment_reason as $reason ) {
 					echo wp_kses(
 						sprintf(
-						/* translators: 1: Title with the explanation of the update reason , 2: The update reason */
+						/* translators: 1: Title with the explanation of the comment reason , 2: The comment reason */
 							__( '<span title="%1$s" class="tooltip">%2$s</span> <span class="tooltip dashicons dashicons-info" title="%1$s"></span>', 'glotpress' ),
-							$update_reasons[ $reason ]['explanation'],
-							$update_reasons[ $reason ]['name'],
+							$comment_reasons[ $reason ]['explanation'],
+							$comment_reasons[ $reason ]['name'],
 						),
 						array(
 							'span' => array(
