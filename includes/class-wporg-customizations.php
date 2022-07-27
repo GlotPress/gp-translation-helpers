@@ -16,7 +16,7 @@ class WPorg_GlotPress_Customizations {
 	 * @return void
 	 */
 	public static function init() {
-//		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && ( get_current_blog_id() === WPORG_TRANSLATE_BLOGID ) ) {
+		if ( defined( 'WPORG_TRANSLATE_BLOGID' ) && ( get_current_blog_id() === WPORG_TRANSLATE_BLOGID ) ) {
 			add_filter(
 				'gp_discussion_new_comment_options',
 				function ( $options, $locale_slug ) {
@@ -44,5 +44,5 @@ class WPorg_GlotPress_Customizations {
 				2
 			);
 		}
-//	}
+	}
 }
