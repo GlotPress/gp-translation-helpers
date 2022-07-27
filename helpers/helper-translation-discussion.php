@@ -877,7 +877,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( $reject_reason ) :
 				?>
-				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> was rejected with <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'a reason that is being discussed here' ); ?></a>.
+				The translation <?php gth_print_translation( $comment_translation_id, $args ); ?> <a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'is being discussed here' ); ?></a>.
 			<?php else : ?>
 				<a href="<?php echo esc_url( $linked_comment ); ?>"><?php esc_html_e( 'Please continue the discussion here' ); ?></a>
 			<?php endif; ?>
@@ -885,7 +885,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 			<?php comment_text(); ?>
 			<?php if ( $reject_reason ) : ?>
 			<p>
-				<?php echo esc_html( _n( 'Rejection Reason: ', 'Rejection Reasons: ', count( $reject_reason ) ) ); ?>
+				<?php echo esc_html( _n( 'Comment Reason: ', 'Comment Reasons: ', count( $reject_reason ) ) ); ?>
 				<?php
 				$number_of_items = count( $reject_reason );
 				$counter         = 0;
@@ -956,7 +956,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( ! $is_linking_comment ) :
 				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
-					gth_print_translation( $comment_translation_id, $args, empty( $reject_reason ) ? 'Translation: ' : 'Translation  (Rejected): ' );
+					gth_print_translation( $comment_translation_id, $args, 'Translation: ' );
 				}
 
 				?>

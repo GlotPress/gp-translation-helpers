@@ -90,6 +90,63 @@
 		}
 	);
 
+	$gp.editor.hooks.set_status_current = function() {
+		var button = $( this );
+		var rejectData = {};
+		var rejectReason = [];
+		var comment = '';
+		var div = button.closest( 'div.meta' );
+
+		div.find( 'input[name="feedback_reason"]:checked' ).each(
+			function() {
+				rejectReason.push( this.value );
+			}
+		);
+
+		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
+
+		if ( ! comment.trim().length && ! rejectReason.length ) {
+			$gp.editor.set_status( button, 'current' );
+			return;
+		}
+
+		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
+		rejectData.reason = rejectReason;
+		rejectData.comment = comment;
+		rejectData.original_id = [ $gp.editor.current.original_id ];
+		rejectData.translation_id = [ $gp.editor.current.translation_id ];
+
+		rejectWithFeedback( rejectData, button, 'current' );
+	};
+	$gp.editor.hooks.set_status_fuzzy = function() {
+		var button = $( this );
+		var rejectData = {};
+		var rejectReason = [];
+		var comment = '';
+		var div = button.closest( 'div.meta' );
+
+		div.find( 'input[name="feedback_reason"]:checked' ).each(
+			function() {
+				rejectReason.push( this.value );
+			}
+		);
+
+		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
+
+		if ( ! comment.trim().length && ! rejectReason.length ) {
+			$gp.editor.set_status( button, 'fuzzy' );
+			return;
+		}
+
+		rejectData.locale_slug = $gp_reject_feedback_settings.locale_slug;
+		rejectData.reason = rejectReason;
+		rejectData.comment = comment;
+		rejectData.original_id = [ $gp.editor.current.original_id ];
+		rejectData.translation_id = [ $gp.editor.current.translation_id ];
+
+		rejectWithFeedback( rejectData, button, 'fuzzy' );
+	};
+
 	$gp.editor.hooks.set_status_rejected = function() {
 		var button = $( this );
 		var rejectData = {};
@@ -116,10 +173,10 @@
 		rejectData.original_id = [ $gp.editor.current.original_id ];
 		rejectData.translation_id = [ $gp.editor.current.translation_id ];
 
-		rejectWithFeedback( rejectData, button );
+		rejectWithFeedback( rejectData, button, 'rejected' );
 	};
 
-	function rejectWithFeedback( rejectData, button ) {
+	function rejectWithFeedback( rejectData, button, status ) {
 		var data = {};
 		var div = {};
 		if ( button ) {
@@ -145,7 +202,7 @@
 				if ( rejectData.is_bulk_reject ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				} else {
-					$gp.editor.set_status( button, 'rejected' );
+					$gp.editor.set_status( button, status );
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
 					div.find( 'textarea[name="feedback_comment"]' ).val( '' );
 				}
