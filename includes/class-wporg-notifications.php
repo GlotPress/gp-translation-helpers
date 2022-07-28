@@ -299,7 +299,7 @@ class WPorg_GlotPress_Notifications {
 	public static function get_email_body( WP_Comment $comment, ?array $comment_meta ): ?string {
 		$project         = self::get_project_from_post_id( $comment->comment_post_ID );
 		$original        = self::get_original( $comment->comment_post_ID );
-		$url             = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id ) . '#comment-' . $comment->comment_ID;
+		$url             = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
 		$link_to_comment = $url . '#comment-' . $comment->comment_ID;
 		$output          = esc_html__( 'Hi:' );
 		$output         .= '<br><br>';
