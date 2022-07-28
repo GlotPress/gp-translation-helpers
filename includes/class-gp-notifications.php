@@ -386,7 +386,7 @@ class GP_Notifications {
 		$link_to_comment = $url . '#comment-' . $comment->comment_ID;
 		$output         .= wp_kses(
 			/* translators: The discussion URL where the user can find the comment. */
-			sprintf( __( 'There is a new <a href="%1$s">comment</a> in a <a href="%2$s">GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $link_to_comment, $url ),
+			sprintf( __( 'There is a <a href="%1$s">new comment</a> in a <a href="%2$s">GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $link_to_comment, $url ),
 			array(
 				'a' => array( 'href' => array() ),
 			)

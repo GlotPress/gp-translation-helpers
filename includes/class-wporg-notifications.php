@@ -305,7 +305,7 @@ class WPorg_GlotPress_Notifications {
 		$output         .= '<br><br>';
 		$output         .= wp_kses(
 			/* translators: The comment URL where the user can find the comment. */
-			sprintf( __( 'There is a new <a href="%1$s">comment</a> in a discussion of the WordPress translation system that may be of interest to you.', 'glotpress' ), $link_to_comment ),
+			sprintf( __( 'There is a <a href="%1$s">new comment</a> in a discussion of the WordPress translation system that may be of interest to you.', 'glotpress' ), $link_to_comment ),
 			array(
 				'a' => array( 'href' => array() ),
 			)
