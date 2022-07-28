@@ -379,13 +379,14 @@ class GP_Notifications {
 		 * @param WP_Comment $comment      The comment object.
 		 * @param array      $comment_meta The meta values for the comment.
 		 */
-		$output  = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
-		$output .= esc_html__( 'Hi there,', 'glotpress' );
-		$output .= '<br><br>';
-		$url     = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
-		$output .= wp_kses(
+		$output          = apply_filters( 'gp_notification_pre_email_body', $output, $comment, $comment_meta );
+		$output         .= esc_html__( 'Hi there,', 'glotpress' );
+		$output         .= '<br><br>';
+		$url             = GP_Route_Translation_Helpers::get_permalink( $project->path, $original->id );
+		$link_to_comment = $url . '#comment-' . $comment->comment_ID;
+		$output         .= wp_kses(
 			/* translators: The discussion URL where the user can find the comment. */
-			sprintf( __( 'There is a new comment in a <a href="%1$s">GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $url ),
+			sprintf( __( 'There is a new <a href="%1$s">comment</a> in a <a href="%2$s">GlotPress discussion</a> that may be of interest to you.', 'glotpress' ), $link_to_comment, $url ),
 			array(
 				'a' => array( 'href' => array() ),
 			)
