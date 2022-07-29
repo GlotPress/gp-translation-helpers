@@ -33,7 +33,7 @@ class WPorg_GlotPress_Customizations {
 
 					return '<select required="" name="comment_topic" id="comment_topic">
 								<option value="">Select a topic</option>
-								<optgroup label="Notify  developers (if opted-in)">
+								<optgroup label="Notify developers (if opted-in)">
 									<option value="typo">Typo in the English text</option>
 									<option value="context">Where does this string appear? (more context)</option>
 								</optgroup>' .
