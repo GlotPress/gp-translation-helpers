@@ -1,5 +1,5 @@
 <?php
-gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ),  esc_html( $locale->english_name ) ) );
+gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ), esc_html( $locale->english_name ) ) );
 
 $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
@@ -82,12 +82,17 @@ gp_tmpl_header();
 				<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'stats', 'themes' ) ); ?>">Themes</a></li>
 			</ul>
 		</li>
-		<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'dashboard' ) ); ?>">Dashboard</a></li>
+		<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'discussions' ) ); ?>">Discussions</a></li>
 	</ul>
 	<div class="search-form">
 		<form>
 			<label class="screen-reader-text" for="projects-filter"><?php esc_attr_e( 'Search projects...' ); ?></label>
-			<input placeholder="<?php esc_attr_e( 'Search projects...' ); ?>" type="search" id="projects-filter" name="s" value="<?php if ( !empty( $search ) ) { echo esc_attr( $search ); } ?>" class="filter-search">
+			<input placeholder="<?php esc_attr_e( 'Search projects...' ); ?>" type="search" id="projects-filter" name="s" value="
+												  <?php
+													if ( ! empty( $search ) ) {
+														echo esc_attr( $search ); }
+													?>
+			" class="filter-search">
 			<input type="submit" value="<?php esc_attr_e( 'Search' ); ?>" class="screen-reader-text" />
 		</form>
 	</div>
@@ -117,27 +122,27 @@ gp_tmpl_header();
 		<select id="filter" name="filter">
 			<?php
 				$sorts = array();
-				if ( is_user_logged_in() && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
-					$sorts['special'] = 'Untranslated Favorites, Remaining Strings (Most first)';
-					$sorts['favorites'] = 'My Favorites';
-				}
-				$sorts['strings-remaining'] = 'Remaining Strings (Most first)';
-				$sorts['strings-remaining-asc'] = 'Remaining Strings (Least first)';
-				$sorts['strings-waiting-and-fuzzy'] = 'Waiting + Fuzzy (Most first)';
-				$sorts['strings-waiting-and-fuzzy-asc'] = 'Waiting + Fuzzy (Least first)';
-				$sorts['strings-waiting-and-fuzzy-by-modified-date'] = 'Waiting + Fuzzy (Newest first)';
+			if ( is_user_logged_in() && in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
+				$sorts['special']   = 'Untranslated Favorites, Remaining Strings (Most first)';
+				$sorts['favorites'] = 'My Favorites';
+			}
+				$sorts['strings-remaining']                              = 'Remaining Strings (Most first)';
+				$sorts['strings-remaining-asc']                          = 'Remaining Strings (Least first)';
+				$sorts['strings-waiting-and-fuzzy']                      = 'Waiting + Fuzzy (Most first)';
+				$sorts['strings-waiting-and-fuzzy-asc']                  = 'Waiting + Fuzzy (Least first)';
+				$sorts['strings-waiting-and-fuzzy-by-modified-date']     = 'Waiting + Fuzzy (Newest first)';
 				$sorts['strings-waiting-and-fuzzy-by-modified-date-asc'] = 'Waiting + Fuzzy (Oldest first)';
-				$sorts['percent-completed'] = 'Percent Completed (Most first)';
-				$sorts['percent-completed-asc'] = 'Percent Completed (Least first)';
+				$sorts['percent-completed']                              = 'Percent Completed (Most first)';
+				$sorts['percent-completed-asc']                          = 'Percent Completed (Least first)';
 
 				// Completed project filter, except on the 'waiting' project.
-				if ( $project->slug != 'waiting' ) {
-					$sorts['completed-asc'] = '100% Translations';
-				}
+			if ( $project->slug != 'waiting' ) {
+				$sorts['completed-asc'] = '100% Translations';
+			}
 
-				foreach ( $sorts as $value => $text ) {
-					printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), ( $value == $filter ? 'selected="selected"' : '' ), esc_attr( $text ) );
-				}
+			foreach ( $sorts as $value => $text ) {
+				printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), ( $value == $filter ? 'selected="selected"' : '' ), esc_attr( $text ) );
+			}
 			?>
 		</select>
 
@@ -149,30 +154,29 @@ gp_tmpl_header();
 	foreach ( $sub_projects as $sub_project ) {
 		$percent_complete = $waiting = $sub_projects_count = $fuzzy = $remaining = 0;
 		if ( isset( $project_status[ $sub_project->id ] ) ) {
-			$status = $project_status[ $sub_project->id ];
-			$percent_complete = $status->percent_complete;
-			$waiting = $status->waiting_count;
-			$fuzzy = $status->fuzzy_count;
-			$remaining = $status->all_count - $status->current_count;
+			$status             = $project_status[ $sub_project->id ];
+			$percent_complete   = $status->percent_complete;
+			$waiting            = $status->waiting_count;
+			$fuzzy              = $status->fuzzy_count;
+			$remaining          = $status->all_count - $status->current_count;
 			$sub_projects_count = $status->sub_projects_count;
 		}
 
 		// Link directly to the Waiting strings if we're in the Waiting view, otherwise link to the project overview
 		if ( 'waiting' == $project->slug ) {
 			// TODO: Since we're matching parent projects, we can't link to them as they have no direct translation sets.
-			//$project_url = gp_url_join( '/projects', $sub_project->path, $locale_slug, $set_slug ) . '?filters[status]=waiting_or_fuzzy';
+			// $project_url = gp_url_join( '/projects', $sub_project->path, $locale_slug, $set_slug ) . '?filters[status]=waiting_or_fuzzy';
 			$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
 
-			$project_name = $sub_project->name;
+			$project_name      = $sub_project->name;
 			$parent_project_id = $sub_project->parent_project_id;
 			while ( $parent_project_id ) {
-				$parent_project = GP::$project->get( $parent_project_id );
+				$parent_project    = GP::$project->get( $parent_project_id );
 				$parent_project_id = $parent_project->parent_project_id;
-				$project_name = "{$parent_project->name} - {$project_name}";
+				$project_name      = "{$parent_project->name} - {$project_name}";
 			}
-
 		} else {
-			$project_url = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
+			$project_url  = gp_url_join( '/locale', $locale_slug, $set_slug, $sub_project->path );
 			$project_name = $sub_project->name;
 		}
 
@@ -181,27 +185,29 @@ gp_tmpl_header();
 			$project_icon = $project_icons[ $sub_project->id ];
 		}
 
-		$classes = 'project-' . sanitize_title_with_dashes( str_replace( '/', '-', $project->path ) );
+		$classes  = 'project-' . sanitize_title_with_dashes( str_replace( '/', '-', $project->path ) );
 		$classes .= ' project-' . sanitize_title_with_dashes( str_replace( '/', '-', $sub_project->path ) );
 		$classes .= ' percent-' . $percent_complete;
 		?>
 		<div class="project <?php echo $classes; ?>">
 			<div class="project-top">
 				<div class="project-icon">
-					<?php echo gp_link_get( $project_url, $project_icon ) ?>
+					<?php echo gp_link_get( $project_url, $project_icon ); ?>
 				</div>
 
 				<div class="project-name">
 					<h4>
-						<?php echo gp_link_get( $project_url, $project_name ) ?>
+						<?php echo gp_link_get( $project_url, $project_name ); ?>
 					</h4>
 				</div>
 				<div class="project-description">
-					<p><?php
+					<p>
+					<?php
 						$description = wp_strip_all_tags( $sub_project->description );
 						$description = str_replace( array( 'WordPress.org Plugin Page', 'WordPress.org Theme Page' ), '', $description );
 						echo wp_trim_words( $description, 30 );
-					?></p>
+					?>
+					</p>
 				</div>
 			</div>
 
@@ -229,7 +235,7 @@ gp_tmpl_header();
 			</div>
 
 			<div class="project-bottom">
-				<?php echo gp_link_get( $project_url, 'Translate Project', [ 'class' => 'button contribute-button' ] ); ?>
+				<?php echo gp_link_get( $project_url, 'Translate Project', array( 'class' => 'button contribute-button' ) ); ?>
 			</div>
 		</div>
 		<?php
@@ -244,9 +250,9 @@ gp_tmpl_header();
 	?>
 </div>
 <?php
-	if ( isset( $pages ) && $pages['pages'] > 1 ) {
-		echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
-	}
+if ( isset( $pages ) && $pages['pages'] > 1 ) {
+	echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
+}
 ?>
 
 <script>
@@ -291,4 +297,5 @@ gp_tmpl_header();
 	});
 </script>
 
-<?php gp_tmpl_footer();
+<?php
+gp_tmpl_footer();
