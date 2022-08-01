@@ -8,11 +8,11 @@
 			var modalFeedbackForm =
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
-			'<h3>Reason</h3>' +
+			'<h3>Type (Optional)</h3>' +
 			getReasonList() +
 			'<div class="modal-comment">' +
-					'<label>Comment </label>' +
-					'<textarea name="modal_feedback_comment"></textarea>' +
+					'<h3><label for="modal_feedback_comment">Comment (Optional)</label></h3>' +
+					'<textarea id="modal_feedback_comment" name="modal_feedback_comment"></textarea>' +
 			'</div>' +
 			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject</button>' +
 			'</form>' +
