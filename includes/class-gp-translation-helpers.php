@@ -32,6 +32,14 @@ class GP_Translation_Helpers {
 	private static $instance = null;
 
 	/**
+	 * Stores plugin version.
+	 *
+	 * @since 0.0.2
+	 * @var string
+	 */
+	private static $plugin_version = null;
+
+	/**
 	 * Inits the class.
 	 *
 	 * @since 0.0.1
@@ -64,10 +72,15 @@ class GP_Translation_Helpers {
 		add_action( 'wp_ajax_comment_with_feedback', array( $this, 'comment_with_feedback' ) );
 		add_action( 'wp_ajax_optout_discussion_notifications', array( $this, 'optout_discussion_notifications' ) );
 
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		self::$plugin_version = get_plugins()['gp-translation-helpers/gp-translation-helpers.php']['Version'];
+
 		add_thickbox();
 		gp_enqueue_style( 'thickbox' );
 
-		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), '20220801' );
+		wp_register_style( 'gp-discussion-css', plugins_url( '/../css/discussion.css', __FILE__ ), array(), self::$plugin_version );
 		gp_enqueue_style( 'gp-discussion-css' );
 
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
@@ -189,10 +202,10 @@ class GP_Translation_Helpers {
 			}
 		);
 
-		wp_register_style( 'gp-translation-helpers-css', plugins_url( 'css/translation-helpers.css', __DIR__ ), '', '20220801' ); // todo: add the version as global element.
+		wp_register_style( 'gp-translation-helpers-css', plugins_url( 'css/translation-helpers.css', __DIR__ ), '', self::$plugin_version );
 		gp_enqueue_style( 'gp-translation-helpers-css' );
 
-		wp_register_script( 'gp-translation-helpers', plugins_url( '/js/translation-helpers.js', __DIR__ ), array( 'gp-editor' ), '20220801', true );
+		wp_register_script( 'gp-translation-helpers', plugins_url( '/js/translation-helpers.js', __DIR__ ), array( 'gp-editor' ), self::$plugin_version, true );
 		gp_enqueue_scripts( array( 'gp-translation-helpers' ) );
 
 		wp_localize_script( 'gp-translation-helpers', '$gp_translation_helpers_settings', $translation_helpers_settings );
@@ -363,7 +376,7 @@ class GP_Translation_Helpers {
 			return;
 		}
 
-		wp_register_script( 'gp-comment-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), '20220801' );
+		wp_register_script( 'gp-comment-feedback-js', plugins_url( '/../js/reject-feedback.js', __FILE__ ), array( 'jquery', 'gp-common', 'gp-editor', 'thickbox' ), self::$plugin_version );
 		gp_enqueue_script( 'gp-comment-feedback-js' );
 
 		wp_localize_script(
