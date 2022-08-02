@@ -956,7 +956,11 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( ! $is_linking_comment ) :
 				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
-					gth_print_translation( $comment_translation_id, $args, 'Translation: ' );
+					$translation_status = GP::$translation->get( $comment_translation_id )->status;
+					if ( $translation_status ) {
+						$translation_status = ' (' . $translation_status . ')';
+					}
+					gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ':' );
 				}
 
 				?>
