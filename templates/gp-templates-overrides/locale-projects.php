@@ -1,4 +1,9 @@
 <?php
+/**
+ * This template overrides the default local-projects template so we can add a link to "Discussions" dashboard.
+ */
+
+/* translators: %s: locale */
 gp_title( sprintf( __( 'Projects translated to %s &lt; GlotPress' ), esc_html( $locale->english_name ) ) );
 
 $breadcrumb   = array();
@@ -14,11 +19,11 @@ gp_tmpl_header();
 
 	<div class="locale-box">
 		<ul class="name">
-			<li class="english"><?php echo $locale->english_name; ?></li>
-			<li class="native"><?php echo $locale->native_name; ?></li>
+			<li class="english"><?php echo esc_html( $locale->english_name ); ?></li>
+			<li class="native"><?php echo esc_html( $locale->native_name ); ?></li>
 			<li class="code">
 				<?php
-				echo $locale->wp_locale;
+				echo esc_html( $locale->wp_locale );
 
 				if ( count( $variants ) > 1 ) {
 					?>
@@ -31,7 +36,7 @@ gp_tmpl_header();
 								$variant,
 								esc_url( gp_url_join( '/locale', $locale_slug, $variant, $project->slug ) ),
 								( $set_slug == $variant ) ? ' selected="selected"' : '',
-								ucfirst( $variant )
+								esc_html( ucfirst( $variant ) )
 							);
 						}
 						?>
@@ -70,7 +75,7 @@ gp_tmpl_header();
 				'<li><a href="%s"%s>%s</a></li>',
 				esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, $top_level_project->slug ) ),
 				( $top_level_project->path == $project_path ) ? ' class="current"' : '',
-				$top_level_project->name
+				esc_html( $top_level_project->name )
 			);
 		}
 		?>
@@ -136,7 +141,7 @@ gp_tmpl_header();
 				$sorts['percent-completed-asc']                          = 'Percent Completed (Least first)';
 
 				// Completed project filter, except on the 'waiting' project.
-			if ( $project->slug != 'waiting' ) {
+			if ( 'waiting' !== $project->slug ) {
 				$sorts['completed-asc'] = '100% Translations';
 			}
 
@@ -154,12 +159,12 @@ gp_tmpl_header();
 	foreach ( $sub_projects as $sub_project ) {
 		$percent_complete = $waiting = $sub_projects_count = $fuzzy = $remaining = 0;
 		if ( isset( $project_status[ $sub_project->id ] ) ) {
-			$status             = $project_status[ $sub_project->id ];
-			$percent_complete   = $status->percent_complete;
-			$waiting            = $status->waiting_count;
-			$fuzzy              = $status->fuzzy_count;
-			$remaining          = $status->all_count - $status->current_count;
-			$sub_projects_count = $status->sub_projects_count;
+			$status_of_project  = $project_status[ $sub_project->id ];
+			$percent_complete   = $status_of_project->percent_complete;
+			$waiting            = $status_of_project->waiting_count;
+			$fuzzy              = $status_of_project->fuzzy_count;
+			$remaining          = $status_of_project->all_count - $status_of_project->current_count;
+			$sub_projects_count = $status_of_project->sub_projects_count;
 		}
 
 		// Link directly to the Waiting strings if we're in the Waiting view, otherwise link to the project overview
@@ -189,7 +194,7 @@ gp_tmpl_header();
 		$classes .= ' project-' . sanitize_title_with_dashes( str_replace( '/', '-', $sub_project->path ) );
 		$classes .= ' percent-' . $percent_complete;
 		?>
-		<div class="project <?php echo $classes; ?>">
+		<div class="project <?php echo esc_attr( $classes ); ?>">
 			<div class="project-top">
 				<div class="project-icon">
 					<?php echo gp_link_get( $project_url, $project_icon ); ?>
@@ -205,7 +210,7 @@ gp_tmpl_header();
 					<?php
 						$description = wp_strip_all_tags( $sub_project->description );
 						$description = str_replace( array( 'WordPress.org Plugin Page', 'WordPress.org Theme Page' ), '', $description );
-						echo wp_trim_words( $description, 30 );
+						echo esc_html( wp_trim_words( $description, 30 ) );
 					?>
 					</p>
 				</div>
@@ -231,7 +236,7 @@ gp_tmpl_header();
 			</div>
 
 			<div class="percent">
-				<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
+				<div class="percent-complete" style="width:<?php echo esc_attr( $percent_complete ); ?>%;"></div>
 			</div>
 
 			<div class="project-bottom">
