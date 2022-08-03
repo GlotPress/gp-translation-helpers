@@ -24,7 +24,7 @@ gp_tmpl_header();
 			echo '<tr>' .
 			 '<td>' . esc_html( $discussion_comment->comment_author ) . '</td>' .
 			 '<td><a href="' . esc_url( get_comment_link( $discussion_comment ) ) . '">' . esc_html( $discussion_comment->comment_content ) . '</a></td>' .
-			 '<td>' . esc_html( $comment->comment_date ) . '</td>' .
+			 '<td>' . esc_html( $discussion_comment->comment_date ) . '</td>' .
 			 '</tr>';
 
 		}
