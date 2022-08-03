@@ -26,6 +26,20 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
+	 * Loads the 'discussions-dashboard' template.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string|null $locale_slug          Optional. The locale slug. E.g. "es".
+	 *
+	 * @return void
+	 */
+	public function discussions_dashboard( $locale_slug ) {
+		$gp_locale = GP_Locales::by_slug( $locale_slug );
+		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
+	}
+
+	/**
 	 * Loads the 'original-permalink' template.
 	 *
 	 * @since 0.0.2
