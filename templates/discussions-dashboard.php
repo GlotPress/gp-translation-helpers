@@ -20,11 +20,11 @@ gp_tmpl_header();
 	</thead>
 	<tbody>
 		<?php
-		foreach ( $comments as $comment ) {
+		foreach ( $comments as $discussion_comment ) {
 			echo '<tr>' .
-			 '<td>' . $comment->comment_author . '</td>' .
-			 '<td>' . $comment->comment_content . '</td>' .
-			 '<td>' . $comment->comment_date . '</td>' .
+			 '<td>' . esc_html( $discussion_comment->comment_author ) . '</td>' .
+			 '<td><a href="' . esc_url( get_comment_link( $discussion_comment ) ) . '">' . esc_html( $discussion_comment->comment_content ) . '</a></td>' .
+			 '<td>' . esc_html( $comment->comment_date ) . '</td>' .
 			 '</tr>';
 
 		}
