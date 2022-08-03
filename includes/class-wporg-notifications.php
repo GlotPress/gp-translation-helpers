@@ -429,12 +429,9 @@ class WPorg_GlotPress_Notifications {
 	 * @return array The list of emails with the opt-in enabled.
 	 */
 	private static function get_opted_in_email_addresses( array $email_addresses ): array {
-		foreach ( $email_addresses as $email_address ) {
-			if ( self::is_global_optout_email_address( $email_address ) ) {
-				$index = array_search( $email_address, $email_addresses, true );
-				if ( false !== $index ) {
-					unset( $email_addresses[ $index ] );
-				}
+		foreach ( $email_addresses as $index => $email_address ) {
+			if ( ! $email_address || self::is_global_optout_email_address( $email_address ) ) {
+				unset( $email_addresses[ $index ] );
 			}
 		}
 		return array_values( $email_addresses );
@@ -607,8 +604,12 @@ class WPorg_GlotPress_Notifications {
 	public static function optin_message_for_each_discussion( int $original_id ): string {
 		$user = wp_get_current_user();
 
+		if ( ! $user->user_email ) {
+			$output = __( "You will not receive notifications because you don't have an e-mail address set." );
+			return $output;
+		}
 		if ( self::is_global_optout_email_address( $user->user_email ) ) {
-			$output  = __( 'You will not receive notifications because you have not yet opted-in. ' );
+			$output  = __( 'You will not receive notifications because you have not yet opted-in.' );
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Start receiving notifications.' ) . '</a>';
 			return $output;
 		}
