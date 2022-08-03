@@ -36,6 +36,14 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 */
 	public function discussions_dashboard( $locale_slug ) {
 		$gp_locale = GP_Locales::by_slug( $locale_slug );
+
+		$args = array(
+			'number' => 20,
+		);
+
+		$comments_query = new WP_Comment_Query( $args );
+		$comments       = $comments_query->comments;
+
 		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
 	}
 

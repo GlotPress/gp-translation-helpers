@@ -10,6 +10,27 @@ gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
 
 ?>
+<table id="translations" class="translations clear">
+	<thead>
+	<tr>
+		<th>Author</th>
+		<th>Comment</th>
+		<th>Submitted on</th>
+	</tr>
+	</thead>
+	<tbody>
+		<?php
+		foreach ( $comments as $comment ) {
+			echo '<tr>' .
+			 '<td>' . $comment->comment_author . '</td>' .
+			 '<td>' . $comment->comment_content . '</td>' .
+			 '<td>' . $comment->comment_date . '</td>' .
+			 '</tr>';
 
+		}
+		?>
+	</tbody>
+	
+</table>
 <?php
 gp_tmpl_footer();
