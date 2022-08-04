@@ -35,6 +35,10 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 * @return void
 	 */
 	public function discussions_dashboard( $locale_slug ) {
+		if ( ! is_user_logged_in() ) {
+			$this->die_with_404();
+		}
+
 		$gp_locale = GP_Locales::by_slug( $locale_slug );
 
 		$args = array(
