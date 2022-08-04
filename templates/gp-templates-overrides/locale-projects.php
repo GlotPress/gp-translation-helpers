@@ -87,8 +87,10 @@ gp_tmpl_header();
 				<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'stats', 'themes' ) ); ?>">Themes</a></li>
 			</ul>
 		</li>
+	<?php if ( is_user_logged_in() ) : ?>
 		<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'discussions' ) ); ?>">Discussions</a></li>
-	</ul>
+	<?php endif ?>
+		</ul>
 	<div class="search-form">
 		<form>
 			<label class="screen-reader-text" for="projects-filter"><?php esc_attr_e( 'Search projects...' ); ?></label>
