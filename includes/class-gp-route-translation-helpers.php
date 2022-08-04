@@ -40,9 +40,10 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 
 		$gp_locale = GP_Locales::by_slug( $locale_slug );
-
-		$args = array(
-			'number' => 20,
+		$args      = array(
+			'number'     => 20,
+			'meta_key'   => 'locale',
+			'meta_value' => $locale_slug,
 		);
 
 		$comments_query = new WP_Comment_Query( $args );
