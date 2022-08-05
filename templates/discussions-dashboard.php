@@ -16,28 +16,27 @@ gp_tmpl_header();
 
 <?php
 
-$comments_by_post_id = array();
-$last_comment_by_post_id = array();
+$comments_by_post_id            = array();
+$latest_comment_date_by_post_id = array();
 
 foreach ( $comments as $_comment ) {
-	$original_id = Helper_Translation_Discussion::get_original_from_post_id( $_comment->comment_post_ID );
 	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
 		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
 	}
 
 	$comments_by_post_id[ $_comment->comment_post_ID ][] = $_comment;
 
-	if ( ! isset( $last_comment_by_post_id[ $_comment->comment_post_ID ] ) ) {
-		$last_comment_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
-	} elseif ( $last_comment_by_post_id[ $_comment->comment_post_ID ] < $_comment->comment_date ) {
-		$last_comment_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
+	if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
+		$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
+	} elseif ( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] < $_comment->comment_date ) {
+		$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
 	}
 }
 
 uasort(
 	$comments_by_post_id,
-	function( $a, $b ) use ( $last_comment_by_post_id ) {
-		return $last_comment_by_post_id[ $b->comment_post_ID ] <=> $last_comment_by_post_id[ $a->comment_post_ID ];
+	function( $a, $b ) use ( $latest_comment_date_by_post_id ) {
+		return $latest_comment_date_by_post_id[ $b->comment_post_ID ] <=> $latest_comment_date_by_post_id[ $a->comment_post_ID ];
 	}
 );
 
@@ -53,16 +52,15 @@ foreach ( $comments_by_post_id as $_post_id => $post_comments ) {
 	if ( ! $original_id ) {
 		continue;
 	}
-	$original = GP::$original->get( $original_id );
+
+	$original      = GP::$original->get( $original_id );
 	$first_comment = reset( $post_comments );
 	?>
 	<h2><?php echo esc_html( $original->singular ); ?></h2>
 	<a href="<?php echo esc_attr( get_comment_link( $first_comment ) ); ?>">Go to Discussions page</a> | <a href="#after-post-<?php echo esc_attr( $_post_id ); ?>">Next ↓</a>
 	<div id="dashboard-comments-<?php echo esc_attr( $_post_id ); ?>" style="border-left: 2px solid #ccc; padding-left: 2em; scroll-behavior: smooth">
-
 	<?php
-
-	wp_list_comments( $args, $post_comments );
+		wp_list_comments( $args, $post_comments );
 	?>
 	</div>
 	<a name="after-post-<?php echo esc_attr( $_post_id ); ?>"></a>
