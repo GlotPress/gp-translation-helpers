@@ -88,7 +88,10 @@ gp_tmpl_header();
 			</ul>
 		</li>
 	<?php
-		// Apply same conditions that show the waiting tab to the discussions tab
+	/**
+	 * Apply same conditions that show the waiting tab to the discussions tab,
+	 * so that this tab is only visible to global admins and GTEs/PTEs.
+	 */
 	if ( is_user_logged_in() && 'waiting' === $default_project_tab ) :
 		?>
 		<li><a href="<?php echo esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, 'discussions' ) ); ?>">Discussions</a></li>
