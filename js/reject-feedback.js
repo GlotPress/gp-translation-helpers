@@ -25,7 +25,6 @@
 			$( $gp.editor.table ).off( 'click', 'summary' );
 
 			$( '#bulk-actions-toolbar-top .button, #bulk-actions-toolbar-bottom .button' ).click( function( e ) {
-
 				rowIds = $( 'input:checked', $( 'table#translations th.checkbox' ) ).map( function() {
 					var selectedRow = $( this ).parents( 'tr.preview' );
 					if ( ! selectedRow.hasClass( 'untranslated' ) ) {
@@ -86,7 +85,7 @@
 
 				comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 				updateBulkRejectStatus( $( this ) );
-			if ( ( ! comment.trim().length && ! commentReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
+				if ( ( ! comment.trim().length && ! commentReason.length ) || ( ! translationIds.length || ! originalIds.length ) ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				}
 
@@ -244,7 +243,7 @@
 			}
 		).done(
 			function() {
- 				if ( feedbackData.is_bulk_reject ) {
+				if ( feedbackData.is_bulk_reject ) {
 					$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 				} else {
 					$gp.editor.set_status( button, status );
