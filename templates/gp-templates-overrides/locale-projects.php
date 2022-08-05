@@ -1,6 +1,8 @@
 <?php
 /**
  * This template overrides the default local-projects template so we can add a link to "Discussions" dashboard.
+ *
+ * Todo: Remove this template override and add customizations directly in wporg-gp-customizations plugin.
  */
 
 /* translators: %s: locale */
@@ -89,8 +91,10 @@ gp_tmpl_header();
 		</li>
 	<?php
 	/**
-	 * Apply same conditions that show the waiting tab to the discussions tab,
+	 * Apply same logic that show the waiting tab to the discussions tab,
 	 * so that this tab is only visible to global admins and GTEs/PTEs.
+	 *
+	 * Todo: Modify this logic mentioned above so that here can use something like $is_admin_or_gte?
 	 */
 	if ( is_user_logged_in() && 'waiting' === $default_project_tab ) :
 		?>
