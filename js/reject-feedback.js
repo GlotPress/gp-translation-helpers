@@ -15,7 +15,7 @@
 					'<textarea name="modal_feedback_comment"></textarea>' +
 			'</div>' +
 			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject</button>' +
-			'<button id="modal-request_changes-btn" class="modal-btn gp-btn-style" style="display: none;" class="modal-btn">Request changes</button>' +
+			'<button id="modal-requestchanges-btn" class="modal-btn gp-btn-style" style="display: none;" class="modal-btn">Request changes</button>' +
 			'</form>' +
 			'</div>';
 
@@ -67,11 +67,11 @@
 				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 				var numberOfCheckedReasons = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
 				if ( commentText || numberOfCheckedReasons ) {
-					$( 'form#bulk-actions-toolbar-top  option[value="reject"]' ).attr( 'value', 'changes_requested' ).text( 'Changes requested' );
+					$( 'form#bulk-actions-toolbar-top  option[value="reject"]' ).attr( 'value', 'changesrequested' ).text( 'Changes requested' );
 				}
 			}
 
-			$( 'body' ).on( 'click', '#modal-reject-btn, #modal-request_changes-btn', function( e ) {
+			$( 'body' ).on( 'click', '#modal-reject-btn, #modal-requestchanges-btn', function( e ) {
 				var comment = '';
 				var commentReason = [];
 				var commentData = {};
@@ -121,7 +121,7 @@
 				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
 				var div = thisObj.closest( '.meta' );
 				var rejectButton = $( '.reject', div );
-				var changesRequestedtButton = $( '.changes_requested', div );
+				var changesRequestedtButton = $( '.changesrequested', div );
 				var numberOfCheckedReasons = form.find( 'input[name="feedback_reason"]:checked' ).length;
 
 				if ( commentText.trim() !== '' || numberOfCheckedReasons ) {
@@ -156,7 +156,7 @@
 				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 				var div = thisObj.closest( '#TB_ajaxContent' );
 				var rejectButton = $( '#modal-reject-btn', div );
-				var changesRequestedtButton = $( '#modal-request_changes-btn', div );
+				var changesRequestedtButton = $( '#modal-requestchanges-btn', div );
 				var numberOfCheckedReasons = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
 
 				if ( commentText.trim() !== '' || numberOfCheckedReasons ) {
@@ -187,8 +187,8 @@
 		setStatus( $( this ), 'rejected' );
 	};
 
-	$gp.editor.hooks.set_status_changes_requested = function() {
-		setStatus( $( this ), 'changes_requested' );
+	$gp.editor.hooks.set_status_changesrequested = function() {
+		setStatus( $( this ), 'changesrequested' );
 	};
 
 	function setStatus( that, status ) {
