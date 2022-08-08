@@ -15,7 +15,7 @@
 					'<textarea name="modal_feedback_comment"></textarea>' +
 			'</div>' +
 			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject</button>' +
-			'<button id="modal-request_changes-btn"  style="display: none;" class="modal-btn">Request changes</button>' +
+			'<button id="modal-request_changes-btn" class="modal-btn gp-btn-style" style="display: none;" class="modal-btn">Request changes</button>' +
 			'</form>' +
 			'</div>';
 
@@ -271,7 +271,7 @@
 
 		// eslint-disable-next-line vars-on-top
 		for ( var reason in commentReasons ) {
-			prefix = '<div class="modal-item">><label class="tooltip" title="' + commentReasons[ reason ].explanation + '">';
+			prefix = '<div class="modal-item"><label class="tooltip" title="' + commentReasons[ reason ].explanation + '">';
 			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + commentReasons[ reason ].explanation + '"></span></div>';
 			inputName = 'modal_feedback_reason';
 			commentList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + commentReasons[ reason ].name + suffix;
