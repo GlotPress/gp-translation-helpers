@@ -325,6 +325,20 @@ class WPorg_GlotPress_Notifications {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
 			}
 		}
+		if ( array_key_exists( 'reject_reason', $comment_meta ) && ( ! empty( $comment_meta['reject_reason'][0] ) ) ) {
+			/* translators: The reason(s) for rejection. */
+			$reasons         = array();
+			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+			$reasons         = array_map(
+				function( $reason ) use ( $comment_reasons ) {
+					if ( array_key_exists( $reason, $comment_reasons ) ) {
+						return $comment_reasons[ $reason ]['name'];
+					}
+				},
+				maybe_unserialize( $comment_meta['reject_reason'][0] )
+			);
+			$output         .= '- <strong>' . esc_html__( 'Reason: ' ) . '</strong>' . esc_html( implode( ', ', $reasons ) ) . '<br>';
+		}
 		$output .= '- <strong>' . esc_html__( 'Comment: ' ) . '</strong>' . esc_html( $comment->comment_content ) . '</pre>';
 		$output .= '<br><br>';
 		$output .= esc_html__( 'Have a nice day' );

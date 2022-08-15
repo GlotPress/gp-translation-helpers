@@ -421,6 +421,21 @@ class GP_Notifications {
 				}
 			}
 		}
+		if ( array_key_exists( 'reject_reason', $comment_meta ) && ( ! empty( $comment_meta['reject_reason'][0] ) ) ) {
+			/* translators: The reason(s) for rejection. */
+			$reasons         = array();
+			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+			$reasons         = array_map(
+				function( $reason ) use ( $comment_reasons ) {
+					if ( array_key_exists( $reason, $comment_reasons ) ) {
+						return $comment_reasons[ $reason ]['name'];
+					}
+				},
+				maybe_unserialize( $comment_meta['reject_reason'][0] )
+			);
+
+			$output .= '- ' . wp_kses( sprintf( __( '<strong>Reason:</strong> %s', 'glotpress' ), implode( ', ', $reasons ) ), array( 'strong' => array() ) ) . '<br/>';
+		}
 		/* translators: The comment made. */
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) ) . '<br/>';
 		if ( empty( self::$related_comments ) ) {
