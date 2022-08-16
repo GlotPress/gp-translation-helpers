@@ -403,7 +403,7 @@ class GP_Translation_Helpers {
 		$comment              = sanitize_text_field( $_POST['data']['comment'] );
 
 		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $comment_reason && ! $comment ) ) {
-			wp_send_json_error();
+			wp_send_json_error( 'Oops! One or more required parameters missing' );
 		}
 
 		// Get original_id and translation_id of first string in the array
