@@ -336,7 +336,7 @@ class WPorg_GlotPress_Notifications {
 				},
 				maybe_unserialize( $comment_meta['reject_reason'][0] )
 			);
-			$output         .= '- <strong>' . esc_html__( 'Reason: ' ) . '</strong>' . esc_html( implode( ', ', $reasons ) ) . '<br>';
+			$output         .= '- <strong>' . esc_html__( 'Reason(s): ' ) . '</strong>' . esc_html( implode( ', ', $reasons ) ) . '<br>';
 		}
 		$output .= '- <strong>' . esc_html__( 'Comment: ' ) . '</strong>' . esc_html( $comment->comment_content ) . '</pre>';
 		$output .= '<br><br>';

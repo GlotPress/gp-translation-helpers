@@ -433,7 +433,7 @@ class GP_Notifications {
 				maybe_unserialize( $comment_meta['reject_reason'][0] )
 			);
 			/* translators: The reason(s) for rejection. */
-			$output .= '- ' . wp_kses( sprintf( __( '<strong>Reason:</strong> %s', 'glotpress' ), implode( ', ', $reasons ) ), array( 'strong' => array() ) ) . '<br/>';
+			$output .= '- ' . wp_kses( sprintf( __( '<strong>Reason(s):</strong> %s', 'glotpress' ), implode( ', ', $reasons ) ), array( 'strong' => array() ) ) . '<br/>';
 		}
 		/* translators: The comment made. */
 		$output .= '- ' . wp_kses( sprintf( __( '<strong>Comment:</strong> %s', 'glotpress' ), $comment->comment_content ), array( 'strong' => array() ) ) . '<br/>';
