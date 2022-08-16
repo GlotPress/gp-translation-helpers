@@ -1,4 +1,4 @@
-/* global $gp, $gp_comment_feedback_settings, document, tb_show */
+/* global $gp, $gp_comment_feedback_settings, document, tb_show, console */
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
@@ -164,7 +164,8 @@
 			}
 		).fail(
 			function( xhr, msg ) {
-				// Todo: Remove after debugging is complete
+				// Todo: Remove console output after debugging is completed
+				/* eslint no-console: ["error", { allow: ["error"] }] */
 				console.error( data );
 				msg = 'An error has occurred';
 				if ( xhr.responseText ) {
