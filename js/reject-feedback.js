@@ -164,6 +164,8 @@
 			}
 		).fail(
 			function( xhr, msg ) {
+				// Todo: Remove after debugging is complete
+				console.error( data );
 				msg = 'An error has occurred';
 				if ( xhr.responseText ) {
 					msg += ': ' + xhr.responseText;
