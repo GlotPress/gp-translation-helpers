@@ -68,17 +68,23 @@ $args = array(
 				continue;
 			}
 
-			$original          = GP::$original->get( $original_id );
-			$first_comment     = reset( $post_comments );
-			$no_other_comments = count( $post_comments ) - 1;
-			echo '<tr>' .
-			 '<td>' . esc_html( $original->singular ) . '</td>' .
-			 '<td><a href="' . esc_url( get_comment_link( $first_comment ) ) . '">' . esc_html( $first_comment->comment_content ) . '</a><br>' .
-			 '<a class="other-comments" href="' . esc_url( get_comment_link( $first_comment ) ) . '"> + ' . esc_html( $no_other_comments ) . ' comments</a></td>' .
-			 '<td>' . esc_html( $discussion_comment->comment_author ) . '</td>' .
-			 '<td>' . esc_html( $discussion_comment->comment_date ) . '</td>' .
-			 '</tr>';
-
+			$original             = GP::$original->get( $original_id );
+			$first_comment        = reset( $post_comments );
+			$no_of_other_comments = count( $post_comments ) - 1;
+			?>
+			<tr>
+				<td><?php echo esc_html( $original->singular ); ?></td>
+				 <td>
+					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( $first_comment->comment_content ); ?></a>
+					<?php if ( $no_of_other_comments > 0 ) : ?>
+						<br>
+						<a class="other-comments" href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"> + <?php echo esc_html( $no_of_other_comments ); ?> comments</a>
+					<?php endif; ?>
+				</td>
+				<td><?php echo esc_html( $first_comment->comment_author ); ?></td>
+				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
+			</tr>
+			<?php
 		}
 		?>
 		
