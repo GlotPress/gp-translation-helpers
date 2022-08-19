@@ -73,7 +73,8 @@ $args = array(
 			$no_other_comments = count( $post_comments ) - 1;
 			echo '<tr>' .
 			 '<td>' . esc_html( $original->singular ) . '</td>' .
-			 '<td><a href="' . esc_url( get_comment_link( $first_comment ) ) . '">' . esc_html( $first_comment->comment_content ) . ' + ' . esc_html( $no_other_comments ) . ' other comments</a></td>' .
+			 '<td><a href="' . esc_url( get_comment_link( $first_comment ) ) . '">' . esc_html( $first_comment->comment_content ) . '</a><br>' .
+			 '<a class="other-comments" href="' . esc_url( get_comment_link( $first_comment ) ) . '"> + ' . esc_html( $no_other_comments ) . ' comments</a></td>' .
 			 '<td>' . esc_html( $discussion_comment->comment_author ) . '</td>' .
 			 '<td>' . esc_html( $discussion_comment->comment_date ) . '</td>' .
 			 '</tr>';
