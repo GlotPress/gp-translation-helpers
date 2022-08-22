@@ -78,6 +78,7 @@ $args = array(
 					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( $first_comment->comment_content ); ?></a>
 					<?php if ( $no_of_other_comments > 0 ) : ?>
 						<br>
+						<?php /* translators: number of comments. */ ?>
 						<a class="other-comments" href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"> + <?php printf( _n( '%s Comment', '%s Comments', $no_of_other_comments ), number_format_i18n( $no_of_other_comments ) ); ?></a>
 					<?php endif; ?>
 				</td>
