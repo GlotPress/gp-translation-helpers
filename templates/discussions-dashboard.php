@@ -12,6 +12,7 @@ gp_tmpl_header();
 ?>
 <style>
 	html { scroll-behavior: smooth; }
+	table td { overflow-wrap: break-word }
 </style>
 
 <?php
