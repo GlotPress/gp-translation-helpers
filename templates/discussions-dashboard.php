@@ -53,7 +53,7 @@ $args = array(
 ?>
 
 <table id="translations" class="translations clear">
-	<thead>
+	<thead class="discussions-table-head">
 	<tr>
 		<th>Original string</th>
 		<th>Comment</th>

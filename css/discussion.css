@@ -258,3 +258,6 @@ a.comment-reply-link {
 	text-decoration: none !important;
 	margin-top: 8px;
 }
+.discussions-table-head{
+	background-color: var(--gp-color-canvas-subtle) !important;
+}
