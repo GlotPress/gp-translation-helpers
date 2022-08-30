@@ -445,11 +445,14 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param string $email_address The user's email address.
+	 * @param string|null $email_address The user's email address.
 	 *
-	 * @return bool Whether a user wis globally opt-out.
+	 * @return bool Whether a user is globally opt-out.
 	 */
-	private static function is_global_optout_email_address( string $email_address ): bool {
+	private static function is_global_optout_email_address( ?string $email_address ): bool {
+		if ( is_null( $email_address ) ) {
+			return false;
+		}
 		$user            = get_user_by( 'email', $email_address );
 		$gp_default_sort = get_user_option( 'gp_default_sort', $user->ID );
 		if ( 'on' != gp_array_get( $gp_default_sort, 'notifications_optin', 'off' ) ) {
