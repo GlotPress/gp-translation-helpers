@@ -1,4 +1,4 @@
-/* global $gp, $gp_comment_feedback_settings, document, tb_show */
+/* global $gp, $gp_comment_feedback_settings, document, tb_show, console */
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
@@ -164,11 +164,13 @@
 			}
 		).fail(
 			function( xhr, msg ) {
+				/* eslint no-console: ["error", { allow: ["error"] }] */
+				console.error( data );
 				msg = 'An error has occurred';
 				if ( xhr.responseText ) {
 					msg += ': ' + xhr.responseText;
 				}
-				msg += '. Please, take a screenshot, send it to the developers, and reload the page to see if it still worked.';
+				msg += '. Please, take a screenshot of the output in the browser console, send it to the developers, and reload the page to see if it works.';
 				$gp.notices.error( msg );
 			}
 		);
