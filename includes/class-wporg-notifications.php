@@ -430,7 +430,7 @@ class WPorg_GlotPress_Notifications {
 	 */
 	private static function get_opted_in_email_addresses( array $email_addresses ): array {
 		foreach ( $email_addresses as $index => $email_address ) {
-			if ( ! $email_address || self::is_global_optout_email_address( $email_address ) ) {
+			if ( ! is_string( $email_address ) || empty( $email_address ) || self::is_global_optout_email_address( $email_address ) ) {
 				unset( $email_addresses[ $index ] );
 			}
 		}
