@@ -22,10 +22,6 @@ $bulk_comments                  = array();
 $latest_comment_date_by_post_id = array();
 
 foreach ( $comments as $_comment ) {
-	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
-		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
-	}
-
 	$is_linking_comment = preg_match( '!^' . home_url( gp_url() ) . '[a-z0-9_/#-]+$!i', $_comment->comment_content );
 	if ( $is_linking_comment ) {
 		$linked_comment = $_comment->comment_content;
@@ -37,9 +33,17 @@ foreach ( $comments as $_comment ) {
 		$linking_comment_locale      = array_pop( $path_parts );
 		$linking_comment_original_id = array_pop( $path_parts );
 
+		if ( ! isset( $bulk_comments[ $linking_comment_original_id ] ) ) {
+			$bulk_comments[ $linking_comment_original_id ] = array();
+		}
+
 		$bulk_comments[ $linking_comment_original_id ][] = $_comment->comment_post_ID;
 		continue;
 	}
+	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
+		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
+	}
+
 
 	$comments_by_post_id[ $_comment->comment_post_ID ][] = $_comment;
 
