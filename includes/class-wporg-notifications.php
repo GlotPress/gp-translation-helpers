@@ -325,7 +325,7 @@ class WPorg_GlotPress_Notifications {
 				$output .= '- <strong>' . esc_html__( 'Translation string: ' ) . '</strong>' . esc_html( $translation->translation_0 ) . '<br>';
 			}
 		}
-		if ( ! empty( $comment_meta['reject_reason'][0] ) ) {
+		if ( isset( $comment_meta['reject_reason'][0] ) && ! empty( maybe_unserialize( $comment_meta['reject_reason'][0] ) ) ) {
 			$reasons         = array();
 			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
 			$reasons         = array_map(
