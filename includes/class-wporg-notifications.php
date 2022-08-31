@@ -442,15 +442,12 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param ?string $email_address The user's email address.
+	 * @param string $email_address The user's email address.
 	 *
 	 * @return bool Whether a user wis globally opt-out.
 	 */
-	private static function is_global_optout_email_address( ?string $email_address ): bool {
-		if ( is_null( $email_address ) ) {
-			return false;
-		}
-		if ( ! is_email( $email_address ) ) {
+	private static function is_global_optout_email_address( string $email_address ): bool {
+		if ( empty( $email_address ) || ! is_email( $email_address ) ) {
 			return false;
 		}
 		$user            = get_user_by( 'email', $email_address );
@@ -605,8 +602,7 @@ class WPorg_GlotPress_Notifications {
 		$user = wp_get_current_user();
 
 		if ( ! $user->user_email ) {
-			$output = __( "You will not receive notifications because you don't have an e-mail address set." );
-			return $output;
+			return __( "You will not receive notifications because you don't have an e-mail address set." );
 		}
 		if ( self::is_global_optout_email_address( $user->user_email ) ) {
 			$output  = __( 'You will not receive notifications because you have not yet opted-in.' );
