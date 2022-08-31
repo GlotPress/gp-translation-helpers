@@ -18,11 +18,27 @@ gp_tmpl_header();
 <?php
 
 $comments_by_post_id            = array();
+$bulk_comments                  = array();
 $latest_comment_date_by_post_id = array();
 
 foreach ( $comments as $_comment ) {
 	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
 		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
+	}
+
+	$is_linking_comment = preg_match( '!^' . home_url( gp_url() ) . '[a-z0-9_/#-]+$!i', $_comment->comment_content );
+	if ( $is_linking_comment ) {
+		$linked_comment = $_comment->comment_content;
+		$parts          = wp_parse_url( $linked_comment );
+		$parts['path']  = rtrim( $parts['path'], '/' );
+		$path_parts     = explode( '/', $parts['path'] );
+
+		$linking_comment_set_slug    = array_pop( $path_parts );
+		$linking_comment_locale      = array_pop( $path_parts );
+		$linking_comment_original_id = array_pop( $path_parts );
+
+		$bulk_comments[ $linking_comment_original_id ][] = $_comment->comment_post_ID;
+		continue;
 	}
 
 	$comments_by_post_id[ $_comment->comment_post_ID ][] = $_comment;
@@ -74,7 +90,12 @@ $args = array(
 			$no_of_other_comments = count( $post_comments ) - 1;
 			?>
 			<tr>
-				<td><?php echo esc_html( $original->singular ); ?></td>
+				<td><?php
+				echo esc_html( $original->singular );
+				if ( isset( $bulk_comments[ $original_id ] ) ) {
+					printf( '+ ' . _n( '%s Original', '%s Originals', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
+				}
+				?></td>
 				 <td>
 					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( $first_comment->comment_content ); ?></a>
 					<?php if ( $no_of_other_comments > 0 ) : ?>
