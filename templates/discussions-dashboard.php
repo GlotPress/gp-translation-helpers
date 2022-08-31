@@ -61,7 +61,7 @@ foreach ( $bulk_comments as $original_id => $_post_id ) {
 		$parts          = wp_parse_url( $linked_comment );
 		$comment_id = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
 		if ( $comment_id ) {
-			$comments_by_post_id[ $_comment->comment_post_ID ] = get_comment( $comment_id );
+			$comments_by_post_id[ $_comment->comment_post_ID ][] = get_comment( $comment_id );
 		}
 	}
 }
@@ -106,16 +106,27 @@ $args = array(
 			$no_of_other_comments = count( $post_comments ) - 1;
 			?>
 			<tr>
-				<td><?php
-				echo esc_html( $original->singular );
-				if ( isset( $bulk_comments[ $original_id ] ) ) {
-					?> <span class="other-comments" title="<?php echo esc_attr( implode( ', ', array_column( $bulk_comments[ $original_id ], 'comment_content' ) ) ); ?>"><?php
-					printf( '+ ' . _n( '%s Other', '%s Others', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
-					 ?>
-					</span>
+				<td>
 					<?php
-				}
-				?></td>
+					echo esc_html( $original->singular );
+					if ( isset( $bulk_comments[ $original_id ] ) ) {
+						?><details>
+							<summary class="other-comments"><?php
+							printf( '+ ' . _n( '%s Other', '%s Others', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
+							?>
+						</summary>
+						<ul>
+						<?php
+						foreach ( $bulk_comments[$original_id] as $_comment  ) {
+							?><li><a href="<?php echo esc_attr( $_comment->comment_content ); ?>"><?php echo esc_html( $_comment->comment_content ); ?></a></li><?php
+						}
+						?>
+						</ul>
+						</details>
+						<?php
+					}
+					?>
+				</td>
 				 <td>
 					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( $first_comment->comment_content ); ?></a>
 					<?php if ( $no_of_other_comments > 0 ) : ?>
