@@ -27,19 +27,19 @@ foreach ( $comments as $_comment ) {
 		$linked_comment = $_comment->comment_content;
 		$parts          = wp_parse_url( $linked_comment );
 		$parts['path']  = rtrim( $parts['path'], '/' );
+		$parts['path']  = rtrim( $parts['path'], '/' );
 		$path_parts     = explode( '/', $parts['path'] );
 
-		$linking_comment_set_slug    = array_pop( $path_parts );
-		$linking_comment_locale      = array_pop( $path_parts );
 		$linking_comment_original_id = array_pop( $path_parts );
 
 		if ( ! isset( $bulk_comments[ $linking_comment_original_id ] ) ) {
 			$bulk_comments[ $linking_comment_original_id ] = array();
 		}
 
-		$bulk_comments[ $linking_comment_original_id ][] = $_comment->comment_post_ID;
+		$bulk_comments[ $linking_comment_original_id ][] = $_comment;
 		continue;
 	}
+
 	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
 		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
 	}
@@ -51,6 +51,18 @@ foreach ( $comments as $_comment ) {
 		$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
 	} elseif ( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] < $_comment->comment_date ) {
 		$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
+	}
+}
+
+// If the referenced comment is not in the current batch of comments we need to re-add it.
+foreach ( $bulk_comments as $original_id => $_post_id ) {
+	if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
+		$linked_comment = $_comment->comment_content;
+		$parts          = wp_parse_url( $linked_comment );
+		$comment_id = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
+		if ( $comment_id ) {
+			$comments_by_post_id[ $_comment->comment_post_ID ] = get_comment( $comment_id );
+		}
 	}
 }
 
@@ -97,7 +109,11 @@ $args = array(
 				<td><?php
 				echo esc_html( $original->singular );
 				if ( isset( $bulk_comments[ $original_id ] ) ) {
-					printf( '+ ' . _n( '%s Original', '%s Originals', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
+					?> <span class="other-comments" title="<?php echo esc_attr( implode( ', ', array_column( $bulk_comments[ $original_id ], 'comment_content' ) ) ); ?>"><?php
+					printf( '+ ' . _n( '%s Other', '%s Others', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
+					 ?>
+					</span>
+					<?php
 				}
 				?></td>
 				 <td>
