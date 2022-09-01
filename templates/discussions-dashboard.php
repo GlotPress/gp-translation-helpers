@@ -133,7 +133,7 @@ $args = array(
 					?>
 				</td>
 				 <td>
-					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( $first_comment->comment_content ); ?></a>
+					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( get_comment_excerpt( $first_comment ) ); ?></a>
 					<?php if ( $no_of_other_comments > 0 ) : ?>
 						<br>
 						<?php /* translators: number of comments. */ ?>
