@@ -423,8 +423,17 @@ class GP_Translation_Helpers {
 		);
 		$comment              = sanitize_text_field( $_POST['data']['comment'] );
 
-		if ( ! $locale_slug || ! $translation_id_array || ! $original_id_array || ( ! $comment_reason && ! $comment ) ) {
-			wp_send_json_error();
+		if ( ! $locale_slug ) {
+			wp_send_json_error( 'Oops! Locale slug missing' );
+		}
+		if ( ! $translation_id_array ) {
+			wp_send_json_error( 'Oops! Translation ID missing' );
+		}
+		if ( ! $original_id_array ) {
+			wp_send_json_error( 'Oops! Original ID missing' );
+		}
+		if ( ! $comment_reason && ! $comment ) {
+			wp_send_json_error( 'Oops! No comment and reason found' );
 		}
 
 		// Get original_id and translation_id of first string in the array
