@@ -133,7 +133,7 @@ $args = array(
 					?>
 				</td>
 				 <td>
-					 <?php if ( ! $first_comment ) : ?>
+					 <?php if ( ! $first_comment->comment_content ) : ?>
 						
 							<?php
 							$comment_reason  = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
