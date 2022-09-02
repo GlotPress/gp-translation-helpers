@@ -133,11 +133,38 @@ $args = array(
 					?>
 				</td>
 				 <td>
-					<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( get_comment_excerpt( $first_comment ) ); ?></a>
-					<?php if ( $no_of_other_comments > 0 ) : ?>
-						<br>
-						<?php /* translators: number of comments. */ ?>
-						<a class="other-comments" href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"> + <?php printf( _n( '%s Comment', '%s Comments', $no_of_other_comments ), number_format_i18n( $no_of_other_comments ) ); ?></a>
+					 <?php if ( ! $first_comment ) : ?>
+						
+							<?php
+							$comment_reason  = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
+							$number_of_items = count( $comment_reason );
+							$counter         = 0;
+							$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+							foreach ( $comment_reason as $reason ) {
+								echo wp_kses(
+									sprintf(
+									/* translators: 1: The comment reason */
+										__( '<span>%1$s</span>', 'glotpress' ),
+										$comment_reasons[ $reason ]['name'],
+									),
+									array(
+										'span' => array(),
+									)
+								);
+
+								if ( ++$counter < $number_of_items ) {
+									echo ', ';
+								}
+							}
+							?>
+						
+					<?php else : ?>
+						<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( get_comment_excerpt( $first_comment ) ); ?></a>
+						<?php if ( $no_of_other_comments > 0 ) : ?>
+							<br>
+							<?php /* translators: number of comments. */ ?>
+							<a class="other-comments" href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"> + <?php printf( _n( '%s Comment', '%s Comments', $no_of_other_comments ), number_format_i18n( $no_of_other_comments ) ); ?></a>
+						<?php endif; ?>
 					<?php endif; ?>
 				</td>
 				<td><?php echo esc_html( $first_comment->comment_author ); ?></td>
