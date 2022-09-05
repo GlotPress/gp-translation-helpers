@@ -38,12 +38,15 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		if ( ! is_user_logged_in() ) {
 			$this->die_with_404();
 		}
-
-		$gp_locale = GP_Locales::by_slug( $locale_slug );
-		$args      = array(
-			'number'     => 20,
+		$page_num_from_query = get_query_var( 'page' );
+		$page_number         = ( ! empty( $page_num ) && is_int( $page_num ) ) ? $page_num : 1;
+		$comments_per_page   = 12;
+		$gp_locale           = GP_Locales::by_slug( $locale_slug );
+		$args                = array(
+			'number'     => $comments_per_page,
 			'meta_key'   => 'locale',
 			'meta_value' => $locale_slug,
+			'paged'      => $page_number,
 		);
 
 		$comments_query = new WP_Comment_Query( $args );
