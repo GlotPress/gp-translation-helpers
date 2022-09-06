@@ -16,6 +16,10 @@ gp_tmpl_header();
 </style>
 
 <?php
+if ( ! $comments ) {
+	echo 'There are no discussions in this locale';
+	return;
+}
 
 $comments_by_post_id            = array();
 $bulk_comments                  = array();
@@ -175,14 +179,23 @@ $args = array(
 		?>
 		<?php
 			$current_page = max( 1, get_query_var( 'page' ) );
-			echo paginate_links(
+			echo wp_kses(
+				paginate_links(
+					array(
+						'base'      => add_query_arg( 'page', '%#%' ),
+						'format'    => '?page=%#%',
+						'current'   => $current_page,
+						'total'     => count( $comments ),
+						'prev_text' => __( '« prev' ),
+						'next_text' => __( 'next »' ),
+					)
+				),
 				array(
-					'base'      => add_query_arg( 'page', '%#%' ),
-					'format'    => '?page=%#%',
-					'current'   => $current_page,
-					'total'     => count( $comments ),
-					'prev_text' => __( '« prev' ),
-					'next_text' => __( 'next »' ),
+					'span' => array(),
+					'a'    => array(
+						'href'  => array(),
+						'class' => array(),
+					),
 				)
 			);
 			?>
