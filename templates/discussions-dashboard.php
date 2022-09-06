@@ -173,7 +173,19 @@ $args = array(
 			<?php
 		}
 		?>
-		
+		<?php
+			$current_page = max( 1, get_query_var( 'page' ) );
+			echo paginate_links(
+				array(
+					'base'      => add_query_arg( 'page', '%#%' ),
+					'format'    => '?page=%#%',
+					'current'   => $current_page,
+					'total'     => count( $comments ),
+					'prev_text' => __( '« prev' ),
+					'next_text' => __( 'next »' ),
+				)
+			);
+			?>
 	</tbody>
 	
 </table>

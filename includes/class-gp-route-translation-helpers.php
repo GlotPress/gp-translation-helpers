@@ -39,8 +39,9 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$this->die_with_404();
 		}
 		$page_num_from_query = get_query_var( 'page' );
-		$page_number         = ( ! empty( $page_num ) && is_int( $page_num ) ) ? $page_num : 1;
+		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
 		$comments_per_page   = 12;
+		$offset              = ( $page_number - 1 ) * $comments_per_page;
 		$gp_locale           = GP_Locales::by_slug( $locale_slug );
 		$args                = array(
 			'number'     => $comments_per_page,
