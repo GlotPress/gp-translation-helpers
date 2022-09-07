@@ -123,7 +123,15 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$priorities_key_value = $original->get_static( 'priorities' );
 		$priority             = $priorities_key_value[ $original->priority ];
 
-		$args     = compact( 'project', 'locale_slug', 'translation_set_slug', 'original_id', 'translation_id', 'translation', 'original_permalink' );
+		/** Get recent translation status */
+		$displayed_translation_status = '';
+		if ( $translation ) {
+			$displayed_translation_status = $translation->status;
+		} elseif ( $existing_translations ) {
+			$displayed_translation_status = $existing_translations[0]->status;
+		}
+
+		$args     = compact( 'project', 'locale_slug', 'translation_set_slug', 'original_id', 'translation_id', 'translation', 'original_permalink', 'displayed_translation_status' );
 		$sections = $this->get_translation_helper_sections( $args );
 
 		$translations       = GP::$translation->find_many_no_map(

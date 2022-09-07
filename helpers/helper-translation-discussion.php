@@ -157,6 +157,18 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		register_meta(
 			'comment',
+			'translation_status',
+			array(
+				'description'       => 'Translation status as at when the comment was made',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => array( $this, 'sanitize_comment_translation_status' ),
+				'rewrite'           => false,
+			)
+		);
+
+		register_meta(
+			'comment',
 			'comment_topic',
 			array(
 				'description'       => 'Reason for the comment',
@@ -517,19 +529,19 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
-
+		$post   = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
-				'comments'             => $comments,
-				'post'                 => $post,
-				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
-				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['original_permalink'],
-				'original_id'          => $this->data['original_id'],
-				'project'              => $this->data['project'],
-				'translation_set_slug' => $this->data['translation_set_slug'],
+				'comments'                     => $comments,
+				'post'                         => $post,
+				'translation_id'               => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
+				'locale_slug'                  => $this->data['locale_slug'],
+				'original_permalink'           => $this->data['original_permalink'],
+				'original_id'                  => $this->data['original_id'],
+				'project'                      => $this->data['project'],
+				'translation_set_slug'         => $this->data['translation_set_slug'],
+				'displayed_translation_status' => $this->data['displayed_translation_status'],
 
 			),
 			$this->assets_dir . 'templates'
@@ -633,6 +645,26 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			throw new Exception( 'Invalid translation ID' );
 		}
 		return $translation_id;
+	}
+
+	/**
+	 * Sets the translation_status meta_key as "unknown" if is not in the accepted values.
+	 *
+	 * Used as sanitize callback in the register_meta for the "comment" object type,
+	 * 'translation_status' meta_key
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $translation_status The meta_value for the meta_key "translation_status".
+	 *
+	 * @return string
+	 */
+	public function sanitize_translation_status( string $translation_status ): string {
+		if ( ! in_array( $translation_status, array( 'approved', 'rejected', 'waiting', 'current', 'fuzzy' ), true ) ) {
+			$translation_status = 'unknown';
+		}
+		return $translation_status;
+
 	}
 
 	/**
@@ -824,6 +856,8 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 	$comment_translation_id = get_comment_meta( $comment->comment_ID, 'translation_id', true );
 
 	$comment_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
+
+	$comment_trans_status = get_comment_meta( $comment->comment_ID, 'translation_status', true );
 
 	$classes = array( 'comment-locale-' . $comment_locale );
 	if ( ! empty( $comment_reason ) ) {
