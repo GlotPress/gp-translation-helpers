@@ -261,3 +261,6 @@ a.comment-reply-link {
 .discussions-table-head{
 	background-color: var(--gp-color-canvas-subtle) !important;
 }
+.bulk-comment-item{
+	font-size: .8em;
+}

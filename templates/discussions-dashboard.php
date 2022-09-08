@@ -125,8 +125,16 @@ $args = array(
 						<ul>
 						<?php
 						foreach ( $bulk_comments[ $original_id ] as $_comment ) {
+							$bulk_link_text = $_comment->comment_content;
+							$_original_id   = Helper_Translation_Discussion::get_original_from_post_id( $_comment->comment_post_ID );
+
+							if ( $_original_id ) {
+								$_original      = GP::$original->get( $_original_id );
+								$bulk_link_text = $_original->singular;
+							}
+
 							?>
-							<li><a href="<?php echo esc_attr( $_comment->comment_content ); ?>"><?php echo esc_html( $_comment->comment_content ); ?></a></li>
+							<li class="bulk-comment-item"><a href="<?php echo esc_attr( $_comment->comment_content ); ?>"><?php echo esc_html( $bulk_link_text ); ?></a></li>
 							<?php
 						}
 						?>
