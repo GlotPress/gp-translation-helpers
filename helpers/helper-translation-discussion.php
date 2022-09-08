@@ -533,16 +533,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
-				'comments'                     => $comments,
-				'post'                         => $post,
-				'translation_id'               => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
-				'locale_slug'                  => $this->data['locale_slug'],
-				'original_permalink'           => $this->data['original_permalink'],
-				'original_id'                  => $this->data['original_id'],
-				'project'                      => $this->data['project'],
-				'translation_set_slug'         => $this->data['translation_set_slug'],
-				'displayed_translation_status' => $this->data['displayed_translation_status'],
-
+				'comments'             => $comments,
+				'post'                 => $post,
+				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
+				'locale_slug'          => $this->data['locale_slug'],
+				'original_permalink'   => $this->data['original_permalink'],
+				'original_id'          => $this->data['original_id'],
+				'project'              => $this->data['project'],
+				'translation_set_slug' => $this->data['translation_set_slug'],
 			),
 			$this->assets_dir . 'templates'
 		);
@@ -857,7 +855,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 	$comment_reason = get_comment_meta( $comment->comment_ID, 'reject_reason', true );
 
-	$comment_trans_status = get_comment_meta( $comment->comment_ID, 'translation_status', true );
+	$_translation_status = get_comment_meta( $comment->comment_ID, 'translation_status', true );
 
 	$classes = array( 'comment-locale-' . $comment_locale );
 	if ( ! empty( $comment_reason ) ) {
@@ -990,11 +988,11 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 
 			if ( ! $is_linking_comment ) :
 				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
-					$translation_status = GP::$translation->get( $comment_translation_id )->status;
-					if ( $translation_status ) {
-						$translation_status = ' (' . $translation_status . ')';
+					$translation_status = '';
+					if ( $_translation_status ) {
+						$translation_status = ' (' . $_translation_status . ')';
 					}
-					gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ':' );
+					gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ': ' );
 				}
 
 				?>
