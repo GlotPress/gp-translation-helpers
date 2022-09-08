@@ -144,7 +144,7 @@
 					array(
 						'<input type="hidden" name="comment_locale" value="' . esc_attr( $locale_slug ) . '" />',
 						'<input type="hidden" name="translation_id" value="' . esc_attr( $translation_id ) . '" />',
-						'<input type="hidden" name="redirect_to" value="ddd' . esc_url( $original_permalink ) . '" />',
+						'<input type="hidden" name="redirect_to" value="' . esc_url( $original_permalink ) . '" />',
 					)
 				),
 			),
