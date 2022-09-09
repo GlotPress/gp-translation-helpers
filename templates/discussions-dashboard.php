@@ -119,7 +119,7 @@ $args = array(
 							<summary class="other-comments">
 							<?php
 							/* translators: number of other originals in the bulk rejection. */
-							printf( '+ ' . _n( '%s Other', '%s Others', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
+							printf( '+ ' . _n( 'Thread with %s comment', 'Thread with %s comments', count( $bulk_comments[ $original_id ] ) ), number_format_i18n( count( $bulk_comments[ $original_id ] ) ) );
 							?>
 						</summary>
 						<ul>
