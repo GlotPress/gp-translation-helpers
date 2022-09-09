@@ -38,6 +38,14 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		if ( ! is_user_logged_in() ) {
 			$this->die_with_404();
 		}
+		$all_comments_count  = count(
+			get_comments(
+				array(
+					'meta_key'   => 'locale',
+					'meta_value' => $locale_slug,
+				)
+			)
+		);
 		$page_num_from_query = get_query_var( 'page' );
 		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
 		$comments_per_page   = 12;

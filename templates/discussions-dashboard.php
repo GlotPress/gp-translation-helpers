@@ -197,7 +197,7 @@ $args = array(
 				'base'      => add_query_arg( 'page', '%#%' ),
 				'format'    => '?page=%#%',
 				'current'   => $current_page,
-				'total'     => count( $comments ),
+				'total'     => ceil( $all_comments_count / $comments_per_page ),
 				'prev_text' => __( '« prev' ),
 				'next_text' => __( 'next »' ),
 			)
@@ -210,6 +210,7 @@ $args = array(
 			),
 		)
 	);
+
 	?>
 
 	</li>
