@@ -107,7 +107,9 @@ $args = array(
 			}
 
 			$original             = GP::$original->get( $original_id );
-			$project_name         = GP::$project->get( $original->project_id )->name;
+			$project              = GP::$project->get( $original->project_id );
+			$project_name         = $project->name;
+			$project_link         = gp_link_project_get( $project, esc_html( $project_name ) );
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
 			?>
@@ -173,7 +175,7 @@ $args = array(
 						<?php endif; ?>
 					<?php endif; ?>
 				</td>
-				<td><?php echo esc_html( $project_name ); ?></td>
+				<td><?php echo $project_link; ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
 			</tr>
