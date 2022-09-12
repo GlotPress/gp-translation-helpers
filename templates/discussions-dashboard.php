@@ -188,7 +188,7 @@ $args = array(
 						<?php endif; ?>
 					<?php endif; ?>
 				</td>
-				<td><?php echo $project_link; ?></td>
+				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
 			</tr>
