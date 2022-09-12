@@ -112,13 +112,24 @@ $args = array(
 			$project_link         = gp_link_project_get( $project, esc_html( $project_name ) );
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
+			$_translation_set     = GP::$translation_set->by_project_id( $project->id );
+			$original_permalink   = gp_url_project_locale(
+				$project,
+				$locale_slug,
+				$_translation_set[0]->slug,
+				array(
+					'filters[original_id]' => $original_id,
+					'filters[status]'      => 'either',
+				)
+			);
+
 			?>
 			<tr>
 				<td>
-					<?php
-					echo esc_html( $original->singular );
-					if ( isset( $bulk_comments[ $original_id ] ) ) {
-						?>
+				<a href="<?php echo esc_url( $original_permalink ); ?>">
+					<?php echo esc_html( $original->singular ); ?>
+				</a>
+						<?php if ( isset( $bulk_comments[ $original_id ] ) ) { ?>
 						<details>
 							<summary class="other-comments">
 							<?php
@@ -127,26 +138,25 @@ $args = array(
 							?>
 						</summary>
 						<ul>
-						<?php
-						foreach ( $bulk_comments[ $original_id ] as $_comment ) {
-							$bulk_link_text = $_comment->comment_content;
-							$_original_id   = Helper_Translation_Discussion::get_original_from_post_id( $_comment->comment_post_ID );
+							<?php
+							foreach ( $bulk_comments[ $original_id ] as $_comment ) {
+								$bulk_link_text = $_comment->comment_content;
+								$_original_id   = Helper_Translation_Discussion::get_original_from_post_id( $_comment->comment_post_ID );
+								if ( $_original_id ) {
+									$_original      = GP::$original->get( $_original_id );
+									$bulk_link_text = $_original->singular;
+								}
 
-							if ( $_original_id ) {
-								$_original      = GP::$original->get( $_original_id );
-								$bulk_link_text = $_original->singular;
-							}
-
-							?>
+								?>
 							<li class="bulk-comment-item"><a href="<?php echo esc_attr( $_comment->comment_content ); ?>"><?php echo esc_html( $bulk_link_text ); ?></a></li>
+								<?php
+							}
+							?>
+						</ul>
+						</details>
 							<?php
 						}
 						?>
-						</ul>
-						</details>
-						<?php
-					}
-					?>
 				</td>
 				 <td>
 					 <?php if ( ! $first_comment->comment_content ) : ?>
