@@ -113,7 +113,7 @@ $args = array(
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
 			$_translation_set     = GP::$translation_set->by_project_id( $project->id );
-			$comment_link         = get_permalink( $first_comment->comment_post_ID ) . $locale_slug . '/' . $_translation_set[0]->slug . '/' . '#comment-' . $first_comment->comment_ID;
+			$comment_link         = get_permalink( $first_comment->comment_post_ID ) . $locale_slug . '/' . $_translation_set[0]->slug . '/#comment-' . $first_comment->comment_ID;
 			$original_permalink   = gp_url_project_locale(
 				$project,
 				$locale_slug,
