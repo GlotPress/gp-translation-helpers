@@ -148,27 +148,19 @@ $args = array(
 					 <?php if ( ! $first_comment->comment_content ) : ?>
 						
 							<?php
-							$comment_reason  = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
-							$number_of_items = count( $comment_reason );
-							$counter         = 0;
-							$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+							$comment_reason       = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
+							$number_of_items      = count( $comment_reason );
+							$counter              = 0;
+							$all_comment_reasons  = Helper_Translation_Discussion::get_comment_reasons();
+							$comment_reasons_text = '';
 							foreach ( $comment_reason as $reason ) {
-								echo wp_kses(
-									sprintf(
-									/* translators: 1: The comment reason */
-										__( '<span>%1$s</span>', 'glotpress' ),
-										$comment_reasons[ $reason ]['name'],
-									),
-									array(
-										'span' => array(),
-									)
-								);
-
+								$comment_reasons_text .= $all_comment_reasons[ $reason ]['name'];
 								if ( ++$counter < $number_of_items ) {
-									echo ', ';
+									$comment_reasons_text .= ', ';
 								}
 							}
 							?>
+							<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( $comment_reasons_text ); ?></a>
 						
 					<?php else : ?>
 						<a href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"><?php echo esc_html( get_comment_excerpt( $first_comment ) ); ?></a>
