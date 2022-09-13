@@ -128,6 +128,10 @@
 			$post_obj = $post->ID;
 			$_post_id = $post->ID;
 		}
+		?>
+		<details>
+			<summary>Start a new conversation</summary>
+		<?php
 		comment_form(
 			array(
 				'title_reply'         => __( 'Discuss this string' ),
@@ -163,6 +167,9 @@
 			)
 		);
 		echo '</div>';
+		?>
+		</details>
+		<?php
 	} else {
 		/* translators: Log in URL. */
 		echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
