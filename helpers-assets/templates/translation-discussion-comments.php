@@ -129,8 +129,12 @@
 			$_post_id = $post->ID;
 		}
 		?>
+
+		<?php if ( $comments ) : ?>
 		<details>
 			<summary>Start a new conversation</summary>
+		<?php endif; ?>
+
 		<?php
 		comment_form(
 			array(
@@ -168,8 +172,12 @@
 		);
 		echo '</div>';
 		?>
-		</details>
-		<?php
+		
+		<?php if ( $comments ) : ?>
+			</details>
+		<?php endif; ?>
+		
+			<?php
 	} else {
 		/* translators: Log in URL. */
 		echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
