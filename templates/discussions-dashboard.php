@@ -106,11 +106,11 @@ $args = array(
 				continue;
 			}
 
-			$original = GP::$original->get( $original_id );
-			$project  = GP::$project->get( $original->project_id );
-			$parent_project       = GP::$project->get( $project->parent_project_id );
-			$project_name         = ( $parent_project ) ? $parent_project->name : $project->name;
-			$project_link         = gp_link_project_get( $project, esc_html( $project_name ) );
+			$original       = GP::$original->get( $original_id );
+			$project        = GP::$project->get( $original->project_id );
+			$parent_project = GP::$project->get( $project->parent_project_id );
+			$project_name   = ( $parent_project ) ? $parent_project->name : $project->name;
+			$project_link   = gp_link_project_get( $project, esc_html( $project_name ) );
 
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
@@ -186,7 +186,7 @@ $args = array(
 						   <?php if ( $no_of_other_comments > 0 ) : ?>
 							<br>
 								<?php /* translators: number of comments. */ ?>
-							<a class="other-comments" href="<?php echo esc_url( get_comment_link( $first_comment ) ); ?>"> + <?php printf( _n( '%s Comment', '%s Comments', $no_of_other_comments ), number_format_i18n( $no_of_other_comments ) ); ?></a>
+							<a class="other-comments" href="<?php echo esc_url( $comment_link ); ?>"> + <?php printf( _n( '%s Comment', '%s Comments', $no_of_other_comments ), number_format_i18n( $no_of_other_comments ) ); ?></a>
 						<?php endif; ?>
 					<?php endif; ?>
 				</td>
