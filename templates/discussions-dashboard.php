@@ -106,10 +106,12 @@ $args = array(
 				continue;
 			}
 
-			$original             = GP::$original->get( $original_id );
-			$project              = GP::$project->get( $original->project_id );
-			$project_name         = $project->name;
+			$original = GP::$original->get( $original_id );
+			$project  = GP::$project->get( $original->project_id );
+			$parent_project       = GP::$project->get( $project->parent_project_id );
+			$project_name         = ( $parent_project ) ? $parent_project->name : $project->name;
 			$project_link         = gp_link_project_get( $project, esc_html( $project_name ) );
+
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
 			$_translation_set     = GP::$translation_set->by_project_id( $project->id );
