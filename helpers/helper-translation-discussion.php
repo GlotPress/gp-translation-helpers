@@ -558,7 +558,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'post'                 => $post,
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['original_permalink'],
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
@@ -686,6 +685,12 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			'replyto'        => sprintf( $args['reply_to_text'], $comment->comment_author ),
 		);
 
+		if ( get_option( 'page_comments' ) ) {
+			$permalink = str_replace( '#comment-' . $comment->comment_ID, '', get_comment_link( $comment ) );
+		} else {
+			$permalink = get_permalink( $post->ID );
+		}
+
 		$data_attribute_string = '';
 
 		foreach ( $data_attributes as $name => $value ) {
@@ -703,7 +708,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 						'unapproved'      => false,
 						'moderation-hash' => false,
 					),
-					$args['original_permalink']
+					$permalink
 				)
 			) . '#' . $args['respond_id'],
 			$data_attribute_string,

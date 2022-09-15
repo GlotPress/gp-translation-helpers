@@ -80,7 +80,7 @@ class GP_Translation_Helpers {
 		add_filter(
 			'gp_tmpl_load_locations',
 			function( $locations, $template, $args, $template_path ) {
-				if ( 'translation-row-editor-meta-status' === $template ) {
+				if ( 'translation-row-editor-meta-status' === $template || 'locale-projects' === $template ) {
 					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
 				} else {
 					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';
@@ -327,6 +327,7 @@ class GP_Translation_Helpers {
 		GP::$router->prepend( "/$project/(\d+)(?:/$locale/$dir)?(/\d+)?", array( 'GP_Route_Translation_Helpers', 'original_permalink' ), 'get' );
 		GP::$router->prepend( "/$project/-get-translation-helpers/$id", array( 'GP_Route_Translation_Helpers', 'ajax_translation_helpers' ), 'get' );
 		GP::$router->prepend( "/$project/$locale/$dir/-get-translation-helpers/$id", array( 'GP_Route_Translation_Helpers', 'ajax_translation_helpers_locale' ), 'get' );
+		GP::$router->prepend( "/locale/$locale/$dir/discussions/?", array( 'GP_Route_Translation_Helpers', 'discussions_dashboard' ), 'get' );
 	}
 
 	/**
