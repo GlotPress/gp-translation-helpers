@@ -184,3 +184,13 @@
 	}
 	?>
 </div><!-- .discussion-wrapper -->
+<script>	
+	jQuery(function( e, mentions ) {
+	var jetpackMentionsData = [
+		{"ID":68342,"user_login":"akirk","user_nicename":"akirk","display_name":"","source":["translators"],"image_URL":"https:\/\/secure.gravatar.com\/avatar\/95eaf88cbef1a12676ec33aed6b76c82?s=96&d=mm&r=g"},
+		{"ID":131758,"user_login":"Amieiro","user_nicename":"amieiro","display_name":"","source":["translators"],"image_URL":"https:\/\/secure.gravatar.com\/avatar\/cec9269f2c7f43871230ff701544d03f?s=96&d=mm&r=g"},
+		{"ID":20037692,"user_login":"spiraltee","user_nicename":"spiraltee","display_name":"","source":["translators"],"image_URL":"https:\/\/secure.gravatar.com\/avatar\/31234153d87269cb5f41d17e569b2f0d?s=96&d=mm&r=g"},
+	];
+		jQuery( 'textarea#comment' ).mentions( jetpackMentionsData );
+	});
+</script>
