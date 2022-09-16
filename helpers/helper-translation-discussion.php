@@ -671,7 +671,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @param      string  $link     The link.
 	 * @param      array   $args     The arguments.
-	 * @param      string  $comment  The comment.
+	 * @param      object  $comment  The comment.
 	 * @param      WP_Post $post     The post.
 	 *
 	 * @return     string  Return the reply link HTML.
