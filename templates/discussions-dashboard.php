@@ -48,7 +48,6 @@ foreach ( $comments as $_comment ) {
 		$comments_by_post_id[ $_comment->comment_post_ID ] = array();
 	}
 
-
 	$comments_by_post_id[ $_comment->comment_post_ID ][] = $_comment;
 
 	if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
@@ -75,10 +74,10 @@ foreach ( $bulk_comments as $original_id => $_comments ) {
 	}
 }
 
-uasort(
+uksort(
 	$comments_by_post_id,
 	function( $a, $b ) use ( $latest_comment_date_by_post_id ) {
-		return $latest_comment_date_by_post_id[ $b->comment_post_ID ] <=> $latest_comment_date_by_post_id[ $a->comment_post_ID ];
+		return $latest_comment_date_by_post_id[ $b ] <=> $latest_comment_date_by_post_id[ $a ];
 	}
 );
 
