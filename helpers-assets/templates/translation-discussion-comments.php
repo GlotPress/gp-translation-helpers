@@ -48,6 +48,7 @@
 				'callback'             => 'gth_discussion_callback',
 				'translation_id'       => $translation_id,
 				'locale_slug'          => $locale_slug,
+				'original_permalink'   => $original_permalink,
 				'original_id'          => $original_id,
 				'project'              => $project,
 				'translation_set_slug' => $translation_set_slug,
