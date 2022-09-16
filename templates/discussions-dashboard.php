@@ -67,6 +67,9 @@ foreach ( $bulk_comments as $original_id => $_comments ) {
 			$comment_id     = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
 			if ( $comment_id ) {
 				$comments_by_post_id[ $_comment->comment_post_ID ][] = get_comment( $comment_id );
+				if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
+					$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
+				}
 			}
 		}
 	}
