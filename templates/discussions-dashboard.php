@@ -59,13 +59,15 @@ foreach ( $comments as $_comment ) {
 }
 
 // If the referenced comment is not in the current batch of comments we need to re-add it.
-foreach ( $bulk_comments as $original_id => $_post_id ) {
-	if ( ! isset( $comments_by_post_id[ $_post_id ] ) ) {
-		$linked_comment = $_comment->comment_content;
-		$parts          = wp_parse_url( $linked_comment );
-		$comment_id     = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
-		if ( $comment_id ) {
-			$comments_by_post_id[ $_post_id ][] = get_comment( $comment_id );
+foreach ( $bulk_comments as $original_id => $_comments ) {
+	foreach ( $_comments as $_comment ) {
+		if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
+			$linked_comment = $_comment->comment_content;
+			$parts          = wp_parse_url( $linked_comment );
+			$comment_id     = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
+			if ( $comment_id ) {
+				$comments_by_post_id[ $_comment->comment_post_ID ][] = get_comment( $comment_id );
+			}
 		}
 	}
 }
