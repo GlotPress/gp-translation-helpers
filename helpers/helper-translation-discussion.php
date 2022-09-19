@@ -561,7 +561,24 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post   = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$post                = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$gte_email_addresses = WPorg_GlotPress_Notifications::get_gte_email_addresses( $this->data['locale_slug'] );
+		$gte_user_objects    = array_map(
+			function( $email ) {
+				$user = get_user_by( 'email', $email );
+				return array(
+					'ID'            => $user->ID,
+					'user_login'    => $user->user_login,
+					'user_nicename' => $user->user_nicename,
+					'display_name'  => '',
+					'source'        => array( 'translators' ),
+					'image_URL'     => get_avatar_url( $user->ID ),
+				);
+			},
+			$gte_email_addresses
+		);
+		$mentions_list       = json_encode( $gte_user_objects );
+
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
 			array(
@@ -569,10 +586,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				'post'                 => $post,
 				'translation_id'       => isset( $this->data['translation_id'] ) ? $this->data['translation_id'] : null,
 				'locale_slug'          => $this->data['locale_slug'],
-				'original_permalink'   => $this->data['original_permalink'],
 				'original_id'          => $this->data['original_id'],
 				'project'              => $this->data['project'],
 				'translation_set_slug' => $this->data['translation_set_slug'],
+				'mentions_list'        => $mentions_list,
+
 			),
 			$this->assets_dir . 'templates'
 		);
