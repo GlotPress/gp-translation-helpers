@@ -35,9 +35,15 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 * @return void
 	 */
 	public function discussions_dashboard( $locale_slug ) {
-		if ( ! is_user_logged_in() ) {
-			$this->die_with_404();
+		$roles_adapter = null;
+		$user          = wp_get_current_user();
+		$user_email    = $user->user_email;
+
+		$emails_for_locale_gtes = WPorg_GlotPress_Notifications::get_gte_email_addresses( $locale_slug );
+		if ( ! is_user_logged_in() || ! in_array( $user_email, $emails_for_locale_gtes ) ) {
+				$this->die_with_404();
 		}
+
 		$all_comments_count  = count(
 			get_comments(
 				array(
