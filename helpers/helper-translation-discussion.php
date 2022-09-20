@@ -587,7 +587,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			$commenters_email_addresses
 		);
 
-		$gte_user_objects = array_map(
+		$users         = array_map(
 			function( $email ) {
 				$user = get_user_by( 'email', $email );
 				return array(
@@ -601,7 +601,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			},
 			$all_email_addresses
 		);
-		$mentions_list    = wp_json_encode( $gte_user_objects );
+		$mentions_list = wp_json_encode( $users );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
