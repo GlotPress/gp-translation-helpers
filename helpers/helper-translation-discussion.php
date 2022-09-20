@@ -504,6 +504,23 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
+	 * Gets email addresses for all validators (GTEs/PTEs/CLPTEs).
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param int $locale  The locale for the translation.
+	 * @param int $original_id  The original id for the string.
+	 *
+	 * @return array The email addresses of validators
+	 */
+	public static function get_validator_email_addresses_for_original_id( $locale, $original_id ): array {
+		$gte_email_addresses = WPorg_GlotPress_Notifications::get_gte_email_addresses( $locale );
+
+		$email_addresses = array_merge( $gte_email_addresses, WPorg_GlotPress_Notifications::get_pte_email_addresses_by_project_and_locale( $original_id, $locale ) );
+		return array_merge( $email_addresses, WPorg_GlotPress_Notifications::get_clpte_email_addresses_by_project( $original_id ) );
+	}
+
+	/**
 	 * Shows the discussion template with the comment form.
 	 *
 	 * @since 0.0.1
@@ -561,9 +578,16 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post                = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
-		$gte_email_addresses = WPorg_GlotPress_Notifications::get_gte_email_addresses( $this->data['locale_slug'] );
-		$gte_user_objects    = array_map(
+		$post                       = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$validator_email_addresses  = self::get_validator_email_addresses_for_original_id( $this->data['locale_slug'], $this->data['original_id'] );
+		$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, '' ) );
+
+		$all_email_addresses = array_merge(
+			$validator_email_addresses,
+			$commenters_email_addresses
+		);
+
+		$gte_user_objects = array_map(
 			function( $email ) {
 				$user = get_user_by( 'email', $email );
 				return array(
@@ -575,9 +599,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 					'image_URL'     => get_avatar_url( $user->ID ),
 				);
 			},
-			$gte_email_addresses
+			$all_email_addresses
 		);
-		$mentions_list       = json_encode( $gte_user_objects );
+		$mentions_list    = json_encode( $gte_user_objects );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
