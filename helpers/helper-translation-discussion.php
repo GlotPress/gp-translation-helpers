@@ -601,7 +601,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			},
 			$all_email_addresses
 		);
-		$mentions_list    = json_encode( $gte_user_objects );
+		$mentions_list    = wp_json_encode( $gte_user_objects );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
