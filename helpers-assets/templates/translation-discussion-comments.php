@@ -186,7 +186,7 @@
 </div><!-- .discussion-wrapper -->
 <script>	
 	jQuery(function( e, mentions ) {
-	var mentionsList = '<?php echo $mentions_list; ?>';
+	var mentionsList = '<?php echo wp_json_encode( $mentions_list ); ?>';
 	var jetpackMentionsData = JSON.parse(mentionsList); 
 		jQuery( 'textarea#comment' ).mentions( jetpackMentionsData );
 	});
