@@ -580,7 +580,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		$post                       = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
 		$validator_email_addresses  = self::get_validator_email_addresses_for_original_id( $this->data['locale_slug'], $this->data['original_id'] );
-		$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, '' ) );
+		$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
 
 		$all_email_addresses = array_merge(
 			$validator_email_addresses,

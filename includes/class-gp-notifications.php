@@ -87,7 +87,7 @@ class GP_Notifications {
 	 */
 	public static function send_emails_to_thread_commenters( WP_Comment $comment, array $comment_meta ) {
 		$parent_comments = self::get_parent_comments( $comment->comment_parent );
-		$email_addresses = self::get_commenters_email_addresses( $parent_comments, $comment->comment_author_email );
+		$email_addresses = self::get_commenters_email_addresses( $parent_comments, array( $comment->comment_author_email ) );
 		/**
 		 * Filters the email addresses in a thread.
 		 *
@@ -202,15 +202,15 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param array       $comments                Array with the parent comments to the posted comment.
-	 * @param string|null $email_address_to_ignore Email from the posted comment.
+	 * @param array      $comments                Array with the parent comments to the posted comment.
+	 * @param array|null $email_address_to_ignore Emails to ignore.
 	 *
 	 * @return array The emails to be notified from the thread comments.
 	 */
-	public static function get_commenters_email_addresses( array $comments, string $email_address_to_ignore = null ): array {
+	public static function get_commenters_email_addresses( array $comments, array $email_address_to_ignore = null ): array {
 		$email_addresses = array();
 		foreach ( $comments as $comment ) {
-			if ( $email_address_to_ignore !== $comment->comment_author_email ) {
+			if ( ! in_array( $comment->comment_author_email, $email_address_to_ignore ) ) {
 				$email_addresses[ $comment->comment_author_email ] = $comment->comment_author_email;
 			}
 		}
