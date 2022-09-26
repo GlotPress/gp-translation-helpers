@@ -561,30 +561,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
-		$post                       = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
-		$validator_email_addresses  = WPorg_GlotPress_Notifications::get_validator_email_addresses_for_original_id( $this->data['locale_slug'], $this->data['original_id'] );
-		$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
-
-		$all_email_addresses = array_merge(
-			$validator_email_addresses,
-			$commenters_email_addresses
-		);
-
-		$users         = array_map(
-			function( $email ) {
-				$user = get_user_by( 'email', $email );
-				return array(
-					'ID'            => $user->ID,
-					'user_login'    => $user->user_login,
-					'user_nicename' => $user->user_nicename,
-					'display_name'  => '',
-					'source'        => array( 'translators' ),
-					'image_URL'     => get_avatar_url( $user->ID ),
-				);
-			},
-			$all_email_addresses
-		);
-		$mentions_list = $users;
+		$post          = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
+		$mentions_list = apply_filters( 'wporg_load_mentions_list', array(), $comments, $this->data['locale_slug'], $this->data['original_id'] );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',

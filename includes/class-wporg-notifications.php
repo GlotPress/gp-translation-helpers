@@ -103,8 +103,8 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $locale  The locale for the translation.
-	 * @param int $original_id  The original id for the string.
+	 * @param string $locale  The locale for the translation.
+	 * @param int    $original_id  The original id for the string.
 	 *
 	 * @return array    The validators' emails.
 	 */
