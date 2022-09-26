@@ -43,6 +43,9 @@ class WPorg_GlotPress_Customizations {
 				10,
 				2
 			);
+
+			add_filter( 'jetpack_mentions_should_load_ui', '__return_true' );
+
 		}
 	}
 }

@@ -559,8 +559,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			}
 		);
 
-		add_filter( 'jetpack_mentions_should_load_ui', '__return_true' );
-
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
 		$post                       = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
