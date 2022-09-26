@@ -48,8 +48,9 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_notification_validator_email_addresses',
-				function ( $email_addresses, $comment, $comment_meta ) {
-					$email_addresses        = self::get_validator_email_addresses( $comment, $comment_meta );
+				function ( $email_addresses, $comment, $comment_meta, $original ) {
+					$locale                 = $comment_meta['locale'][0];
+					$email_addresses        = self::get_validator_email_addresses_for_original_id( $locale, $original->id );
 					$parent_comments        = GP_Notifications::get_parent_comments( $comment->comment_parent );
 					$emails_from_the_thread = GP_Notifications::get_commenters_email_addresses( $parent_comments );
 					// If one validator (GTE/PTE/CLPTE) has a comment in the thread, we don't need to inform to any validator, because this validator will be notified in the thread.
@@ -100,22 +101,17 @@ class WPorg_GlotPress_Notifications {
 	/**
 	 * Gets the email addresses of all project validators: GTE, PTE and CLPTE.
 	 *
-	 * Returns an empty array if one GTE/PTE/CLPTE has a comment in the thread,
-	 * so only one validators is notified.
-	 *
 	 * @since 0.0.2
 	 *
-	 * @param WP_Comment $comment      The comment object.
-	 * @param array      $comment_meta The meta values for the comment.
+	 * @param int $locale  The locale for the translation.
+	 * @param int $original_id  The original id for the string.
 	 *
 	 * @return array    The validators' emails.
 	 */
-	public static function get_validator_email_addresses( WP_Comment $comment, array $comment_meta ): array {
-		$locale          = $comment_meta['locale'][0];
+	public static function get_validator_email_addresses_for_original_id( $locale, $original_id ): array {
 		$email_addresses = self::get_gte_email_addresses( $locale );
-		$original        = GP_Notifications::get_original( $comment );
-		$email_addresses = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $original->id, $locale ) );
-		return array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $original->id ) );
+		$email_addresses = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $original_id, $locale ) );
+		return array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $original_id ) );
 	}
 
 	/**
