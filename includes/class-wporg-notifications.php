@@ -95,6 +95,36 @@ class WPorg_GlotPress_Notifications {
 				10,
 				2
 			);
+			add_filter(
+				'wporg_load_mentions_list',
+				function( $result, $comments, $locale, $original_id ) {
+					$validator_email_addresses  = WPorg_GlotPress_Notifications::get_validator_email_addresses_for_original_id( $locale, $original_id );
+					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
+
+					$all_email_addresses = array_merge(
+						$validator_email_addresses,
+						$commenters_email_addresses
+					);
+
+							$users = array_map(
+								function( $email ) {
+									$user = get_user_by( 'email', $email );
+									return array(
+										'ID'            => $user->ID,
+										'user_login'    => $user->user_login,
+										'user_nicename' => $user->user_nicename,
+										'display_name'  => '',
+										'source'        => array( 'translators' ),
+										'image_URL'     => get_avatar_url( $user->ID ),
+									);
+								},
+								$all_email_addresses
+							);
+							return $users;
+				},
+				10,
+				4
+			);
 		}
 	}
 
