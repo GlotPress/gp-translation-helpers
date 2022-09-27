@@ -109,25 +109,26 @@ class WPorg_GlotPress_Notifications {
 					$current_user       = wp_get_current_user();
 					$current_user_email = $current_user->user_email;
 					$current_user_key   = array_search( $current_user_email, $all_email_addresses );
+					if ( false !== $current_user_key ) {
+						// Remove email address of the logged in user from the array
+						unset( $all_email_addresses[ $current_user_key ] );
+						$all_email_addresses = array_values( $all_email_addresses );
+					}
 
-					// Remove email address of the logged in user from the array
-					unset( $all_email_addresses[ $current_user_key ] );
-					$all_email_addresses = array_values( $all_email_addresses );
-
-							$users = array_map(
-								function( $email ) {
-										$user = get_user_by( 'email', $email );
-										return array(
-											'ID'           => $user->ID,
-											'user_login'   => $user->user_login,
-											'user_nicename' => $user->user_nicename,
-											'display_name' => '',
-											'source'       => array( 'translators' ),
-											'image_URL'    => get_avatar_url( $user->ID ),
-										);
-								},
-								$all_email_addresses
-							);
+					$users = array_map(
+						function( $email ) {
+								$user = get_user_by( 'email', $email );
+								return array(
+									'ID'            => $user->ID,
+									'user_login'    => $user->user_login,
+									'user_nicename' => $user->user_nicename,
+									'display_name'  => '',
+									'source'        => array( 'translators' ),
+									'image_URL'     => get_avatar_url( $user->ID ),
+								);
+						},
+						$all_email_addresses
+					);
 							return $users;
 				},
 				10,
