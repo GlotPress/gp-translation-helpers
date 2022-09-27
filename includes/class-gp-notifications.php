@@ -210,7 +210,7 @@ class GP_Notifications {
 	public static function get_commenters_email_addresses( array $comments, array $email_address_to_ignore = null ): array {
 		$email_addresses = array();
 		foreach ( $comments as $comment ) {
-			if ( ! in_array( $comment->comment_author_email, $email_address_to_ignore ) ) {
+			if ( ! $email_address_to_ignore || ! in_array( $comment->comment_author_email, $email_address_to_ignore ) ) {
 				$email_addresses[ $comment->comment_author_email ] = $comment->comment_author_email;
 			}
 		}
