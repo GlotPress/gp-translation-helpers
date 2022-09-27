@@ -564,7 +564,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		remove_action( 'comment_form_top', 'rosetta_comment_form_support_hint' );
 
 		$post          = self::maybe_get_temporary_post( self::get_shadow_post_id( $this->data['original_id'] ) );
-		$mentions_list = apply_filters( 'wporg_load_mentions_list', array(), $comments, $this->data['locale_slug'], $this->data['original_id'] );
+		$mentions_list = apply_filters( 'gp_mentions_list', array(), $comments, $this->data['locale_slug'], $this->data['original_id'] );
 
 		$output = gp_tmpl_get_output(
 			'translation-discussion-comments',
