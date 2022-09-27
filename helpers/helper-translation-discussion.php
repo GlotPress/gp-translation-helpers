@@ -265,9 +265,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		if ( ! $project ) {
 			return $cache[ $post->ID ];
 		}
+		$locale_slug = isset( $_POST['meta']['locale'] ) ? $_POST['meta']['locale'] : null;
+		$set_slug = isset( $_POST['meta']['locale'] ) ? 'default' : null;
 
 		// We were able to gather all information, let's put it in the cache.
-		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id );
+		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id, $set_slug, $locale_slug );
 
 		return $cache[ $post->ID ];
 	}
