@@ -131,8 +131,8 @@
 		?>
 
 		<?php if ( $comments ) : ?>
-		<details >
-			<summary class="hide-textarea">Start a new conversation</summary>
+		<details class="hide-textarea">
+			<summary>Start a new conversation</summary>
 		<?php endif; ?>
 
 		<?php

@@ -265,8 +265,14 @@ a.comment-reply-link {
 	font-size: .8em;
 }
 .hide-textarea {
+	border: #dfe3e3 thin solid;
+	border-radius: 5px;
+}
+.hide-textarea summary {
 	border: #d0cccc thin solid;
 	background: #e7e7e7;
-	border-radius: 3px;
 	padding: 5px 10px;
+}
+h5#reply-title {
+	padding-left: 13px;
 }
