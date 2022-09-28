@@ -265,11 +265,14 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		if ( ! $project ) {
 			return $cache[ $post->ID ];
 		}
+		
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$locale = $this->sanitize_comment_locale( $_POST['meta']['locale'] );
-		$locale_slug = isset( $locale ) ? $locale : null;
+		$locale_exists = isset( $_POST['meta']['locale'] ) && ! empty( $this->sanitize_comment_locale( $_POST['meta']['locale'] ) );
 
-		$set_slug = isset( $locale ) ? 'default' : null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$locale_slug = $locale_exists ? $_POST['meta']['locale'] : null;
+
+		$set_slug = $locale_exists ? 'default' : null;
 
 		// We were able to gather all information, let's put it in the cache.
 		$cache[ $post->ID ] = GP_Route_Translation_Helpers::get_permalink( $project->path, $original_id, $set_slug, $locale_slug );
