@@ -265,7 +265,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		if ( ! $project ) {
 			return $cache[ $post->ID ];
 		}
-		
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$locale_exists = isset( $_POST['meta']['locale'] ) && ! empty( $this->sanitize_comment_locale( $_POST['meta']['locale'] ) );
 
