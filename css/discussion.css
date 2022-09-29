@@ -267,7 +267,6 @@ a.comment-reply-link {
 .hide-textarea {
 	border: #dfe3e3 thin solid;
 	border-radius: 5px;
-	cursor: pointer;
 	width: fit-content;
 }
 .hide-textarea summary {
@@ -280,6 +279,7 @@ a.comment-reply-link {
 	font-size: 14px;
 	line-height: 20px;
 	font-weight: 500;
+	cursor: pointer;
 }
 .hide-textarea summary:hover {
 	background-color: var(--gp-color-btn-primary-hover-bg);
