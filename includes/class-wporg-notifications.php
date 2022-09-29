@@ -98,7 +98,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_mentions_list',
 				function( $result, $comments, $locale, $original_id ) {
-					$validator_email_addresses  = WPorg_GlotPress_Notifications::get_validator_email_addresses_for_original_id( $locale, $original_id );
+					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_email_addresses_for_original_id( $locale, $original_id ) : array();
 					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
 
 					$all_email_addresses = array_merge(
