@@ -267,6 +267,7 @@ a.comment-reply-link {
 .hide-textarea {
 	border: #dfe3e3 thin solid;
 	border-radius: 5px;
+	cursor: pointer;
 }
 .hide-textarea summary {
 	border: #d0cccc thin solid;
