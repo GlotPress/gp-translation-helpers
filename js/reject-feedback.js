@@ -211,7 +211,7 @@
 							glossaryList.appendChild( li );
 							}
 						);
-						$( this ).closest( 'ul' ).append( glossaryList );
+						$( this ).closest( 'ul' ).after( glossaryList );
 		
 					} else {
 						$( '#glossary-item-list' ).hide();
