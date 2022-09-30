@@ -690,7 +690,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @return string
 	 */
 	public function sanitize_translation_status( string $translation_status ): string {
-		if ( ! in_array( $translation_status, array( 'approved', 'rejected', 'waiting', 'current', 'fuzzy' ), true ) ) {
+		if ( ! in_array( $translation_status, array( 'approved', 'rejected', 'waiting', 'current', 'fuzzy', 'changesrequested' ), true ) ) {
 			$translation_status = 'unknown';
 		}
 		return $translation_status;
