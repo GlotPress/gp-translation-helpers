@@ -14,7 +14,7 @@
 					'<h3><label for="modal_feedback_comment">Comment (Optional)</label></h3>' +
 					'<textarea id="modal_feedback_comment" name="modal_feedback_comment"></textarea>' +
 			'</div>' +
-			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject with no Feedback</button>' +
+			'<button id="modal-reject-btn" class="modal-btn gp-btn-style">Reject without Feedback</button>' +
 			'<button id="modal-requestchanges-btn" class="modal-btn gp-btn-style" style="display: none;" class="modal-btn">Request changes</button>' +
 			'</form>' +
 			'</div>';
