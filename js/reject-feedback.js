@@ -216,6 +216,7 @@
 		feedbackData.comment = comment;
 		feedbackData.original_id = [ $gp.editor.current.original_id ];
 		feedbackData.translation_id = [ $gp.editor.current.translation_id ];
+		feedbackData.translation_status = status;
 
 		commentWithFeedback( feedbackData, button, status );
 	}

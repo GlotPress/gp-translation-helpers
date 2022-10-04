@@ -182,6 +182,5 @@
 		/* translators: Log in URL. */
 		echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
 	}
-
 	?>
 </div><!-- .discussion-wrapper -->
