@@ -216,7 +216,7 @@
 		
 					} else {
 						$( '#glossary-item-list' ).hide();
-		
+						$(this).closest( '.feedback-reason-list' ).siblings( '.feedback-comment' ).find( 'textarea' ).val( '' );
 					}
 				}
 			);
@@ -226,7 +226,6 @@
 				'input.glossary-word-item', function(e){
 					if ( $( this ).is( ':checked' ) ) {
 						glossaryMessage += $(this).val() + ', ' ;
-						$(this).closest('ul').next().find('textarea').val( glossaryMessage );
 					}
 			});
 
