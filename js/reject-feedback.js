@@ -226,7 +226,12 @@
 				'input.glossary-word-item', function(e){
 					if ( $( this ).is( ':checked' ) ) {
 						glossaryMessage += $(this).val() + ', ' ;
+					} else {
+						var newGlossaryMessage = glossaryMessage.replace( $(this).val() + ',', '' );
+						glossaryMessage = newGlossaryMessage;
 					}
+					$(this).closest( 'ul' ).next().find( 'textarea' ).val( glossaryMessage );
+
 			});
 
 		}
