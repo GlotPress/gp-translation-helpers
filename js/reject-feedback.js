@@ -224,13 +224,19 @@
 			$( 'body' ).on(
 				'change',
 				'input.glossary-word-item', function(e){
+					var textArea = $(this).closest( 'ul' ).next().find( 'textarea' );
 					if ( $( this ).is( ':checked' ) ) {
 						glossaryMessage += $(this).val() + ', ' ;
 					} else {
 						var newGlossaryMessage = glossaryMessage.replace( $(this).val() + ',', '' );
 						glossaryMessage = newGlossaryMessage;
+						var lastWord = newGlossaryMessage.trim().split(' ').pop();
+						if( lastWord == 'term' ){
+							glossaryMessage = '';
+						}
 					}
-					$(this).closest( 'ul' ).next().find( 'textarea' ).val( glossaryMessage );
+					textArea.val( glossaryMessage );
+
 
 			});
 
