@@ -225,19 +225,13 @@
 				'change',
 				'input.glossary-word-item', function(e){
 					var textArea = $(this).closest( 'ul' ).next().find( 'textarea' );
-					if ( $( this ).is( ':checked' ) ) {
-						glossaryMessage += $(this).val() + ', ' ;
-					} else {
-						var newGlossaryMessage = glossaryMessage.replace( $(this).val() + ',', '' );
-						glossaryMessage = newGlossaryMessage;
-						var lastWord = newGlossaryMessage.trim().split(' ').pop();
-						if( lastWord == 'term' ){
-							glossaryMessage = '';
-						}
+					if ( $(this).closest( 'ul' ).find( 'input:checked' ).length === 0 ) { 
+						textArea.val(''); 
+						return; 
 					}
-					textArea.val( glossaryMessage );
-
-
+					var message = 'There is a problem with ' + ( $(this).closest( 'ul' ).find( 'input:checked' ).length === 1 ? 'the glossary term' : 'the following glossary terms' ) + ': ' + $(this).closest( 'ul' ).find( 'input:checked' ).get().map(s => s.defaultValue).join(', '); 
+					
+					textArea.val( message );
 			});
 
 		}
