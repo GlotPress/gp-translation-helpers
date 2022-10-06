@@ -87,6 +87,9 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+      - name: Install GlotPress
+        run: vendor/bin/wp plugin install --activate glotpress
+
       - name: GlotPress path
         run: |
           echo "GLOTPRESS_PATH=$(dirname "$(dirname `pwd`)")/glotpress" >> $GITHUB_ENV
