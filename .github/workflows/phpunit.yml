@@ -88,7 +88,7 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install GlotPress
-        run: vendor/bin/wp plugin install --activate glotpress
+        run: vendor/bin/wp --path=/tmp/wordpress plugin install --activate glotpress
 
       - name: GlotPress path
         run: |
