@@ -1,0 +1,90 @@
+name: PHPUnit Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: PHPUnit (PHP ${{ matrix.php }}, WordPress ${{ matrix.wordpress }}, GlotPress ${{ matrix.glotpress }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306/tcp
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        # Set health checks to wait until mysql has started
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        php: [ '7.4' ]
+#        wordpress: [ 'latest', 'nightly' ]
+        wordpress: [ 'latest' ]
+        glotpress: [ 'develop' ]
+        multisite: [ false ]
+        experimental: [ false ]
+        include:
+          # - php: '8.0'
+          #   os: ubuntu-latest
+          #   experimental: true
+          - os: ubuntu-latest
+            php: '7.4'
+            wordpress: 'latest'
+            glotpress: 'latest'
+            multisite: false
+            experimental: false
+#          - os: ubuntu-latest
+#            php: '7.4'
+#            wordpress: 'latest'
+#            glotpress: 'latest'
+#            multisite: true
+#            experimental: false
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v1
+        with:
+          composer-options: "--no-progress --no-ansi --no-interaction"
+
+      - name: Install WordPress test setup
+        env:
+          WP_VERSION: ${{ matrix.wordpress }}
+          GP_VERSION: ${{ matrix.glotpress }}
+          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+        run: bash bin/install-wp-tests.sh wordpress_test root password "127.0.0.1:$MYSQL_PORT" "$WP_VERSION" "$GP_VERSION"
+
+      - name: Setup problem matchers for PHPUnit
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Runing tests
+        env:
+          GLOTPRESS_DIR: /tmp/wordpress/build/wp-content/plugins/glotpress
+          WP_MULTISITE: ${{ matrix.multisite && '1' || '' }}
+        run: composer run-script test

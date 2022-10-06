@@ -36,20 +36,29 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 // Give access to tests_add_filter() function.
 require_once "{$_tests_dir}/includes/functions.php";
 
-if ( getenv( 'GLOTPRESS_PATH' ) ) {
-	define( 'EXTERNAL_GP_PATH', getenv( 'GLOTPRESS_PATH' ) );
-} else {
-	define( 'EXTERNAL_GP_PATH', dirname( __DIR__, 3 ) . '/glotpress/' );
+
+$_core_dir = getenv( 'WP_CORE_DIR' );
+
+if ( ! $_core_dir ) {
+	$_core_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
 }
-if ( ! file_exists( EXTERNAL_GP_PATH . '/glotpress.php' ) ) {
-	echo 'Could not find ' . EXTERNAL_GP_PATH . '/glotpress.php Please specify the path to your GlotPress install with the GLOTPRESS_PATH environment variable.' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+$_gp_dir = getenv( 'GLOTPRESS_DIR' );
+if ( $_gp_dir ) {
+	define( 'EXTERNAL_GP_DIR', $_gp_dir );
+} else {
+	define( 'EXTERNAL_GP_DIR', $_core_dir . '/wp-content/plugins/glotpress' );
+}
+
+if ( ! file_exists( EXTERNAL_GP_DIR . '/glotpress.php' ) ) {
+	echo 'Could not find ' . EXTERNAL_GP_DIR . '/glotpress.php Please specify the path to your GlotPress install with the GLOTPRESS_DIR environment variable.' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit( 1 );
 }
 /**
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require EXTERNAL_GP_PATH . '/glotpress.php';
+	require EXTERNAL_GP_DIR . '/glotpress.php';
 	require dirname( __DIR__, 2 ) . '/gp-translation-helpers.php';
 }
 
@@ -70,8 +79,8 @@ require_once GP_TESTS_DIR . '/lib/testcase-request.php';
  */
 function _install_glotpress() {
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	require_once EXTERNAL_GP_PATH . '/gp-includes/schema.php';
-	require_once EXTERNAL_GP_PATH . '/gp-includes/install-upgrade.php';
+	require_once EXTERNAL_GP_DIR . '/gp-includes/schema.php';
+	require_once EXTERNAL_GP_DIR . '/gp-includes/install-upgrade.php';
 	gp_upgrade_db();
 }
 _install_glotpress();
