@@ -216,7 +216,7 @@
 						$( this ).closest( 'ul' ).after( glossaryList );
 		
 					} else {
-						$( '#glossary-item-list' ).hide();
+						$( '#glossary-item-list' ).remove();
 						$(this).closest( '.feedback-reason-list' ).siblings( '.feedback-comment' ).find( 'textarea' ).val( '' );
 					}
 				}
