@@ -87,13 +87,13 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Run tests
-        if: ${{ ! matrix.coverage }}
-        run: WP_MULTISITE=${{ matrix.multisite && '1' || '' }} vendor/bin/phpunit
+      - name: GlotPress path
+        run: |
+          echo "GLOTPRESS_PATH=$(dirname "$(dirname `pwd`)")/glotpress" >> $GITHUB_ENV
 
-      - name: Run tests for locales
-        if: ${{ ! matrix.coverage && ! matrix.multisite }}
-        run: vendor/bin/phpunit --group locales
+      - name: Runing tests
+        if: ${{ ! matrix.coverage }}
+        run: GLOTPRESS_PATH=${{ env.GLOTPRESS_PATH }} WP_MULTISITE=${{ matrix.multisite && '1' || '' }} vendor/bin/phpunit
 
       - name: Run tests with code coverage
         if: ${{ matrix.coverage }}
