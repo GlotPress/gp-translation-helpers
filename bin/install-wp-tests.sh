@@ -16,8 +16,6 @@ TMPDIR=${TMPDIR-/tmp}
 TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
-GLOTPRESS_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/wp-content/plugins/glotpress}
-GLOTPRESS_BRANCH=${GLOTPRESS_BRANCH-trunk}
 
 download() {
     if [ `which curl` ]; then
