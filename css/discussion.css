@@ -290,3 +290,9 @@ a.comment-reply-link {
 h5#reply-title {
 	padding-left: 13px;
 }
+ul#glossary-item-list {
+    list-style-type: none;
+}
+ul#glossary-item-list li label {
+    margin-left: 5px;
+}
