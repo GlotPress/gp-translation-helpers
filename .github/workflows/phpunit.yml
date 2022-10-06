@@ -85,5 +85,6 @@ jobs:
 
       - name: Runing tests
         env:
+          GLOTPRESS_DIR: /tmp/wordpress/build/wp-content/plugins/glotpress
           WP_MULTISITE: ${{ matrix.multisite && '1' || '' }}
         run: composer run-script test

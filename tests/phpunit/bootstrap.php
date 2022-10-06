@@ -51,7 +51,7 @@ if ( $_gp_dir ) {
 }
 
 if ( ! file_exists( EXTERNAL_GP_DIR . '/glotpress.php' ) ) {
-	echo 'Could not find ' . EXTERNAL_GP_DIR . '/glotpress.php Please specify the path to your GlotPress install with the GP_DIR environment variable.' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo 'Could not find ' . EXTERNAL_GP_DIR . '/glotpress.php Please specify the path to your GlotPress install with the GLOTPRESS_DIR environment variable.' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit( 1 );
 }
 /**
