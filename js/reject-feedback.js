@@ -208,8 +208,8 @@
 						glossaryWords.forEach(
 							(item) => {
 							var li = document.createElement( "li" );
-							$( '<input />', { type: 'checkbox', class: 'glossary-word-item', value: item } ).appendTo( li );
-							$( '<label />', { text: item } ).appendTo( li );
+							var checkbox = $( '<input />', { type: 'checkbox', class: 'glossary-word-item', value: item } );
+							$( '<label></label>' ).html( checkbox ).append( item ).appendTo( li );
 							glossaryList.appendChild( li );
 							}
 						);

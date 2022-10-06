@@ -304,3 +304,6 @@ ul#glossary-item-list h6 {
 ul#glossary-item-list li label {
     margin-left: 5px;
 }
+#glossary-item-list li label input[type="checkbox"].glossary-word-item {
+    margin-right: 5px;
+}
