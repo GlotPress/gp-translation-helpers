@@ -84,4 +84,7 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Runing tests
-        run: GLOTPRESS_PATH=/tmp/wordpress/build/wp-content/plugins/glotpress WP_MULTISITE=${{ matrix.multisite && '1' || '' }} composer run-script test
+        env:
+          GLOTPRESS_PATH: /tmp/wordpress/build/wp-content/plugins/glotpress
+          WP_MULTISITE: ${{ matrix.multisite && '1' || '' }}
+        run: composer run-script test
