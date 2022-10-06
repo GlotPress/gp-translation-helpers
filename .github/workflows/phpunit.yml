@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   test:
-    name: PHP ${{ matrix.php }}, WordPress${{ matrix.multisite && ' multisite' || '' }} ${{ matrix.wordpress }}
+    name: PHPUnit (PHP ${{ matrix.php }}, WordPress ${{ matrix.wordpress }}, GlotPress ${{ matrix.glotpress }})
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
 
@@ -40,7 +40,6 @@ jobs:
         wordpress: [ 'latest' ]
         glotpress: [ 'develop' ]
         multisite: [ false ]
-        #coverage: [ false ]
         experimental: [ false ]
         include:
           # - php: '8.0'
@@ -51,14 +50,12 @@ jobs:
             wordpress: 'latest'
             glotpress: 'latest'
             multisite: false
-#            coverage: true
             experimental: false
 #          - os: ubuntu-latest
 #            php: '7.4'
 #            wordpress: 'latest'
 #            glotpress: 'latest'
 #            multisite: true
-#            coverage: false
 #            experimental: false
 
     steps:
@@ -69,7 +66,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-#          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
           tools: composer
 
       - name: Install Composer dependencies
@@ -88,16 +84,4 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Runing tests
-        if: ${{ ! matrix.coverage }}
-        run: GLOTPRESS_PATH=/tmp/wordpress/build/wp-content/plugins/glotpress WP_MULTISITE=${{ matrix.multisite && '1' || '' }} vendor/bin/phpunit
-
-      - name: Run tests with code coverage
-        if: ${{ matrix.coverage }}
-        run: vendor/bin/phpunit --coverage-clover coverage-clover-${{ github.sha }}.xml
-
-      - name: Upload coverage to Codecov
-        if: ${{ matrix.coverage }}
-        uses: codecov/codecov-action@v3
-        with:
-          file: coverage-clover-${{ github.sha }}.xml
-          fail_ci_if_error: true
+        run: GLOTPRESS_PATH=/tmp/wordpress/build/wp-content/plugins/glotpress WP_MULTISITE=${{ matrix.multisite && '1' || '' }} composer run-script test
