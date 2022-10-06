@@ -203,6 +203,7 @@
 					if ( $( this ).is( ':checked' ) ) {
 						var glossaryWords = $( this ).closest( 'tr' ).find( '.original .glossary-word' ).get().map( o => o.innerText );
 						var glossaryList  = document.createElement( 'ul' );
+						glossaryList.innerHTML = '<h6>Glossary Words</h6>';
 						$( glossaryList ).attr( 'id','glossary-item-list' );
 						glossaryWords.forEach(
 							(item) => {

@@ -292,6 +292,14 @@ h5#reply-title {
 }
 ul#glossary-item-list {
     list-style-type: none;
+	border: #bcc3c3 thin solid;
+    padding: 10px;
+    border-radius: 3px;
+    background: #f2f2f2;
+}
+ul#glossary-item-list h6 {
+	margin-top: 3px;
+    margin-bottom: 8px
 }
 ul#glossary-item-list li label {
     margin-left: 5px;
