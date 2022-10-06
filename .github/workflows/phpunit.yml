@@ -87,16 +87,9 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Install GlotPress
-        run: vendor/bin/wp --path=/tmp/wordpress plugin install --activate glotpress
-
-      - name: GlotPress path
-        run: |
-          echo "GLOTPRESS_PATH=$(dirname "$(dirname `pwd`)")/glotpress" >> $GITHUB_ENV
-
       - name: Runing tests
         if: ${{ ! matrix.coverage }}
-        run: GLOTPRESS_PATH=${{ env.GLOTPRESS_PATH }} WP_MULTISITE=${{ matrix.multisite && '1' || '' }} vendor/bin/phpunit
+        run: GLOTPRESS_PATH=/tmp/wordpress/build/wp-content/plugins/glotpress WP_MULTISITE=${{ matrix.multisite && '1' || '' }} vendor/bin/phpunit
 
       - name: Run tests with code coverage
         if: ${{ matrix.coverage }}

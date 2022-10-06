@@ -16,6 +16,8 @@ TMPDIR=${TMPDIR-/tmp}
 TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
+GLOTPRESS_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/wp-content/plugins/glotpress}
+GLOTPRESS_BRANCH=${GLOTPRESS_BRANCH-trunk}
 
 download() {
     if [ `which curl` ]; then
@@ -176,6 +178,20 @@ install_db() {
 	fi
 }
 
+install_gp() {
+	if [[ $GP_VERSION == 'nightly' || $GP_VERSION == 'develop' || $GP_VERSION == 'trunk' ]]; then
+		local BRANCH_NAME='develop'
+	elif [[ $GP_VERSION == 'latest' ]]; then
+		local BRANCH_NAME='stable'
+	else
+		local BRANCH_NAME="$GP_VERSION"
+	fi
+
+	# Set up GlotPress
+	git clone --branch "$BRANCH_NAME" --single-branch -q https://github.com/GlotPress/GlotPress.git "$WP_CORE_DIR/build/wp-content/plugins/glotpress"
+}
+
 install_wp
 install_test_suite
 install_db
+install_gp
