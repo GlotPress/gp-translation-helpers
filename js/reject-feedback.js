@@ -2,9 +2,9 @@
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
-			var rowIds            = [];
-			var translationIds    = [];
-			var originalIds       = [];
+			var rowIds = [];
+			var translationIds = [];
+			var originalIds = [];
 			var modalFeedbackForm =
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
@@ -30,7 +30,7 @@
 						function() {
 							var selectedRow = $( this ).parents( 'tr.preview' );
 							if ( ! selectedRow.hasClass( 'untranslated' ) ) {
-								  return selectedRow.attr( 'row' );
+								return selectedRow.attr( 'row' );
 							}
 							$( this ).prop( 'checked', false );
 							return null;
@@ -39,12 +39,12 @@
 
 					rowIds.forEach(
 						function( rowId ) {
-							var originalId    = $gp.editor.original_id_from_row_id( rowId );
+							var originalId = $gp.editor.original_id_from_row_id( rowId );
 							var translationId = $gp.editor.translation_id_from_row_id( rowId );
 
 							if ( originalId && translationId ) {
-								  originalIds.push( originalId );
-								  translationIds.push( translationId );
+								originalIds.push( originalId );
+								translationIds.push( translationId );
 							}
 						}
 					);
@@ -69,8 +69,8 @@
 			 * @param {Object} thisObj The object that dispatches this call.
 			 */
 			function updateBulkRejectStatus( thisObj ) {
-				var form                   = thisObj.closest( 'form' );
-				var commentText            = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
+				var form = thisObj.closest( 'form' );
+				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
 				var numberOfCheckedReasons = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
 				if ( commentText || numberOfCheckedReasons ) {
 					$( 'form#bulk-actions-toolbar-top  option[value="reject"]' ).attr( 'value', 'changesrequested' ).text( 'Changes requested' );
@@ -81,10 +81,10 @@
 				'click',
 				'#modal-reject-btn, #modal-requestchanges-btn',
 				function( e ) {
-					var comment       = '';
+					var comment = '';
 					var commentReason = [];
-					var commentData   = {};
-					var form          = $( this ).closest( 'form' );
+					var commentData = {};
+					var form = $( this ).closest( 'form' );
 
 					form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 						function() {
@@ -98,10 +98,10 @@
 						$( 'form.filters-toolbar.bulk-actions, form#bulk-actions-toolbar-top' ).submit();
 					}
 
-					commentData.locale_slug    = $gp_comment_feedback_settings.locale_slug;
-					commentData.reason         = commentReason;
-					commentData.comment        = comment;
-					commentData.original_id    = originalIds;
+					commentData.locale_slug = $gp_comment_feedback_settings.locale_slug;
+					commentData.reason = commentReason;
+					commentData.comment = comment;
+					commentData.original_id = originalIds;
 					commentData.translation_id = translationIds;
 					commentData.is_bulk_reject = true;
 					commentWithFeedback( commentData, false, 'rejected' );
@@ -133,12 +133,12 @@
 			 * @param {document#event} event   The event.
 			 */
 			function toggleButtons( thisObj, event ) {
-				var form                    = thisObj.closest( 'form' );
-				var commentText             = form.find( 'textarea[name="feedback_comment"]' ).val();
-				var div                     = thisObj.closest( '.meta' );
-				var rejectButton            = $( '.reject', div );
+				var form = thisObj.closest( 'form' );
+				var commentText = form.find( 'textarea[name="feedback_comment"]' ).val();
+				var div = thisObj.closest( '.meta' );
+				var rejectButton = $( '.reject', div );
 				var changesRequestedtButton = $( '.changesrequested', div );
-				var numberOfCheckedReasons  = form.find( 'input[name="feedback_reason"]:checked' ).length;
+				var numberOfCheckedReasons = form.find( 'input[name="feedback_reason"]:checked' ).length;
 
 				if ( commentText.trim() !== '' || numberOfCheckedReasons ) {
 					rejectButton.hide();
@@ -174,12 +174,12 @@
 			 * @param {document#event} event   The event.
 			 */
 			function toggleModalButtons( thisObj, event ) {
-				var form                    = thisObj.closest( 'form' );
-				var commentText             = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
-				var div                     = thisObj.closest( '#TB_ajaxContent' );
-				var rejectButton            = $( '#modal-reject-btn', div );
+				var form = thisObj.closest( 'form' );
+				var commentText = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
+				var div = thisObj.closest( '#TB_ajaxContent' );
+				var rejectButton = $( '#modal-reject-btn', div );
 				var changesRequestedtButton = $( '#modal-requestchanges-btn', div );
-				var numberOfCheckedReasons  = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
+				var numberOfCheckedReasons = form.find( 'input[name="modal_feedback_reason"]:checked' ).length;
 
 				if ( commentText.trim() !== '' || numberOfCheckedReasons ) {
 					rejectButton.hide();
@@ -199,41 +199,45 @@
 
 			$( 'input[name="feedback_reason"]' ).change(
 				function() {
-					var glossaryWords = $( this ).closest( 'tr' ).find( '.original .glossary-word' ).get().map( o => o.innerText );
+					var glossaryWords = $( this ).closest( 'tr' ).find( '.original .glossary-word' ).get().map( function( word ) {
+						return word.innerText;
+					} );
 					if ( $( this ).is( ':checked' ) && glossaryWords.length ) {
-						var glossaryList  = document.createElement( 'ul' );
+						// eslint-disable-next-line vars-on-top
+						var glossaryList = document.createElement( 'ul' );
 						glossaryList.innerHTML = '<h6>Glossary Words</h6>';
-						$( glossaryList ).attr( 'id','glossary-item-list' );
+						$( glossaryList ).attr( 'id', 'glossary-item-list' );
 						glossaryWords.forEach(
-							(item) => {
-							var li = document.createElement( "li" );
-							var checkbox = $( '<input />', { type: 'checkbox', class: 'glossary-word-item', value: item } );
-							$( '<label></label>' ).html( checkbox ).append( item ).appendTo( li );
-							glossaryList.appendChild( li );
+							function( item ) {
+								var li = document.createElement( 'li' );
+								var checkbox = $( '<input />', { type: 'checkbox', class: 'glossary-word-item', value: item } );
+								$( '<label></label>' ).html( checkbox ).append( item ).appendTo( li );
+								glossaryList.appendChild( li );
 							}
 						);
 						$( this ).closest( 'ul' ).after( glossaryList );
-		
 					} else {
 						$( '#glossary-item-list' ).remove();
-						$(this).closest( '.feedback-reason-list' ).siblings( '.feedback-comment' ).find( 'textarea' ).val( '' );
+						$( this ).closest( '.feedback-reason-list' ).siblings( '.feedback-comment' ).find( 'textarea' ).val( '' );
 					}
 				}
 			);
 
 			$( 'body' ).on(
 				'change',
-				'input.glossary-word-item', function(e){
-					var textArea = $(this).closest( 'ul' ).next().find( 'textarea' );
-					if ( $(this).closest( 'ul' ).find( 'input:checked' ).length === 0 ) { 
-						textArea.val(''); 
-						return; 
+				'input.glossary-word-item', function( ) {
+					var textArea = $( this ).closest( 'ul' ).next().find( 'textarea' );
+					if ( $( this ).closest( 'ul' ).find( 'input:checked' ).length === 0 ) {
+						textArea.val( '' );
+						return;
 					}
-					var message = 'There is a problem with ' + ( $(this).closest( 'ul' ).find( 'input:checked' ).length === 1 ? 'the glossary term' : 'the following glossary terms' ) + ': ' + $(this).closest( 'ul' ).find( 'input:checked' ).get().map(s => s.defaultValue).join(', '); 
-					
-					textArea.val( message );
-			});
+					// eslint-disable-next-line vars-on-top
+					var message = 'There is a problem with ' + ( $( this ).closest( 'ul' ).find( 'input:checked' ).length === 1 ? 'the glossary term' : 'the following glossary terms' ) + ': ' + $( this ).closest( 'ul' ).find( 'input:checked' ).get().map( function( word ) {
+						return word.defaultValue;
+					} ).join( ', ' );
 
+					textArea.val( message );
+				} );
 		}
 	);
 
@@ -254,11 +258,11 @@
 	};
 
 	function setStatus( that, status ) {
-		var button        = $( that );
-		var feedbackData  = {};
+		var button = $( that );
+		var feedbackData = {};
 		var commentReason = [];
-		var comment       = '';
-		var div           = button.closest( 'div.meta' );
+		var comment = '';
+		var div = button.closest( 'div.meta' );
 
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
@@ -273,10 +277,10 @@
 			return;
 		}
 
-		feedbackData.locale_slug    = $gp_comment_feedback_settings.locale_slug;
-		feedbackData.reason         = commentReason;
-		feedbackData.comment        = comment;
-		feedbackData.original_id    = [ $gp.editor.current.original_id ];
+		feedbackData.locale_slug = $gp_comment_feedback_settings.locale_slug;
+		feedbackData.reason = commentReason;
+		feedbackData.comment = comment;
+		feedbackData.original_id = [ $gp.editor.current.original_id ];
 		feedbackData.translation_id = [ $gp.editor.current.translation_id ];
 		feedbackData.translation_status = status;
 
@@ -285,7 +289,7 @@
 
 	function commentWithFeedback( feedbackData, button, status ) {
 		var data = {};
-		var div  = {};
+		var div = {};
 		if ( button ) {
 			div = button.closest( 'div.meta' );
 		}
@@ -330,16 +334,16 @@
 
 	function getReasonList( ) {
 		var commentReasons = $gp_comment_feedback_settings.comment_reasons;
-		var commentList    = '';
-		var prefix         = '';
-		var suffix         = '';
-		var inputName      = '';
+		var commentList = '';
+		var prefix = '';
+		var suffix = '';
+		var inputName = '';
 
 		// eslint-disable-next-line vars-on-top
 		for ( var reason in commentReasons ) {
-			prefix       = '<div class="modal-item"><label class="tooltip" title="' + commentReasons[ reason ].explanation + '">';
-			suffix       = '</label> <span class="tooltip dashicons dashicons-info" title="' + commentReasons[ reason ].explanation + '"></span></div>';
-			inputName    = 'modal_feedback_reason';
+			prefix = '<div class="modal-item"><label class="tooltip" title="' + commentReasons[ reason ].explanation + '">';
+			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + commentReasons[ reason ].explanation + '"></span></div>';
+			inputName = 'modal_feedback_reason';
 			commentList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + commentReasons[ reason ].name + suffix;
 		}
 		return commentList;
