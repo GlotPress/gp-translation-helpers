@@ -18,7 +18,6 @@
 			'<button id="modal-requestchanges-btn" class="modal-btn gp-btn-style" style="display: none;" class="modal-btn">Request changes</button>' +
 			'</form>' +
 			'</div>';
-			var glossaryMessage = 'There is a problem with the glossary term ';
 
 			$( 'body' ).append( modalFeedbackForm );
 
