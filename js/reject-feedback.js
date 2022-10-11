@@ -197,7 +197,7 @@
 				}
 			);
 
-			$( 'input[name="feedback_reason"]' ).change(
+			$( 'input[name="feedback_reason"][value="glossary"]' ).change(
 				function() {
 					var glossaryWords = $( this ).closest( 'tr' ).find( '.original .glossary-word' ).get().map( function( word ) {
 						return word.innerText;
