@@ -42,7 +42,7 @@ $_gp_dir = getenv( 'GLOTPRESS_DIR' );
 if ( $_gp_dir ) {
 	define( 'EXTERNAL_GP_DIR', $_gp_dir );
 } else {
-	define( 'EXTERNAL_GP_DIR', $_core_dir . '/wp-content/plugins/glotpress' );
+	define( 'EXTERNAL_GP_DIR', $_core_dir . '/build/wp-content/plugins/glotpress' );
 }
 
 if ( ! file_exists( EXTERNAL_GP_DIR . '/glotpress.php' ) ) {
