@@ -100,7 +100,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that users who participate in a comment thread gets notification for new replies
 	 */
 	function test_reply_notification() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
 		$pre_wp_mail = new MockAction();
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
@@ -134,8 +133,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that admin gets an email when a comment is made on a translation by an author
 	 */
 	function test_notify_admin_of_comment() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -170,8 +167,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that admin and author gets an email when a subscriber replies to a comment made by an author
 	 */
 	function test_notify_admin_author_of_comment_by_subscriber() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -216,8 +211,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that two admins get an email when a comment is made on a translation by an author
 	 */
 	function test_notify_two_admins_of_comment_by_author() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_1_id = $this->user1_id;
 		$admin      = get_user_by( 'id', $admin_1_id );
 		$admin->set_role( 'administrator' );
@@ -257,8 +250,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that subscriber and author gets an email when an admin replies to a comment made by a subscriber
 	 */
 	function test_notify_comment_author_and_subscriber_of_reply_by_admin() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -311,8 +302,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that author gets an email notification when an admin replies to their comment
 	 */
 	function test_notify_author_of_reply_by_admin() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
