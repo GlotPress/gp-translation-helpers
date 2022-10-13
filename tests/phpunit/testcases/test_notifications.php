@@ -59,8 +59,9 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * @param int    $post_id  The post ID.
 	 * @param string $comment_content  Body of comment.
 	 * @param int    $comment_parent_id The ID of the parent comment or `0` if it doesn't exist.
+	 * @param array  $reject_reason The ID of the parent comment or `0` if it doesn't exist.
 	 */
-	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id ) {
+	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id, $reject_reason ) {
 		return wp_insert_comment(
 			array(
 				'comment_content'      => $comment_content,
@@ -69,7 +70,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 				'comment_author_email' => get_user_by( 'id', $user_id )->data->user_email,
 				'user_id'              => $user_id,
 				'comment_meta'         => array(
-					'reject_reason'  => 1,
+					'reject_reason'  => $reject_reason,
 					'translation_id' => $this->translation->id,
 					'locale'         => $this->set->locale,
 					'comment_topic'  => 'context',
@@ -103,10 +104,10 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$pre_wp_mail = new MockAction();
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
-		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $this->user2_id );
-		$comment_reply_id = $this->create_comment( $this->user2_id, $this->post_id, 'Reply to first comment.', $comment_id );
+		$comment_reply_id = $this->create_comment( $this->user2_id, $this->post_id, 'Reply to first comment.', $comment_id, array() );
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
 		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
@@ -117,7 +118,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
 
 		wp_set_current_user( $this->user3_id );
-		$comment_reply_2_id = $this->create_comment( $this->user3_id, $this->post_id, 'Reply to first reply.', $comment_reply_id );
+		$comment_reply_2_id = $this->create_comment( $this->user3_id, $this->post_id, 'Reply to first reply.', $comment_reply_id, array() );
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_2_id ), null, null );
 
 		$this->assertSame( 2, $pre_wp_mail->get_call_count() );
@@ -150,7 +151,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
 
@@ -188,10 +189,10 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $subscriber_id );
-		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
@@ -234,7 +235,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
 
@@ -278,13 +279,13 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $subscriber_id );
-		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id, array() );
 
 		wp_set_current_user( $admin_id );
-		$subscriber_comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to subscriber\'s reply.', $comment_reply_id );
+		$subscriber_comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to subscriber\'s reply.', $comment_reply_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $subscriber_comment_reply_id ), null, null );
 
@@ -325,10 +326,10 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $admin_id );
-		$comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to comment.', $comment_id );
+		$comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to comment.', $comment_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
