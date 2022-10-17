@@ -228,6 +228,12 @@ div#TB_ajaxWindowTitle {
 	height: 110px;
 	font-size: 1.1em;
 }
+.feedback-comment .note {
+	font-size: 0.8rem;
+	font-weight: normal;
+	display: inline-block;
+	margin-bottom: 1rem;
+}
 .status-actions details {
 	margin-bottom: 5px;
 }
