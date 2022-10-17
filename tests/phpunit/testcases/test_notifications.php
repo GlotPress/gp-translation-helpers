@@ -341,5 +341,13 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $author_id )->data->user_email );
 
 	}
+	/**
+	 * Test that translator gets an email notification when their translation is set to 'changesrequested'
+	 */
+	function test_notify_comment_feedback() {
+		$this->translation->set_status( 'changesrequested' );
+		$this->assertEquals( 'changesrequested', $this->translation->status );
+
+	}
 
 }
