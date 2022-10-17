@@ -59,7 +59,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * @param int    $post_id  The post ID.
 	 * @param string $comment_content  Body of comment.
 	 * @param int    $comment_parent_id The ID of the parent comment or `0` if it doesn't exist.
-	 * @param array  $reject_reason The ID of the parent comment or `0` if it doesn't exist.
+	 * @param array  $reject_reason An array of reject reasons.
 	 */
 	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id, $reject_reason ) {
 		return wp_insert_comment(
