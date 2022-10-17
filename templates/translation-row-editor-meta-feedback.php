@@ -1,7 +1,7 @@
 <?php if ( ! $can_approve_translation || ! $translation->translation_status ) {
 	return;
 }  ?>
-<details>
+<details open>
 	<summary class="feedback-summary"><?php esc_html_e( 'Give feedback', 'glotpress' ); ?></summary>
 	<div id="feedback-form">
 		<form>
