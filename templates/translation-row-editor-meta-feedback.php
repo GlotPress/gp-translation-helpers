@@ -20,6 +20,7 @@
 				<label><?php esc_html_e( 'Comment (Optional)', 'glotpress' ); ?>
 					<textarea name="feedback_comment"></textarea>
 				</label>
+				<label class="note">Please, note that all feedback are visible to the public.</label>
 			</div>
 		</form>
 	</div>
