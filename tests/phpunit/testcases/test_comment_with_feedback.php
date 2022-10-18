@@ -9,6 +9,8 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$translation = $gp_test_notifications->translation;
 		$translation->set_status( 'changesrequested' );
 
+		$this->assertEquals( 'changesrequested', $translation->status );
+
 		$_POST['nonce']                      = wp_create_nonce( 'gp_comment_feedback' );
 		$_POST['data']                       = array();
 		$_POST['data']['locale_slug']        = 'af';
