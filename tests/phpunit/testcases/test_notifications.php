@@ -6,7 +6,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	private $user1_id;
 	private $user2_id;
 	private $user3_id;
-	private $translation;
+	public $translation;
 	private $post_id;
 
 	function setUp() {
