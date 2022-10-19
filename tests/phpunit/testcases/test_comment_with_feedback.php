@@ -3,6 +3,9 @@
 class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 
 	function test_notify_comment_feedback() {
+		$pre_wp_mail = new MockAction();
+		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
+
 		$gp_test_notifications = new GP_Test_Notifications();
 		$gp_test_notifications->setUp();
 
@@ -27,6 +30,8 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 
 		$response = json_decode( $this->_last_response );
 		$this->assertEquals( 'success', $response->data );
+
+		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
 
 	}
 }
