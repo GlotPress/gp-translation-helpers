@@ -2,6 +2,9 @@
 
 class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 
+	/**
+	 * Test that an email is fired when translation status is updated to changesrequested and also with a feedback.
+	 */
 	function test_notify_comment_feedback() {
 		$pre_wp_mail = new MockAction();
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
