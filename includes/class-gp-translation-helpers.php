@@ -443,13 +443,13 @@ class GP_Translation_Helpers {
 		$first_translation_id = array_shift( $translation_id_array );
 
 		// Post comment on discussion page for the first string
-		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $translation_status );
+		$first_comment_id = $this->insert_comment( $comment, $first_original_id, $comment_reason, $first_translation_id, $locale_slug, $_SERVER, $translation_status );
 
 		if ( ! empty( $original_id_array ) && ! empty( $translation_id_array ) ) {
 			// For other strings post link to the comment.
 			$comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
-				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $translation_status );
+				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER, $translation_status );
 				$comment    = get_comment( $comment_id );
 				GP_Notifications::add_related_comment( $comment );
 			}
@@ -507,7 +507,7 @@ class GP_Translation_Helpers {
 	 * @return false|int
 	 * @since 0.0.2
 	 */
-	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $translation_status ) {
+	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server, $translation_status ) {
 		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original_id );
 		$user    = wp_get_current_user();
 		return wp_insert_comment(
@@ -516,7 +516,9 @@ class GP_Translation_Helpers {
 				'comment_author'       => $user->display_name,
 				'comment_author_email' => $user->user_email,
 				'comment_author_url'   => $user->user_url,
+				'comment_author_IP'    => sanitize_text_field( $server['REMOTE_ADDR'] ),
 				'comment_content'      => $comment,
+				'comment_agent'        => sanitize_text_field( $server['HTTP_USER_AGENT'] ),
 				'user_id'              => $user->ID,
 				'comment_meta'         => array(
 					'reject_reason'      => $reason,
