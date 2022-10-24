@@ -88,10 +88,13 @@ $args = array(
 	'reverse_children' => false,
 );
 
-
-
 ?>
 
+<div class="filter-toolbar">
+	<a class="filter-current" href="">All&nbsp;(<?php echo count( $comments_by_post_id ); ?>)</a> <span class="separator">•</span>
+	<a href="">Participating&nbsp;(0)</a> <span class="separator">•</span>
+	<a href="">Not participating&nbsp;(0)</a>
+</div>
 <table id="translations" class="translations clear">
 	<thead class="discussions-table-head">
 	<tr>
