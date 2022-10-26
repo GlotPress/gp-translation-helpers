@@ -52,17 +52,25 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$filter              = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
 		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
 		$gp_locale           = GP_Locales::by_slug( $locale_slug );
-		$user_id             = ( $filter == 'participating' || $filter == 'non_participating' ) ? wp_get_current_user()->ID : '';
-		$args                = array(
+		$user_id             = wp_get_current_user()->ID;
+		$post_ids            = array();
+		if ( 'participating' == $filter ) {
+			$comments_per_page = 0;
+			$post_ids          = $this->get_user_comments_post_ids( $locale_slug, $user_id );
+
+		}
+
+		$args = array(
 			'number'     => $comments_per_page,
 			'meta_key'   => 'locale',
 			'meta_value' => $locale_slug,
 			'paged'      => $page_number,
-			'user_id'    => $user_id,
+			'post__in'   => $post_ids,
 		);
 
 		$comments_query = new WP_Comment_Query( $args );
 		$comments       = $comments_query->comments;
+
 		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
 	}
 
@@ -374,5 +382,27 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$args
 		);
 		return $translation_permalink;
+	}
+
+	/**
+	 * Gets distinct post_ids for all comments made by user
+	 *
+	 * @param      string $locale_slug           The locale slug.
+	 * @param      int    $user_id           The user id.
+	 *
+	 * @return     array    The array of comment_post_IDs.
+	 */
+	private function get_user_comments_post_ids( $locale_slug, $user_id ) {
+		$args     = array(
+			'meta_key'   => 'locale',
+			'meta_value' => $locale_slug,
+			'user_id'    => $user_id,
+		);
+		$query    = new WP_Comment_Query( $args );
+		$comments = $query->comments;
+
+		return array_unique(
+			array_column( $comments, 'comment_post_ID' )
+		);
 	}
 }
