@@ -192,7 +192,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $subscriber_id );
-		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id, array() );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to comment.', $comment_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
