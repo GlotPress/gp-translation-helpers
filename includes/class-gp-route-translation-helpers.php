@@ -54,18 +54,26 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$gp_locale           = GP_Locales::by_slug( $locale_slug );
 		$user_id             = wp_get_current_user()->ID;
 		$post_ids            = array();
-		if ( 'participating' == $filter ) {
+		$post_filter_arg     = array();
+		if ( 'participating' == $filter || 'non-participating' == $filter ) {
 			$comments_per_page = 0;
 			$post_ids          = $this->get_user_comments_post_ids( $locale_slug, $user_id );
-
+			if ( 'participating' == $filter ) {
+				$post_filter_arg = array( 'post__in' => $post_ids );
+			}
+			if ( 'non_participating' == $filter ) {
+				$post_filter_arg = array( 'post__not_in' => $post_ids );
+			}
 		}
 
-		$args = array(
-			'number'     => $comments_per_page,
-			'meta_key'   => 'locale',
-			'meta_value' => $locale_slug,
-			'paged'      => $page_number,
-			'post__in'   => $post_ids,
+		$args = array_merge(
+			array(
+				'number'     => $comments_per_page,
+				'meta_key'   => 'locale',
+				'meta_value' => $locale_slug,
+				'paged'      => $page_number,
+			),
+			$post_filter_arg
 		);
 
 		$comments_query = new WP_Comment_Query( $args );
