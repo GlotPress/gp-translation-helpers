@@ -55,7 +55,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$user_id             = wp_get_current_user()->ID;
 		$post_ids            = array();
 		$post_filter_arg     = array();
-		if ( 'participating' == $filter || 'non-participating' == $filter ) {
+		if ( 'participating' == $filter || 'non_participating' == $filter ) {
 			$comments_per_page = 0;
 			$post_ids          = $this->get_user_comments_post_ids( $locale_slug, $user_id );
 			if ( 'participating' == $filter ) {
@@ -65,7 +65,6 @@ class GP_Route_Translation_Helpers extends GP_Route {
 				$post_filter_arg = array( 'post__not_in' => $post_ids );
 			}
 		}
-
 		$args = array_merge(
 			array(
 				'number'     => $comments_per_page,
