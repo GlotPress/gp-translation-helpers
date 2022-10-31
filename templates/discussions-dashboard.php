@@ -91,9 +91,9 @@ $args = array(
 ?>
 
 <div class="filter-toolbar">
-	<a class="filter-current" href="<?php echo esc_url( remove_query_arg( array( 'filter', 'page' ) ) ); ?>">All&nbsp;(<?php echo count( $comments_by_post_id ); ?>)</a> <span class="separator">•</span>
-	<a href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(0)</a> <span class="separator">•</span>
-	<a href="<?php echo esc_url( add_query_arg( 'filter', 'non_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(0)</a>
+	<a class="filter-current" href="<?php echo esc_url( remove_query_arg( array( 'filter', 'page' ) ) ); ?>">All&nbsp;(<?php echo count( $all_comments_post_ids ); ?>)</a> <span class="separator">•</span>
+	<a href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo count( $participating_post_ids ); ?>)</a> <span class="separator">•</span>
+	<a href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo count( $not_participating_post_ids ); ?>)</a>
 </div>
 <table id="translations" class="translations clear">
 	<thead class="discussions-table-head">
