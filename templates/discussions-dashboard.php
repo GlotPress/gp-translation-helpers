@@ -91,9 +91,9 @@ $args = array(
 ?>
 
 <div class="filter-toolbar">
-	<a class="filter-current" href="<?php echo esc_url( remove_query_arg( array( 'filter', 'page' ) ) ); ?>">All&nbsp;(<?php echo count( $all_comments_post_ids ); ?>)</a> <span class="separator">•</span>
-	<a href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo count( $participating_post_ids ); ?>)</a> <span class="separator">•</span>
-	<a href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo count( $not_participating_post_ids ); ?>)</a>
+	<a class="<?php echo ! $filter ? 'filter-current' : ''; ?>" href="<?php echo esc_url( remove_query_arg( array( 'filter', 'page' ) ) ); ?>">All&nbsp;(<?php echo count( $all_comments_post_ids ); ?>)</a> <span class="separator">•</span>
+	<a class="<?php echo ( $filter === 'participating' ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo count( $participating_post_ids ); ?>)</a> <span class="separator">•</span>
+	<a class="<?php echo ( $filter === 'not_participating' ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo count( $not_participating_post_ids ); ?>)</a>
 </div>
 <table id="translations" class="translations clear">
 	<thead class="discussions-table-head">
