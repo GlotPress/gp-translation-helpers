@@ -419,7 +419,10 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	private function get_comment_post_ids( $locale_slug ) {
 		global $wpdb;
 		return $wpdb->get_col(
-			"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value='" . $locale_slug . "' ORDER BY comment_date DESC"
+			$wpdb->prepare(
+				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s ORDER BY comment_date DESC",
+				$locale_slug
+			)
 		);
 	}
 }
