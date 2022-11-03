@@ -103,7 +103,7 @@ $args = array(
 		<th>Project</th>
 		<th>Author</th>
 		<th>Submitted on</th>
-		<th>PTEs/GTEs</th>
+		<th>GTEs/PTEs Involved</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -205,7 +205,7 @@ $args = array(
 				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
-				<td><?php echo implode( ',', $gtes_involved ); ?></td>
+				<td><?php echo esc_html( implode( ',', $gtes_involved ) ); ?></td>
 			</tr>
 			<?php
 		}
