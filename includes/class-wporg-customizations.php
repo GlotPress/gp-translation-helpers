@@ -53,6 +53,16 @@ class WPorg_GlotPress_Customizations {
 				}
 			);
 
+			add_filter(
+				'gp_gtes_ptes_involved',
+				function ( $gtes_involved, $locale_slug, $original_id, $comment_authors ) {
+					$gte_emails = WPorg_GlotPress_Notifications::get_gte_email_addresses( $locale_slug );
+					$pte_emails = WPorg_GlotPress_Notifications::get_pte_email_addresses_by_project_and_locale( $original_id, $locale_slug );
+					return array_intersect( array_merge( $gte_emails, $pte_emails ), $comment_authors );
+				},
+				10,
+				4
+			);
 		}
 	}
 }

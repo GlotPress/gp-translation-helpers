@@ -120,9 +120,19 @@ $args = array(
 			$project_name   = ( $parent_project ) ? $parent_project->name : $project->name;
 			$project_link   = gp_link_project_get( $project, esc_html( $project_name ) );
 
-			$comment_authors  = array_unique( array_column( $post_comments, 'comment_author_email' ) );
-			$validator_emails = GP_Notifications::get_validators_email_addresses( $project->path );
-			$gtes_involved    = array_intersect( $validator_emails, $comment_authors );
+			$comment_authors      = array_unique( array_column( $post_comments, 'comment_author_email' ) );
+			$validator_emails     = GP_Notifications::get_validators_email_addresses( $project->path );
+			$gtes_involved_emails = array_intersect( $validator_emails, $comment_authors );
+
+			$gtes_involved_emails = apply_filters( 'gp_gtes_ptes_involved', $gtes_involved_emails, $locale_slug, $original_id, $comment_authors );
+
+			$gte_involved_names = array_map(
+				function( $gte ) {
+					$gte_user = get_user_by( 'email', $gte );
+					return '<a href="' . esc_url( gp_url_profile( $gte_user->user_nicename ) ) . '">' . esc_html( $gte_user->user_nicename ) . '</a>';
+				},
+				$gtes_involved_emails
+			);
 
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
@@ -205,7 +215,7 @@ $args = array(
 				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
-				<td><?php echo esc_html( implode( ',', $gtes_involved ) ); ?></td>
+				<td><?php echo implode( ',', $gte_involved_names ); ?></td>
 			</tr>
 			<?php
 		}
