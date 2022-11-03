@@ -103,6 +103,7 @@ $args = array(
 		<th>Project</th>
 		<th>Author</th>
 		<th>Submitted on</th>
+		<th>PTEs/GTEs</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -118,6 +119,10 @@ $args = array(
 			$parent_project = GP::$project->get( $project->parent_project_id );
 			$project_name   = ( $parent_project ) ? $parent_project->name : $project->name;
 			$project_link   = gp_link_project_get( $project, esc_html( $project_name ) );
+
+			$comment_authors  = array_unique( array_column( $post_comments, 'comment_author_email' ) );
+			$validator_emails = GP_Notifications::get_validators_email_addresses( $project->path );
+			$gtes_involved    = array_intersect( $validator_emails, $comment_authors );
 
 			$first_comment        = reset( $post_comments );
 			$no_of_other_comments = count( $post_comments ) - 1;
@@ -200,6 +205,7 @@ $args = array(
 				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
+				<td><?php echo implode( ',', $gtes_involved ); ?></td>
 			</tr>
 			<?php
 		}
