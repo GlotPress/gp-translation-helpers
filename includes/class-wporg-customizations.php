@@ -63,6 +63,13 @@ class WPorg_GlotPress_Customizations {
 				10,
 				4
 			);
+
+			add_filter(
+				'gp_involved_table_heading',
+				function () {
+					return 'GTEs/PTEs Involved';
+				}
+			);
 		}
 	}
 }
