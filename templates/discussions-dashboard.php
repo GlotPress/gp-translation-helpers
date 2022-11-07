@@ -215,7 +215,19 @@ $args = array(
 				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
-				<td><?php echo implode( ',', $gte_involved_names ); ?></td>
+				<td>
+					<?php
+						echo wp_kses(
+							implode( ',', $gte_involved_names ),
+							array(
+								'a' => array(
+									'href'  => array(),
+									'class' => array(),
+								),
+							)
+						);
+					?>
+			</td>
 			</tr>
 			<?php
 		}
