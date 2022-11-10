@@ -98,7 +98,7 @@ class WPorg_GlotPress_Notifications {
 			add_filter(
 				'gp_mentions_list',
 				function( $result, $comments, $locale, $original_id ) {
-					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_email_addresses_for_original_id( $locale, $original_id ) : array();
+					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_details_for_original_id( $locale, $original_id ) : array();
 					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
 
 					$all_email_addresses = array_merge(
@@ -116,12 +116,19 @@ class WPorg_GlotPress_Notifications {
 					}
 
 					$users = array_map(
-						function( $email ) {
+						function( $mentionable_user ) {
+							$email = $mentionable_user;
+							$role  = '';
+							if ( is_array( $mentionable_user ) ) {
+								$email = $mentionable_user['email'];
+								$role  = ' - ' . $mentionable_user['role'];
+							}
+
 								$user = get_user_by( 'email', $email );
 								return array(
 									'ID'            => $user->ID,
 									'user_login'    => $user->user_login,
-									'user_nicename' => $user->user_nicename,
+									'user_nicename' => $user->user_nicename . $role,
 									'display_name'  => '',
 									'source'        => array( 'translators' ),
 									'image_URL'     => get_avatar_url( $user->ID ),
@@ -152,6 +159,54 @@ class WPorg_GlotPress_Notifications {
 		$email_addresses = array_merge( $email_addresses, self::get_pte_email_addresses_by_project_and_locale( $original_id, $locale ) );
 		return array_merge( $email_addresses, self::get_clpte_email_addresses_by_project( $original_id ) );
 	}
+
+	/**
+	 * Gets the email addresses and roles(GTE/PTE/CLPTE) of all project validators: GTE, PTE and CLPTE.
+	 *
+	 * @since 0.0.2
+	 *
+	 * @param string $locale  The locale for the translation.
+	 * @param int    $original_id  The original id for the string.
+	 *
+	 * @return array    The emails and roles(GTE/PTE/CLPTE) of the validators.
+	 */
+	public static function get_validator_details_for_original_id( $locale, $original_id ): array {
+		$gtes_email_and_role = array_map(
+			function( $gte_email ) {
+				return array(
+					'role'  => 'GTE',
+					'email' => $gte_email,
+				);
+			},
+			self::get_gte_email_addresses( $locale )
+		);
+
+		$ptes_email_and_role = array_map(
+			function( $pte_email ) {
+				return array(
+					'role'  => 'GTE',
+					'email' => $pte_email,
+				);
+			},
+			self::get_pte_email_addresses_by_project_and_locale( $original_id, $locale )
+		);
+
+		$clptes_email_and_role = array_map(
+			function( $clpte_email ) {
+				return array(
+					'role'  => 'GTE',
+					'email' => $clpte_email,
+				);
+			},
+			self::get_clpte_email_addresses_by_project( $original_id )
+		);
+
+		return array_merge(
+			array_merge( $gtes_email_and_role, $ptes_email_and_role ),
+			$clptes_email_and_role
+		);
+	}
+
 
 	/**
 	 * Gets the general translation editors (GTE) emails for the given locale.
