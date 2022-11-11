@@ -100,17 +100,33 @@ class WPorg_GlotPress_Notifications {
 					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_details_for_original_id( $locale, $original_id ) : array();
 					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
 
+					$commenters_email_role = array_map(
+						function( $commenter_email ) {
+							return(
+							array(
+								'role'  => 'commenter',
+								'email' => $commenter_email,
+							)
+							);
+						},
+						$commenters_email_addresses
+					);
+
 					$all_email_addresses = array_merge(
 						$validator_email_addresses,
-						$commenters_email_addresses
+						$commenters_email_role
 					);
 
 					$current_user       = wp_get_current_user();
 					$current_user_email = $current_user->user_email;
-					$current_user_key   = array_search( $current_user_email, $all_email_addresses );
-					if ( false !== $current_user_key ) {
-						// Remove email address of the logged in user from the array
-						unset( $all_email_addresses[ $current_user_key ] );
+
+					// Find all instances of the logged_in user in the array
+					$user_search_result = array_keys( array_column( $all_email_addresses, 'email' ), $current_user_email );
+
+					if ( false !== $user_search_result ) {
+						foreach ( $user_search_result as $index ) {
+							unset( $all_email_addresses[ $index ] );
+						}
 						$all_email_addresses = array_values( $all_email_addresses );
 					}
 
@@ -120,7 +136,7 @@ class WPorg_GlotPress_Notifications {
 							$role  = '';
 							if ( is_array( $mentionable_user ) ) {
 								$email = $mentionable_user['email'];
-								$role  = ' - ' . $mentionable_user['role'];
+								$role  = ! ( 'commenter' === $mentionable_user['role'] ) ? ' - ' . $mentionable_user['role'] : '';
 							}
 
 								$user = get_user_by( 'email', $email );
