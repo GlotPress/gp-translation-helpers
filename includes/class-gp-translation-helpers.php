@@ -395,7 +395,7 @@ class GP_Translation_Helpers {
 				'url'             => admin_url( 'admin-ajax.php' ),
 				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
 				'locale_slug'     => $translation_set['locale_slug'],
-				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons(),
+				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
 			)
 		);
 	}

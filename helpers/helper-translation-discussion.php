@@ -792,33 +792,37 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return array
 	 */
-	public static function get_comment_reasons(): array {
-		return array(
-			'style'       => array(
-				'name'        => __( 'Style Guide' ),
-				'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
+	public static function get_comment_reasons( $locale = null ): array {
+		$custom_reasons = GP_Custom_Locale_Reasons::get_custom_reasons( $locale );
+		return array_merge(
+			array(
+				'style'       => array(
+					'name'        => __( 'Style Guide' ),
+					'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
+				),
+				'grammar'     => array(
+					'name'        => __( 'Grammar' ),
+					'explanation' => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for your locale in the comment.' ),
+				),
+				'branding'    => array(
+					'name'        => __( 'Branding' ),
+					'explanation' => __( 'The translation is using incorrectly some brand. E.g. WordPress without the capital P.' ),
+				),
+				'glossary'    => array(
+					'name'        => __( 'Glossary' ),
+					'explanation' => __( 'The translation is not using the glossary correctly. It will be interesting to provide some link to the glossary for your locale in the comment.' ),
+				),
+				'punctuation' => array(
+					'name'        => __( 'Punctuation' ),
+					'explanation' =>
+						__( 'The translation is not using the punctuation marks correctly.' ),
+				),
+				'typo'        => array(
+					'name'        => __( 'Typo' ),
+					'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
+				),
 			),
-			'grammar'     => array(
-				'name'        => __( 'Grammar' ),
-				'explanation' => __( 'The translation has some grammar problems. It will be interesting to provide a link explaining the grammar issue for your locale in the comment.' ),
-			),
-			'branding'    => array(
-				'name'        => __( 'Branding' ),
-				'explanation' => __( 'The translation is using incorrectly some brand. E.g. WordPress without the capital P.' ),
-			),
-			'glossary'    => array(
-				'name'        => __( 'Glossary' ),
-				'explanation' => __( 'The translation is not using the glossary correctly. It will be interesting to provide some link to the glossary for your locale in the comment.' ),
-			),
-			'punctuation' => array(
-				'name'        => __( 'Punctuation' ),
-				'explanation' =>
-					__( 'The translation is not using the punctuation marks correctly.' ),
-			),
-			'typo'        => array(
-				'name'        => __( 'Typo' ),
-				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
-			),
+			$custom_reasons
 		);
 	}
 }
