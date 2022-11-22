@@ -129,7 +129,7 @@ $args = array(
 			$validator_involved_names = array_map(
 				function( $validator ) {
 					$validator_user = get_user_by( 'email', $validator );
-					return '<a href="' . esc_url( gp_url_profile( $validator_user->user_nicename ) ) . '">' . esc_html( $validator_user->user_nicename ) . '</a>';
+					return '<a href="' . esc_url( gp_url_profile( $validator_user->user_nicename ) ) . '">' . esc_html( $validator_user->display_name ) . '</a>';
 				},
 				$validators_involved_emails
 			);
