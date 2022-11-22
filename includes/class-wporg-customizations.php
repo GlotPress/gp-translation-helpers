@@ -54,11 +54,12 @@ class WPorg_GlotPress_Customizations {
 			);
 
 			add_filter(
-				'gp_gtes_ptes_involved',
+				'gp_validators_involved',
 				function ( $gtes_involved, $locale_slug, $original_id, $comment_authors ) {
-					$gte_emails = WPorg_GlotPress_Notifications::get_gte_email_addresses( $locale_slug );
-					$pte_emails = WPorg_GlotPress_Notifications::get_pte_email_addresses_by_project_and_locale( $original_id, $locale_slug );
-					return array_intersect( array_merge( $gte_emails, $pte_emails ), $comment_authors );
+					$gte_emails   = WPorg_GlotPress_Notifications::get_gte_email_addresses( $locale_slug );
+					$pte_emails   = WPorg_GlotPress_Notifications::get_pte_email_addresses_by_project_and_locale( $original_id, $locale_slug );
+					$clpte_emails = WPorg_GlotPress_Notifications::get_clpte_email_addresses_by_project( $original_id );
+					return array_intersect( array_merge( $clpte_emails, array_merge( $gte_emails, $pte_emails ) ), $comment_authors );
 				},
 				10,
 				4
@@ -67,7 +68,7 @@ class WPorg_GlotPress_Customizations {
 			add_filter(
 				'gp_involved_table_heading',
 				function () {
-					return 'GTEs/PTEs Involved';
+					return 'GTEs/PTEs/CLPTEs Involved';
 				}
 			);
 		}
