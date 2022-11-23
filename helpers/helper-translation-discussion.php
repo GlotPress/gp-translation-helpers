@@ -793,7 +793,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 * @return array
 	 */
 	public static function get_comment_reasons( $locale = null ): array {
-		$custom_reasons = GP_Custom_Locale_Reasons::get_custom_reasons( $locale );
+		$custom_reasons = apply_filters( 'gp_custom_reasons', array(), $locale );
 		return array_merge(
 			array(
 				'style'       => array(
@@ -814,8 +814,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 				),
 				'punctuation' => array(
 					'name'        => __( 'Punctuation' ),
-					'explanation' =>
-						__( 'The translation is not using the punctuation marks correctly.' ),
+					'explanation' => __( 'The translation is not using the punctuation marks correctly.' ),
 				),
 				'typo'        => array(
 					'name'        => __( 'Typo' ),
