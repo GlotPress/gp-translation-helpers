@@ -98,9 +98,9 @@ class WPorg_GlotPress_Notifications {
 				'gp_mentions_list',
 				function( $result, $comments, $locale, $original_id ) {
 					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_details_for_original_id( $locale, $original_id ) : array();
-					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
+					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments ) );
 
-					// Remove commenter email if it already exists as a GTE
+					// Remove commenter email if it already exists as a GTE.
 					$commenters_email_addresses = array_filter(
 						$commenters_email_addresses,
 						function( $commenter_email ) use ( $validator_email_addresses ) {
