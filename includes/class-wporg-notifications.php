@@ -100,6 +100,14 @@ class WPorg_GlotPress_Notifications {
 					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_details_for_original_id( $locale, $original_id ) : array();
 					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments, $validator_email_addresses ) );
 
+					// Remove commenter email if it already exists as a GTE
+					$commenters_email_addresses = array_filter(
+						$commenters_email_addresses,
+						function( $commenter_email ) use ( $validator_email_addresses ) {
+							return ( ! in_array( $commenter_email, array_column( $validator_email_addresses, 'email' ) ) );
+						}
+					);
+
 					$commenters_email_role = array_map(
 						function( $commenter_email ) {
 							return(
