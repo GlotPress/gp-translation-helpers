@@ -46,8 +46,8 @@ class WPorg_GlotPress_Customizations {
 
 			add_filter(
 				'gp_custom_reasons',
-				function ( $reasons, $locale ) {
-					return GP_Custom_Locale_Reasons::get_custom_reasons( $locale );
+				function ( $default_reasons, $locale ) {
+					return array_merge( $default_reasons, GP_Custom_Locale_Reasons::get_custom_reasons( $locale ) );
 				},
 				10,
 				2
