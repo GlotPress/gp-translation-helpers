@@ -75,6 +75,14 @@ class GP_Translation_Helpers {
 		);
 		gp_enqueue_style( 'gp-discussion-css' );
 
+		wp_register_style(  // todo: these CSS should be integrated in GlotPress.
+			'gp-translation-helpers-editor',
+			plugins_url( 'css/editor.css', __DIR__ ),
+			array(),
+			filemtime( plugin_dir_path( __DIR__ ) . 'css/editor.css' )
+		);
+		gp_enqueue_style( 'gp-translation-helpers-editor' );
+
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 		add_filter(
@@ -398,6 +406,15 @@ class GP_Translation_Helpers {
 				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons(),
 			)
 		);
+
+		wp_register_script(
+			'gp-translation-helpers-editor',
+			plugins_url( 'js/editor.js', __DIR__ ),
+			array( 'gp-editor' ),
+			filemtime( plugin_dir_path( __DIR__ ) . 'js/editor.js' ),
+			true
+		);
+		gp_enqueue_scripts( array( 'gp-translation-helpers-editor' ) );
 	}
 
 	/**

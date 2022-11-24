@@ -1,0 +1,42 @@
+.editor .meta {
+    border: 1px solid #ccc;
+    margin-left: -1px !important;
+    width: auto !important;
+}
+
+.editor .nav-sidebar {
+    float: left;
+    width: 35%;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-tabs {
+    margin: 0;
+    padding: 0;
+}
+
+ul.sidebar-tabs {
+    margin-bottom: 0;
+}
+
+.sidebar-tabs > li {
+    background: #eee;
+    color: #222;
+    display: inline-block;
+    padding: 10px 15px;
+    cursor: pointer;
+    margin: 0 1px 0 0;
+}
+.sidebar-tabs li.current {
+    background-color: transparent;
+    margin: 0 0 -1px -1px;
+    border: 1px solid #ccc;
+    border-bottom: 1px solid #fff;
+    font-weight: bold;
+}
+
+.meta h3 {
+    display: none !important;
+}
+
