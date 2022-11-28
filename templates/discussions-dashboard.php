@@ -215,7 +215,7 @@ $args = array(
 				<td><?php echo wp_kses( $project_link, array( 'a' => array( 'href' => true ) ) ); ?></td>
 				<td><?php echo get_comment_author_link( $first_comment ); ?></td>
 				<td><?php echo esc_html( $first_comment->comment_date ); ?></td>
-				<td>
+				<td class="gtes-involved">
 					<?php
 						echo wp_kses(
 							implode( ', ', $validator_involved_names ),
