@@ -59,7 +59,8 @@ class WPorg_GlotPress_Customizations {
 					$gte_emails   = WPorg_GlotPress_Notifications::get_gte_email_addresses( $locale_slug );
 					$pte_emails   = WPorg_GlotPress_Notifications::get_pte_email_addresses_by_project_and_locale( $original_id, $locale_slug );
 					$clpte_emails = WPorg_GlotPress_Notifications::get_clpte_email_addresses_by_project( $original_id );
-					return array_intersect( array_merge( $clpte_emails, array_merge( $gte_emails, $pte_emails ) ), $comment_authors );
+					return array_intersect( array_merge( $gte_emails, $pte_emails, $clpte_emails ), $comment_authors );
+
 				},
 				10,
 				4
