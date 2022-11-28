@@ -218,7 +218,7 @@ $args = array(
 				<td>
 					<?php
 						echo wp_kses(
-							implode( ',', $validator_involved_names ),
+							implode( ', ', $validator_involved_names ),
 							array(
 								'a' => array(
 									'href'  => array(),
