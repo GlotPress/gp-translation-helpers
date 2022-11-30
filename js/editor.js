@@ -1,13 +1,28 @@
-/* global $gp */
+/* global $gp, $gp_translation_helpers_editor */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
 		var tab = $( this );
 		var tabId = tab.attr( 'data-tab' );
 		var divId = tabId.replace( 'tab', 'div' );
-		var originalId = tabId.split( '-' ).pop();
+		var originalId = tabId.replace( /[^\d-]/g, '' ).replace( /^-+/g, '' );
 		change_visible_tab( tab );
 		change_visible_div( divId, originalId );
+	} );
+
+	// When a new translation row is opened (with double click), the tabs (header and content)
+	// for this row are updated with the Ajax query.
+	$gp.editor.table.on( 'dblclick', 'tr.preview td', function() {
+		var originalId = $( this ).parent().attr( 'id' ).substring( 8 );
+		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
+		$.getJSON( requestUrl, function( data ) {
+			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discuss(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
+			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
+			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History(' + data[ 'helper-history-' + originalId ].count + ')' );
+			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other locales(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
+			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+		} );
 	} );
 
 	/**

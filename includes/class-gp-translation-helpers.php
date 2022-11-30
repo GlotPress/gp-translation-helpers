@@ -378,7 +378,7 @@ class GP_Translation_Helpers {
 	 * @since 0.0.2
 	 *
 	 *  @param string $template Template of the current page.
-	 *  @param string $translation_set Current translation set
+	 *  @param array  $translation_set Current translation set.
 	 *
 	 * @return void
 	 */
@@ -415,6 +415,14 @@ class GP_Translation_Helpers {
 			true
 		);
 		gp_enqueue_scripts( array( 'gp-translation-helpers-editor' ) );
+
+		wp_localize_script(
+			'gp-translation-helpers-editor',
+			'$gp_translation_helpers_editor',
+			array(
+				'translation_helper_url' => gp_url_project( $translation_set['project']->path, gp_url_join( $translation_set['locale_slug'], $translation_set['translation_set']->slug, '-get-translation-helpers' ) ),
+			)
+		);
 	}
 
 	/**
