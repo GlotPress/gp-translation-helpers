@@ -25,6 +25,18 @@ jQuery( function( $ ) {
 		} );
 	} );
 
+	$gp.editor.table.on( 'click', 'a.comment-reply-link', function( event ) {
+		var commentId = $( this ).attr( 'data-commentid' );
+		event.preventDefault();
+		$( '#comment-reply-' + commentId ).toggle().find( 'textarea' ).focus();
+		if ( $gp_translation_helpers_editor.reply_text === $( this ).text() ) {
+			$( this ).text( $gp_translation_helpers_editor.cancel_reply_text );
+		} else {
+			$( this ).text( $gp_translation_helpers_editor.reply_text );
+		}
+		return false;
+	} );
+
 	/**
 	 * Hide all tabs and show one of them, the last clicked.
 	 *

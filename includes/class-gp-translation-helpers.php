@@ -421,6 +421,8 @@ class GP_Translation_Helpers {
 			'$gp_translation_helpers_editor',
 			array(
 				'translation_helper_url' => gp_url_project( $translation_set['project']->path, gp_url_join( $translation_set['locale_slug'], $translation_set['translation_set']->slug, '-get-translation-helpers' ) ),
+				'reply_text'             => esc_attr__( 'Reply' ),
+				'cancel_reply_text'      => esc_html__( 'Cancel reply' ),
 			)
 		);
 	}
