@@ -8,7 +8,7 @@
 			<h3 class="feedback-reason-title"><?php esc_html_e( 'Type (Optional)', 'glotpress' ); ?></h3>
 			<ul class="feedback-reason-list">
 			<?php
-				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+				$comment_reasons = Helper_Translation_Discussion::get_comment_reasons( $locale_slug );
 			foreach ( $comment_reasons as $key => $reason ) :
 				?>
 					<li>

@@ -804,8 +804,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @return array
 	 */
-	public static function get_comment_reasons(): array {
-		return array(
+	public static function get_comment_reasons( $locale = null ): array {
+		$default_reasons = array(
 			'style'       => array(
 				'name'        => __( 'Style Guide' ),
 				'explanation' => __( 'The translation is not following the style guide. It will be interesting to provide a link to the style guide for your locale in the comment.' ),
@@ -824,14 +824,15 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			),
 			'punctuation' => array(
 				'name'        => __( 'Punctuation' ),
-				'explanation' =>
-					__( 'The translation is not using the punctuation marks correctly.' ),
+				'explanation' => __( 'The translation is not using the punctuation marks correctly.' ),
 			),
 			'typo'        => array(
 				'name'        => __( 'Typo' ),
 				'explanation' => __( 'The translation has a typo. E.g., it is using the \'apostrope\' word instead of \'apostrophe\'.' ),
 			),
 		);
+		$reasons         = apply_filters( 'gp_custom_reasons', $default_reasons, $locale );
+		return $reasons;
 	}
 }
 

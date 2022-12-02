@@ -44,6 +44,15 @@ class WPorg_GlotPress_Customizations {
 				2
 			);
 
+			add_filter(
+				'gp_custom_reasons',
+				function ( $default_reasons, $locale ) {
+					return array_merge( $default_reasons, GP_Custom_Locale_Reasons::get_custom_reasons( $locale ) );
+				},
+				10,
+				2
+			);
+
 			add_filter( 'jetpack_mentions_should_load_ui', '__return_true' );
 			add_filter(
 				'jetpack_mentions_allowed_post_types',
