@@ -425,6 +425,15 @@ class GP_Translation_Helpers {
 				'cancel_reply_text'      => esc_html__( 'Cancel reply' ),
 			)
 		);
+		wp_localize_script(
+			'gp-translation-helpers-editor',
+			'wpApiSettings',
+			array(
+				'root'           => esc_url_raw( rest_url() ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'admin_ajax_url' => admin_url( 'admin-ajax.php' ),
+			)
+		);
 	}
 
 	/**

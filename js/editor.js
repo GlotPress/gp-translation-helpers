@@ -1,6 +1,7 @@
-/* global $gp, $gp_translation_helpers_editor */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings  */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
+	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
 		var tab = $( this );
 		var tabId = tab.attr( 'data-tab' );
@@ -10,8 +11,8 @@ jQuery( function( $ ) {
 		change_visible_div( divId, originalId );
 	} );
 
-	// When a new translation row is opened (with double click), the tabs (header and content)
-	// for this row are updated with the Ajax query.
+	// When a new translation row is opened (with double click), the tabs
+	// (header tab and content) for this row are updated with the Ajax query.
 	$gp.editor.table.on( 'dblclick', 'tr.preview td', function() {
 		var originalId = $( this ).parent().attr( 'id' ).substring( 8 );
 		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
@@ -25,6 +26,7 @@ jQuery( function( $ ) {
 		} );
 	} );
 
+	// Shows/hides the reply form for a comment in the discussion.
 	$gp.editor.table.on( 'click', 'a.comment-reply-link', function( event ) {
 		var commentId = $( this ).attr( 'data-commentid' );
 		event.preventDefault();
@@ -34,6 +36,97 @@ jQuery( function( $ ) {
 		} else {
 			$( this ).text( $gp_translation_helpers_editor.reply_text );
 		}
+		return false;
+	} );
+
+	// Creates a shadow post, with a format like "gth_original9753" (the number changes)
+	// to avoid creating empty posts (without comments).
+	function createShadowPost( formdata, submitComment ) {
+		var data = {
+			action: 'create_shadow_post',
+			data: formdata,
+			_ajax_nonce: wpApiSettings.nonce,
+		};
+
+		$.ajax(
+			{
+				type: 'POST',
+				url: wpApiSettings.admin_ajax_url,
+				data: data,
+			}
+		).done(
+			function( response ) {
+				formdata.post = response.data;
+				submitComment( formdata );
+			}
+		);
+	}
+
+	// Sends the new comment or the reply to an existing comment.
+	$gp.editor.table.on( 'submit', '.meta.discussion .comment-form', function( e ) {
+		var $commentform = $( e.target );
+		var postId = $commentform.attr( 'id' ).split( '-' )[ 1 ];
+		var divDiscussion = $commentform.closest( '.meta.discussion' );
+		var rowId = divDiscussion.attr( 'data-row-id' );
+		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+
+		var submitComment = function( formdata ) {
+			$.ajax( {
+				url: wpApiSettings.root + 'wp/v2/comments',
+				method: 'POST',
+				beforeSend: function( xhr ) {
+					xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
+				},
+				data: formdata,
+			} ).done( function( response ) {
+				if ( 'undefined' !== typeof ( response.data ) ) {
+					// There's probably a better way, but response.data is only set for errors.
+					// TODO: error handling.
+				} else {
+					$commentform.find( 'textarea[name=comment]' ).val( '' );
+					$.getJSON( requestUrl, function( data ) {
+						$( '[data-tab="sidebar-tab-discussion-' + rowId + '"]' ).html( 'Discuss(' + data[ 'helper-translation-discussion-' + rowId ].count + ')' );
+						$( '#sidebar-div-discussion-' + rowId ).html( data[ 'helper-translation-discussion-' + rowId ].content );
+					} );
+				}
+			} );
+		};
+
+		var formdata = {
+			content: $commentform.find( 'textarea[name=comment]' ).val(),
+			parent: $commentform.find( 'input[name=comment_parent]' ).val(),
+			post: postId,
+			meta: {
+				translation_id: $commentform.find( 'input[name=translation_id]' ).val(),
+				locale: $commentform.find( 'input[name=comment_locale]' ).val(),
+				comment_topic: $commentform.find( 'select[name=comment_topic]' ).val(),
+			},
+		};
+		e.preventDefault();
+		e.stopImmediatePropagation();
+
+		$( 'input.submit' ).prop( 'disabled', true );
+
+		if ( ! formdata.meta.translation_id ) {
+			formdata.meta.translation_id = 0;
+		}
+
+		if ( formdata.meta.locale ) {
+			/**
+			 * Set the locale to an empty string if option selected has value 'typo' or 'context'
+			 * to force comment to be posted to the English discussion page
+			 */
+			if ( formdata.meta.comment_topic === 'typo' || formdata.meta.comment_topic === 'context' ) {
+				formdata.meta.locale = '';
+			}
+		}
+
+		if ( isNaN( Number( postId ) ) ) {
+			createShadowPost( formdata, submitComment );
+		} else {
+			submitComment( formdata );
+		}
+
 		return false;
 	} );
 
