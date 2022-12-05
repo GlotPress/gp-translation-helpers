@@ -1041,7 +1041,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 				if ( $comment_translation_id && $comment_translation_id !== $current_translation_id ) {
 					$translation_status = '';
 					if ( $_translation_status ) {
-						$translation_status = ' (' . $_translation_status . ')';
+						$translation_status = ' (' . $_translation_status[0] . ')';
 					}
 					gth_print_translation( $comment_translation_id, $args, 'Translation' . $translation_status . ': ' );
 				}
