@@ -131,7 +131,7 @@ jQuery( function( $ ) {
 		return false;
 	} );
 
-	$gp.editor.table.on( 'click', 'button.sidebar-other-locales', function( e ) {
+	$gp.editor.table.on( 'click', 'button.sidebar-other-locales', function() {
 		var textToCopy = $( this ).closest( 'li' ).find( 'a' ).text();
 		var textareaToPaste = $( this ).closest( '.editor' ).find( 'textarea.foreign-text' );
 		var selectionStart = textareaToPaste.get( 0 ).selectionStart;
@@ -179,7 +179,7 @@ jQuery( function( $ ) {
 	/**
 	 * Adds a button to each translation from another locales.
 	 *
-	 * @param sidebarDiv
+	 * @param {string} sidebarDiv The div where we add the buttons.
 	 */
 	function add_copy_button( sidebarDiv ) {
 		var lis = $( sidebarDiv + ' .other-locales li' );
