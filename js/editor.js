@@ -23,6 +23,7 @@ jQuery( function( $ ) {
 			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
 			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other locales(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
 			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+			add_copy_button( '#sidebar-div-other-locales-' + originalId );
 		} );
 	} );
 
@@ -130,8 +131,32 @@ jQuery( function( $ ) {
 		return false;
 	} );
 
+	$gp.editor.table.on( 'click', '.sidebar-other-locales', function( e ) {
+		// console.log( $( this ) );
+		var textToCopy = $( this ).closest( 'li' ).find( 'a' ).text();
+		var textareaToPaste = $( this ).closest( '.editor' ).find( 'textarea.foreign-text' );
+		var selectionStart = textareaToPaste.get( 0 ).selectionStart;
+		var selectionEnd = textareaToPaste.get( 0 ).selectionEnd;
+		var textToCopyLength = textToCopy.length;
+		// console.log( textToCopy );
+		// console.log( textareaToPaste );
+		console.log( 'selectionStart: ' + selectionStart + ' selectionEnd: ' + selectionEnd );
+		textareaToPaste.val( textareaToPaste.val().substring( 0, selectionStart ) +
+			textToCopy +
+			textareaToPaste.val().substring( selectionEnd, textareaToPaste.val().length ) );
+		// textareaToPaste.append( textToCopy );
+		selectionStart += textToCopyLength;
+		selectionEnd += textToCopyLength;
+		if ( selectionEnd > textareaToPaste.val().length ) {
+			selectionEnd = textareaToPaste.val().length;
+		}
+		textareaToPaste.get( 0 ).setSelectionRange( selectionStart, selectionEnd );
+		console.log( 'selectionStart: ' + selectionStart + ' selectionEnd: ' + selectionEnd );
+		console.log( '----' );
+	} );
+
 	/**
-	 * Hide all tabs and show one of them, the last clicked.
+	 * Hides all tabs and show one of them, the last clicked.
 	 *
 	 * @param {Object} tab The selected tab.
 	 */
@@ -145,7 +170,7 @@ jQuery( function( $ ) {
 	}
 
 	/**
-	 * Hide all divs and show one of them, the last clicked.
+	 * Hides all divs and show one of them, the last clicked.
 	 *
 	 * @param {string} tabId      The select tab id.
 	 * @param {number} originalId The id of the original string to translate.
@@ -156,5 +181,19 @@ jQuery( function( $ ) {
 		$( '#sidebar-div-history-' + originalId ).hide();
 		$( '#sidebar-div-other-locales-' + originalId ).hide();
 		$( '#' + tabId ).show();
+	}
+
+	/**
+	 * Adds a button to each translation from another locales.
+	 *
+	 * @param sidebarDiv
+	 */
+	function add_copy_button( sidebarDiv ) {
+		var lis = $( sidebarDiv + ' .other-locales li' );
+		lis.each( function() {
+			var html = $( this ).html();
+			html += '<button class="sidebar-other-locales"> Copy </button>';
+			$( this ).html( html );
+		} );
 	}
 } );

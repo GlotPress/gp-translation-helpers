@@ -44,6 +44,10 @@
     color: #fff;
 }
 
+.meta.other-locales .sidebar-other-locales {
+    margin: 0.1rem .5rem;
+}
+
 .editor .nav-sidebar {
     float: left;
     width: 35%;
@@ -51,6 +55,9 @@
     padding: 0;
 }
 
+.warning {
+    margin-right: 1rem !important;
+}
 .sidebar-tabs {
     margin: 0;
     padding: 0;
