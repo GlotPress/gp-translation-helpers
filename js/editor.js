@@ -192,7 +192,8 @@ jQuery( function( $ ) {
 
 	// Fires the double click event in the first row of the table if we only
 	// have a row, because GlotPress opens the first editor if the current
-	// table has only one, so with the double click we load the contend sidebar.
+	// table has only one, so with the double click we load the content sidebar.
+	// eslint-disable-next-line vars-on-top
 	var previewRows = $gp.editor.table.find( 'tr.preview' );
 	if ( 1 === previewRows.length ) {
 		$( 'tr.preview td' ).trigger( 'dblclick' );
