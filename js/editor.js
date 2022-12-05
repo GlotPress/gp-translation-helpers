@@ -131,6 +131,7 @@ jQuery( function( $ ) {
 		return false;
 	} );
 
+	// Copies the translation from another language to the current translation.
 	$gp.editor.table.on( 'click', 'button.sidebar-other-locales', function() {
 		var textToCopy = $( this ).closest( 'li' ).find( 'a' ).text();
 		var textareaToPaste = $( this ).closest( '.editor' ).find( 'textarea.foreign-text' );
@@ -147,6 +148,15 @@ jQuery( function( $ ) {
 		}
 		textareaToPaste.get( 0 ).setSelectionRange( selectionStart, selectionEnd );
 	} );
+
+	// Fires the double click event in the first row of the table if we only
+	// have a row, because GlotPress opens the first editor if the current
+	// table has only one, so with the double click we load the content sidebar.
+	// eslint-disable-next-line vars-on-top
+	var previewRows = $gp.editor.table.find( 'tr.preview' );
+	if ( 1 === previewRows.length ) {
+		$( 'tr.preview td' ).trigger( 'dblclick' );
+	}
 
 	/**
 	 * Hides all tabs and show one of them, the last clicked.
@@ -188,14 +198,5 @@ jQuery( function( $ ) {
 			html += '<button class="sidebar-other-locales"> Copy </button>';
 			$( this ).html( html );
 		} );
-	}
-
-	// Fires the double click event in the first row of the table if we only
-	// have a row, because GlotPress opens the first editor if the current
-	// table has only one, so with the double click we load the content sidebar.
-	// eslint-disable-next-line vars-on-top
-	var previewRows = $gp.editor.table.find( 'tr.preview' );
-	if ( 1 === previewRows.length ) {
-		$( 'tr.preview td' ).trigger( 'dblclick' );
 	}
 } );
