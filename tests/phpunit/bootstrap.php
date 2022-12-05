@@ -36,18 +36,13 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 // Give access to tests_add_filter() function.
 require_once "{$_tests_dir}/includes/functions.php";
 
-
-$_core_dir = getenv( 'WP_CORE_DIR' );
-
-if ( ! $_core_dir ) {
-	$_core_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
-}
+$_core_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
 
 $_gp_dir = getenv( 'GLOTPRESS_DIR' );
 if ( $_gp_dir ) {
 	define( 'EXTERNAL_GP_DIR', $_gp_dir );
 } else {
-	define( 'EXTERNAL_GP_DIR', $_core_dir . '/wp-content/plugins/glotpress' );
+	define( 'EXTERNAL_GP_DIR', $_core_dir . '/build/wp-content/plugins/glotpress' );
 }
 
 if ( ! file_exists( EXTERNAL_GP_DIR . '/glotpress.php' ) ) {

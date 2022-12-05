@@ -460,7 +460,7 @@ class GP_Translation_Helpers {
 			GP_Notifications::init( $comment, null, null );
 		}
 
-		wp_send_json_success();
+		wp_send_json_success( 'success' );
 	}
 
 	/**

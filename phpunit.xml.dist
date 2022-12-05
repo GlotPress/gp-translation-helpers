@@ -12,4 +12,8 @@
 			<directory prefix="test_" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>
+	<php>
+		<server name="REMOTE_ADDR" value="127.0.0.1"/>
+		<server name="HTTP_USER_AGENT" value="test"/>
+	</php>
 </phpunit>

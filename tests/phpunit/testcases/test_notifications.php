@@ -6,7 +6,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	private $user1_id;
 	private $user2_id;
 	private $user3_id;
-	private $translation;
+	public $translation;
 	private $post_id;
 
 	function setUp() {
@@ -59,8 +59,9 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * @param int    $post_id  The post ID.
 	 * @param string $comment_content  Body of comment.
 	 * @param int    $comment_parent_id The ID of the parent comment or `0` if it doesn't exist.
+	 * @param array  $reject_reason An array of reject reasons.
 	 */
-	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id ) {
+	function create_comment( $user_id, $post_id, $comment_content, $comment_parent_id, $reject_reason ) {
 		return wp_insert_comment(
 			array(
 				'comment_content'      => $comment_content,
@@ -69,7 +70,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 				'comment_author_email' => get_user_by( 'id', $user_id )->data->user_email,
 				'user_id'              => $user_id,
 				'comment_meta'         => array(
-					'reject_reason'  => 1,
+					'reject_reason'  => $reject_reason,
 					'translation_id' => $this->translation->id,
 					'locale'         => $this->set->locale,
 					'comment_topic'  => 'context',
@@ -100,14 +101,13 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that users who participate in a comment thread gets notification for new replies
 	 */
 	function test_reply_notification() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
 		$pre_wp_mail = new MockAction();
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
-		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $this->user1_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $this->user2_id );
-		$comment_reply_id = $this->create_comment( $this->user2_id, $this->post_id, 'Reply to first comment.', $comment_id );
+		$comment_reply_id = $this->create_comment( $this->user2_id, $this->post_id, 'Reply to first comment.', $comment_id, array() );
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
 		$this->assertSame( 1, $pre_wp_mail->get_call_count() );
@@ -118,7 +118,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		$this->assertEquals( $atts['headers'][1], 'Bcc: ' . get_user_by( 'id', $this->user1_id )->data->user_email );
 
 		wp_set_current_user( $this->user3_id );
-		$comment_reply_2_id = $this->create_comment( $this->user3_id, $this->post_id, 'Reply to first reply.', $comment_reply_id );
+		$comment_reply_2_id = $this->create_comment( $this->user3_id, $this->post_id, 'Reply to first reply.', $comment_reply_id, array() );
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_2_id ), null, null );
 
 		$this->assertSame( 2, $pre_wp_mail->get_call_count() );
@@ -134,8 +134,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that admin gets an email when a comment is made on a translation by an author
 	 */
 	function test_notify_admin_of_comment() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -153,7 +151,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
 
@@ -170,8 +168,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that admin and author gets an email when a subscriber replies to a comment made by an author
 	 */
 	function test_notify_admin_author_of_comment_by_subscriber() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -193,10 +189,10 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $subscriber_id );
-		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to comment.', $comment_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
@@ -216,8 +212,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that two admins get an email when a comment is made on a translation by an author
 	 */
 	function test_notify_two_admins_of_comment_by_author() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_1_id = $this->user1_id;
 		$admin      = get_user_by( 'id', $admin_1_id );
 		$admin->set_role( 'administrator' );
@@ -241,7 +235,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_id ), null, null );
 
@@ -257,8 +251,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that subscriber and author gets an email when an admin replies to a comment made by a subscriber
 	 */
 	function test_notify_comment_author_and_subscriber_of_reply_by_admin() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -287,13 +279,13 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $subscriber_id );
-		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id );
+		$comment_reply_id = $this->create_comment( $subscriber_id, $this->post_id, 'Reply to first reply.', $comment_id, array() );
 
 		wp_set_current_user( $admin_id );
-		$subscriber_comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to subscriber\'s reply.', $comment_reply_id );
+		$subscriber_comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to subscriber\'s reply.', $comment_reply_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $subscriber_comment_reply_id ), null, null );
 
@@ -311,8 +303,6 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	 * Test that author gets an email notification when an admin replies to their comment
 	 */
 	function test_notify_author_of_reply_by_admin() {
-		return $this->markTestSkipped( 'Prevent breaking our initial phpunit CI setup.' );
-
 		$admin_id = $this->user1_id;
 		$admin    = get_user_by( 'id', $admin_id );
 		$admin->set_role( 'administrator' );
@@ -336,10 +326,10 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 		add_filter( 'pre_wp_mail', array( $pre_wp_mail, 'filter' ), 10, 2 );
 
 		wp_set_current_user( $author_id );
-		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0 );
+		$comment_id = $this->create_comment( $author_id, $this->post_id, 'Testing a comment.', 0, array() );
 
 		wp_set_current_user( $admin_id );
-		$comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to comment.', $comment_id );
+		$comment_reply_id = $this->create_comment( $admin_id, $this->post_id, 'Reply to comment.', $comment_id, array() );
 
 		do_action( 'rest_after_insert_comment', get_comment( $comment_reply_id ), null, null );
 
