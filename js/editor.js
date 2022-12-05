@@ -131,28 +131,21 @@ jQuery( function( $ ) {
 		return false;
 	} );
 
-	$gp.editor.table.on( 'click', '.sidebar-other-locales', function( e ) {
-		// console.log( $( this ) );
+	$gp.editor.table.on( 'click', 'button.sidebar-other-locales', function( e ) {
 		var textToCopy = $( this ).closest( 'li' ).find( 'a' ).text();
 		var textareaToPaste = $( this ).closest( '.editor' ).find( 'textarea.foreign-text' );
 		var selectionStart = textareaToPaste.get( 0 ).selectionStart;
 		var selectionEnd = textareaToPaste.get( 0 ).selectionEnd;
 		var textToCopyLength = textToCopy.length;
-		// console.log( textToCopy );
-		// console.log( textareaToPaste );
-		console.log( 'selectionStart: ' + selectionStart + ' selectionEnd: ' + selectionEnd );
 		textareaToPaste.val( textareaToPaste.val().substring( 0, selectionStart ) +
 			textToCopy +
 			textareaToPaste.val().substring( selectionEnd, textareaToPaste.val().length ) );
-		// textareaToPaste.append( textToCopy );
 		selectionStart += textToCopyLength;
 		selectionEnd += textToCopyLength;
 		if ( selectionEnd > textareaToPaste.val().length ) {
 			selectionEnd = textareaToPaste.val().length;
 		}
 		textareaToPaste.get( 0 ).setSelectionRange( selectionStart, selectionEnd );
-		console.log( 'selectionStart: ' + selectionStart + ' selectionEnd: ' + selectionEnd );
-		console.log( '----' );
 	} );
 
 	/**
