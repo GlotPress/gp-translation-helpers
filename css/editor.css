@@ -6,7 +6,7 @@
     min-height: 300px;
 }
 
-.meta.discussion, .meta.history {
+.meta.discussion, .meta.history, .meta.other-locales {
     padding: 1rem;
 }
 .meta.discussion h6 {
