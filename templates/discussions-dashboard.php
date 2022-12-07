@@ -103,7 +103,7 @@ $args = array(
 		<th>Project</th>
 		<th>Author</th>
 		<th>Submitted on</th>
-		<th><?php echo esc_html( apply_filters( 'gp_involved_table_heading', 'Validators Involved' ) ); ?></th>
+		<th><?php echo esc_html( apply_filters( 'gp_involved_table_heading', __( 'Validators Involved' ) ) ); ?></th>
 	</tr>
 	</thead>
 	<tbody>
