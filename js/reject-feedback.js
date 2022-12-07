@@ -6,6 +6,8 @@
 			var translationIds = [];
 			var originalIds = [];
 			var bulkTranslationStatus = [];
+			var translationStatuses = {};
+			var statusIndex = 0;
 			var modalFeedbackForm =
 			'<div id="reject-feedback-form" style="display:none;">' +
 			'<form>' +
@@ -50,7 +52,9 @@
 							if ( originalId && translationId ) {
 								originalIds.push( originalId );
 								translationIds.push( translationId );
+								translationStatuses[ translationId ] = bulkTranslationStatus[ statusIndex ];
 							}
+							statusIndex++;
 						}
 					);
 
@@ -109,7 +113,7 @@
 					commentData.original_id = originalIds;
 					commentData.translation_id = translationIds;
 					commentData.is_bulk_reject = true;
-					commentData.translation_status = bulkTranslationStatus;
+					commentData.translation_status = translationStatuses;
 
 					commentWithFeedback( commentData, false, 'rejected' );
 					e.preventDefault();
