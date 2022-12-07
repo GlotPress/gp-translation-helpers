@@ -14,17 +14,13 @@ jQuery( function( $ ) {
 	// When a new translation row is opened (with double click), the tabs
 	// (header tab and content) for this row are updated with the Ajax query.
 	$gp.editor.table.on( 'dblclick', 'tr.preview td', function() {
-		var originalId = $( this ).parent().attr( 'id' ).substring( 8 );
-		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
-		$.getJSON( requestUrl, function( data ) {
-			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discuss(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
-			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
-			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History(' + data[ 'helper-history-' + originalId ].count + ')' );
-			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
-			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other locales(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
-			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
-			add_copy_button( '#sidebar-div-other-locales-' + originalId );
-		} );
+		loadTabsAndDivs( $( this ) );
+	} );
+
+	// When a new translation row is opened (clicking in the "Details" button), the
+	// tabs (header tab and content) for this row are updated with the Ajax query.
+	$gp.editor.table.on( 'click', '.action.edit', function( ) {
+		loadTabsAndDivs( $( this ) );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -197,6 +193,25 @@ jQuery( function( $ ) {
 			var html = $( this ).html();
 			html += '<button class="sidebar-other-locales"> Copy </button>';
 			$( this ).html( html );
+		} );
+	}
+
+	/**
+	 * Load the content in the tabs (header tab and content) for the opened row.
+	 *
+	 * @param {Object} element The element that triggers the action.
+	 */
+	function loadTabsAndDivs( element ) {
+		var originalId = element.closest( 'tr' ).attr( 'id' ).substring( 8 );
+		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
+		$.getJSON( requestUrl, function( data ) {
+			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discuss(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
+			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
+			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History(' + data[ 'helper-history-' + originalId ].count + ')' );
+			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other locales(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
+			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+			add_copy_button( '#sidebar-div-other-locales-' + originalId );
 		} );
 	}
 } );
