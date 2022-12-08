@@ -450,8 +450,8 @@ class GP_Translation_Helpers {
 			$comment = get_comment_link( $first_comment_id );
 			foreach ( $original_id_array as $index => $single_original_id ) {
 				$comment_id = $this->insert_comment( $comment, $single_original_id, $comment_reason, $translation_id_array[ $index ], $locale_slug, $_SERVER, $translation_status );
-				$comment    = get_comment( $comment_id );
-				GP_Notifications::add_related_comment( $comment );
+				$_comment   = get_comment( $comment_id );
+				GP_Notifications::add_related_comment( $_comment );
 			}
 		}
 
