@@ -13,6 +13,14 @@ class GP_Sidebar {
 		add_filter( 'gp_right_sidebar', array( static::class, 'add_tabs' ), 10, 2 );
 	}
 
+	/**
+	 * Adds a system with 4 tabs and divs to show the information in the right sidebar.
+	 *
+	 * @param string $meta_sidebar The HTML content for the meta sidebar.
+	 * @param array  $defined_vars The defined variables.
+	 *
+	 * @return string
+	 */
 	public static function add_tabs( $meta_sidebar, $defined_vars ) {
 		$id                = $defined_vars['translation']->row_id;
 		$discussion_tab    = '<div class="meta discussion" id="sidebar-div-discussion-' . $id . '"  data-row-id="' . $id . '" style="display: none;">Discussion tab</div>';
