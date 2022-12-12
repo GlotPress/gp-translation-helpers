@@ -82,7 +82,7 @@ jQuery( function( $ ) {
 				} else {
 					$commentform.find( 'textarea[name=comment]' ).val( '' );
 					$.getJSON( requestUrl, function( data ) {
-						$( '[data-tab="sidebar-tab-discussion-' + rowId + '"]' ).html( 'Discuss(' + data[ 'helper-translation-discussion-' + rowId ].count + ')' );
+						$( '[data-tab="sidebar-tab-discussion-' + rowId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + rowId ].count + ')' );
 						$( '#sidebar-div-discussion-' + rowId ).html( data[ 'helper-translation-discussion-' + rowId ].content );
 					} );
 				}
@@ -205,11 +205,11 @@ jQuery( function( $ ) {
 		var originalId = element.closest( 'tr' ).attr( 'id' ).substring( 8 );
 		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
 		$.getJSON( requestUrl, function( data ) {
-			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
+			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
 			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
-			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History(' + data[ 'helper-history-' + originalId ].count + ')' );
+			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
 			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
-			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other locales(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
+			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
 			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
 			add_copy_button( '#sidebar-div-other-locales-' + originalId );
 		} );
