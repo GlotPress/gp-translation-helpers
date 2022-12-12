@@ -205,7 +205,7 @@ jQuery( function( $ ) {
 		var originalId = element.closest( 'tr' ).attr( 'id' ).substring( 8 );
 		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
 		$.getJSON( requestUrl, function( data ) {
-			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discuss(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
+			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
 			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
 			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History(' + data[ 'helper-history-' + originalId ].count + ')' );
 			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );

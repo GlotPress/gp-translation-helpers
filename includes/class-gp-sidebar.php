@@ -29,7 +29,7 @@ class GP_Sidebar {
 		$tabs              = '<nav class="nav-sidebar">';
 		$tabs             .= '<ul class="sidebar-tabs">';
 		$tabs             .= '	<li class="current tab-meta" data-tab="sidebar-tab-meta-' . $id . '" data-row-id="' . $id . '">Meta</li>';
-		$tabs             .= '	<li class="tab-discussion" data-tab="sidebar-tab-discussion-' . $id . '" data-row-id="' . $id . '">Discuss<span class="count">(0)</span></li>';
+		$tabs             .= '	<li class="tab-discussion" data-tab="sidebar-tab-discussion-' . $id . '" data-row-id="' . $id . '">Discussion<span class="count">(0)</span></li>';
 		$tabs             .= '	<li class="tab-history" data-tab="sidebar-tab-history-' . $id . '" data-row-id="' . $id . '">History<span class="count">(0)</span></li>';
 		$tabs             .= '	<li class="tab-other-locales" data-tab="sidebar-tab-other-locales-' . $id . '" data-row-id="' . $id . '">Other locales<span class="count">(0)</span></li>';
 		$tabs             .= '</ul>';
