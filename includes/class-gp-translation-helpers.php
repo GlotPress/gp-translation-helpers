@@ -75,6 +75,14 @@ class GP_Translation_Helpers {
 		);
 		gp_enqueue_style( 'gp-discussion-css' );
 
+		wp_register_style(  // todo: these CSS should be integrated in GlotPress.
+			'gp-translation-helpers-editor',
+			plugins_url( 'css/editor.css', __DIR__ ),
+			array(),
+			filemtime( plugin_dir_path( __DIR__ ) . 'css/editor.css' )
+		);
+		gp_enqueue_style( 'gp-translation-helpers-editor' );
+
 		add_filter( 'gp_translation_row_template_more_links', array( $this, 'translation_row_template_more_links' ), 10, 5 );
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 		add_filter(
@@ -370,7 +378,7 @@ class GP_Translation_Helpers {
 	 * @since 0.0.2
 	 *
 	 *  @param string $template Template of the current page.
-	 *  @param string $translation_set Current translation set
+	 *  @param array  $translation_set Current translation set.
 	 *
 	 * @return void
 	 */
@@ -396,6 +404,34 @@ class GP_Translation_Helpers {
 				'nonce'           => wp_create_nonce( 'gp_comment_feedback' ),
 				'locale_slug'     => $translation_set['locale_slug'],
 				'comment_reasons' => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
+			)
+		);
+
+		wp_register_script(
+			'gp-translation-helpers-editor',
+			plugins_url( 'js/editor.js', __DIR__ ),
+			array( 'gp-editor' ),
+			filemtime( plugin_dir_path( __DIR__ ) . 'js/editor.js' ),
+			true
+		);
+		gp_enqueue_scripts( array( 'gp-translation-helpers-editor' ) );
+
+		wp_localize_script(
+			'gp-translation-helpers-editor',
+			'$gp_translation_helpers_editor',
+			array(
+				'translation_helper_url' => gp_url_project( $translation_set['project']->path, gp_url_join( $translation_set['locale_slug'], $translation_set['translation_set']->slug, '-get-translation-helpers' ) ),
+				'reply_text'             => esc_attr__( 'Reply' ),
+				'cancel_reply_text'      => esc_html__( 'Cancel reply' ),
+			)
+		);
+		wp_localize_script(
+			'gp-translation-helpers-editor',
+			'wpApiSettings',
+			array(
+				'root'           => esc_url_raw( rest_url() ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'admin_ajax_url' => admin_url( 'admin-ajax.php' ),
 			)
 		);
 	}
