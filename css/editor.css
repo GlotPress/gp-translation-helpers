@@ -87,3 +87,12 @@ ul.sidebar-tabs {
     display: none !important;
 }
 
+.meta.discussion .comment-respond{
+    padding: 0 1rem;
+    background: red;
+}
+
+.meta.discussion .optin-message-for-each-discussion {
+    padding: 0 1rem 1rem 1rem;
+    background: blue;
+}
