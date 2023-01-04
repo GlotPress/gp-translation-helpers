@@ -31,7 +31,7 @@ class GP_Sidebar {
 		$tabs             .= '	<li class="current tab-meta" data-tab="sidebar-tab-meta-' . $id . '" data-row-id="' . $id . '">Meta</li>';
 		$tabs             .= '	<li class="tab-discussion" data-tab="sidebar-tab-discussion-' . $id . '" data-row-id="' . $id . '">Discussion&nbsp;<span class="count">(0)</span></li>';
 		$tabs             .= '	<li class="tab-history" data-tab="sidebar-tab-history-' . $id . '" data-row-id="' . $id . '">History&nbsp;<span class="count">(0)</span></li>';
-		$tabs             .= '	<li class="tab-other-locales" data-tab="sidebar-tab-other-locales-' . $id . '" data-row-id="' . $id . '">Other locales&nbsp;<span class="count">(0)</span></li>';
+		$tabs             .= '	<li class="tab-other-locales" data-tab="sidebar-tab-other-locales-' . $id . '" data-row-id="' . $id . '">Other&nbsp;locales&nbsp;<span class="count">(0)</span></li>';
 		$tabs             .= '</ul>';
 
 		$tabs .= $meta_sidebar;
