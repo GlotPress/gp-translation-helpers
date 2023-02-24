@@ -22,7 +22,34 @@ class GP_Custom_Locale_Reasons extends GP_Route {
 		// ),
 		// )
 		// );
-		$locale_reasons = array();
+		$locale_reasons = array(
+			'it' => array(
+				'Consistenza'                   => array(
+					'name'        => __( 'Consistenza' ),
+					'explanation' => __( 'Utilizzare una traduzione consistente' ),
+				),
+				'2a persona'                    => array(
+					'name'        => __( '2a persona' ),
+					'explanation' => __( 'Per i verbi utilizziamo la seconda persona singolare rivolgendoci direttamente all’utente' ),
+				),
+				'No maiuscole TitleCase'        => array(
+					'name'        => __( 'No maiuscole TitleCase' ),
+					'explanation' => __( 'Verificare il corretto uso delle maiuscole in italiano, sono presenti maiuscole non necessarie/errate' ),
+				),
+				'Spazio doppio'                 => array(
+					'name'        => __( 'Spazio doppio' ),
+					'explanation' => __( 'Sono presenti uno o più uno spazi doppi' ),
+				),
+				'Spazio all’inizio o alla fine' => array(
+					'name'        => __( 'Spazio all’inizio o alla fine' ),
+					'explanation' => __( 'Sono presenti/assenti spazi all’inizio o alla fine della traduzione diversamente dalla stringa originale' ),
+				),
+				'Niente s al plurale'           => array(
+					'name'        => __( 'Niente s al plurale' ),
+					'explanation' => __( 'In italiano non si riportano le s del plurale dei termini che rimangono invariati' ),
+				),
+			),
+		);
 
 		return isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
 	}
