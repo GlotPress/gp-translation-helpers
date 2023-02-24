@@ -204,8 +204,12 @@ div#TB_ajaxWindowTitle {
 }
 .gp-content ul.feedback-reason-list {
 	list-style-type: none;
-	display: inline-block;
 	padding-left: .5em;
+    display: grid;
+    overflow: hidden;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column-gap: 4px;
+    margin-left: 0;
 }
 .feedback-reason-list li {
 	width: 50%;
@@ -215,9 +219,15 @@ div#TB_ajaxWindowTitle {
 .feedback-reason-list li label {
 	font-size: 1.1em;
 	cursor: pointer;
+	display: inline-block;
 }
 .feedback-reason-list li input[type="checkbox"] {
 	margin-right: 5px;
+	float: left;
+}
+.feedback-reason-list li span.gp-reason-text {
+    display: flex;
+    margin-top: -10px;
 }
 .feedback-comment label, .gp-content h3.feedback-reason-title {
 	font-size: 1.1em;
