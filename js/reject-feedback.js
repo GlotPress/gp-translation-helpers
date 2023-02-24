@@ -355,7 +355,7 @@
 			prefix = '<div class="modal-item"><label class="tooltip" title="' + commentReasons[ reason ].explanation + '">';
 			suffix = '</label> <span class="tooltip dashicons dashicons-info" title="' + commentReasons[ reason ].explanation + '"></span></div>';
 			inputName = 'modal_feedback_reason';
-			commentList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> ' + commentReasons[ reason ].name + suffix;
+			commentList += prefix + '<input type="checkbox" name="' + inputName + '" value="' + reason + '" /> <span class="gp-reason-text">' + commentReasons[ reason ].name + '</span>' + suffix;
 		}
 		return commentList;
 	}
