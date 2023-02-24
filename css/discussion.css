@@ -74,7 +74,6 @@ article.comment time {
 	font-size:16px;
 }
 .feedback-reason-list li {
-	white-space:nowrap;
 	padding-right: 2px;
 }
 .ui-tooltip {
@@ -204,30 +203,30 @@ div#TB_ajaxWindowTitle {
 }
 .gp-content ul.feedback-reason-list {
 	list-style-type: none;
-	padding-left: .5em;
     display: grid;
-    overflow: hidden;
     grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 4px;
     margin-left: 0;
 }
 .feedback-reason-list li {
-	width: 50%;
 	float: left;
 	padding-top: 4px;
 }
 .feedback-reason-list li label {
 	font-size: 1.1em;
 	cursor: pointer;
-	display: inline-block;
+	min-width: 100%;
 }
 .feedback-reason-list li input[type="checkbox"] {
-	margin-right: 5px;
 	float: left;
 }
 .feedback-reason-list li span.gp-reason-text {
-    display: flex;
-    margin-top: -10px;
+	display: inline-block;
+    margin-bottom: 5px;
+    float: left;
+    width: 70%;
+    margin-left: 2px;
+    margin-top: -8px;
 }
 .feedback-comment label, .gp-content h3.feedback-reason-title {
 	font-size: 1.1em;
