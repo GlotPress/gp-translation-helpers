@@ -203,10 +203,10 @@ div#TB_ajaxWindowTitle {
 }
 .gp-content ul.feedback-reason-list {
 	list-style-type: none;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-column-gap: 4px;
-    margin-left: 0;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-column-gap: 4px;
+	margin-left: 0;
 }
 .feedback-reason-list li {
 	float: left;
@@ -222,11 +222,11 @@ div#TB_ajaxWindowTitle {
 }
 .feedback-reason-list li span.gp-reason-text {
 	display: inline-block;
-    margin-bottom: 5px;
-    float: left;
-    width: 70%;
-    margin-left: 2px;
-    margin-top: -8px;
+	margin-bottom: .5em;
+	float: left;
+	width: 70%;
+	margin-left: .5em;
+	margin-top: -0.5em;
 }
 .feedback-comment label, .gp-content h3.feedback-reason-title {
 	font-size: 1.1em;
