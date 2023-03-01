@@ -34,7 +34,7 @@
 							var selectedRow = $( this ).parents( 'tr.preview' );
 							var translationStatus = '';
 
-							if ( ! selectedRow.hasClass( 'untranslated' ) ) {
+							if ( ( selectedRow.length ) && ( ! selectedRow.hasClass( 'untranslated' ) ) ) {
 								translationStatus = selectedRow.attr( 'class' ).split( ' ' )[ 1 ].substring( 7 );
 								bulkTranslationStatus.push( translationStatus );
 								return selectedRow.attr( 'row' );
