@@ -6,10 +6,14 @@
 	$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
 	$openai_response = GP_OpenAI_Review::get_openai_review( $translation->singular, $translation->translations[0], $locale_slug, $locale_glossary );
+	// var_dump( $openai_response );
 ?>
 <div>
 	<?php if ( ! empty( $openai_response['openai']['review'] ) ) : ?>
-		<?php esc_html( $openai_response['openai']['review'] ); ?>
+		<div class="openai-review">
+			<h4><?php esc_html_e( 'Auto-review by ChatGPT', 'glotpress' ); ?></h4>
+			<?php echo esc_html( $openai_response['openai']['review'] ); ?>
+		</div>
 	<?php endif; ?>
 </div>
 <details open>
