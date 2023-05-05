@@ -325,3 +325,15 @@ ul#glossary-item-list li label {
 td.gtes-involved a{
 	text-decoration: none;
 }
+.openai-review {
+    background: #eee;
+    border-radius: 3px;
+    padding: 0.4em;
+    color: #4b4c4c;
+    font-size: .9em;
+    margin-top: 1em;
+}
+.openai-review h4 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
