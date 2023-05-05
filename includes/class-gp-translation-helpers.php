@@ -89,6 +89,7 @@ class GP_Translation_Helpers {
 			'gp_tmpl_load_locations',
 			function( $locations, $template, $args, $template_path ) {
 				if ( 'translation-row-editor-meta-status' === $template ) {
+					include_once 'class-gp-openai-review.php';
 					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
 				} else {
 					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';

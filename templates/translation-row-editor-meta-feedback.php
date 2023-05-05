@@ -1,6 +1,17 @@
 <?php if ( ! $can_approve_translation || ! $translation->translation_status ) {
 	return;
-}  ?>
+}
+	$current_set_slug                = 'default';
+	$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
+	$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+
+	$openai_response = GP_OpenAI_Review::get_openai_review( $translation->singular, $translation->translations[0], $locale_slug, $locale_glossary );
+?>
+<div>
+	<?php if ( ! empty( $openai_response['openai']['review'] ) ) : ?>
+		<?php esc_html( $openai_response['openai']['review'] ); ?>
+	<?php endif; ?>
+</div>
 <details open>
 	<summary class="feedback-summary"><?php esc_html_e( 'Give feedback', 'glotpress' ); ?></summary>
 	<div id="feedback-form">
