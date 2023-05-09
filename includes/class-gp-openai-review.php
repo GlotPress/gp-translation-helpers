@@ -6,8 +6,8 @@ class GP_OpenAI_Review {
 	 *
 	 * @var string
 	 */
-	const OPENAI_KEY = '';
-
+	private static $gp_openai_key = '';
+	
 	/**
 	 * Get suggestions from OpenAI (ChatGPT).
 	 *
@@ -21,8 +21,9 @@ class GP_OpenAI_Review {
 	public static function get_openai_review( $original_singular, $translation, $locale, $locale_glossary ): array {
 		$openai_query   = '';
 		$glossary_query = '';
+		$openai_key = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
 
-		if ( empty( trim( self::OPENAI_KEY ) ) ) {
+		if ( empty( trim( $openai_key ) ) ) {
 			return array();
 		}
 		$openai_temperature = 0;
@@ -65,7 +66,7 @@ class GP_OpenAI_Review {
 				'timeout' => 20,
 				'headers' => array(
 					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . self::OPENAI_KEY,
+					'Authorization' => 'Bearer ' . $openai_key,
 				),
 				'body'    => wp_json_encode(
 					array(
