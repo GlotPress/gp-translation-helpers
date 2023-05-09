@@ -18,7 +18,7 @@ jQuery( function( $ ) {
 		var tr = $( this ).closest( 'tr.editor' );
 		var rowId =  tr.attr( 'row' );
 		loadTabsAndDivs( tr );
-		fetchOpenAIReviewResponse( rowId );
+		fetchOpenAIReviewResponse( rowId, tr );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -217,8 +217,9 @@ jQuery( function( $ ) {
 	 * Fetch translation review from OpenAI.
 	 *
 	 * @param {string} rowId The row-id attribute of the current row.
+	 * @param {string} currentRow The current row.
 	 */
-	function fetchOpenAIReviewResponse( rowId ) {
+	function fetchOpenAIReviewResponse( rowId, currentRow ) {
 		var payload = {};
 		var data = {};
 		var translationId = $gp.editor.translation_id_from_row_id( rowId );
@@ -240,12 +241,12 @@ jQuery( function( $ ) {
 			}
 		).done(
 			function( response ) {
-				$( '.openai-review .suggestions__loading-indicator' ).hide();
+				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 				if ( response.data ) {
 
-					$( '.openai-review' ).html( '<h4>Auto-review by ChatGPT' ).append( response.data );
+					currentRow.find( '.openai-review' ).html( '<h4>Auto-review by ChatGPT' ).append( response.data );
 				} else {
-					$( '.openai-review' ).html( 'Oops! No response from ChatGPT.' );
+					currentRow.find( '.openai-review' ).html( 'Oops! No response from ChatGPT.' );
 				}
 			}
 		).fail(
