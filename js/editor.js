@@ -16,7 +16,9 @@ jQuery( function( $ ) {
 	// divs with the content) for the right sidebar are updated.
 	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
 		var tr = $( this ).closest( 'tr.editor' );
+		var rowId =  tr.attr( 'row' );
 		loadTabsAndDivs( tr );
+		fetchOpenAIReviewResponse( rowId );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -209,5 +211,47 @@ jQuery( function( $ ) {
 			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
 			add_copy_button( '#sidebar-div-other-locales-' + originalId );
 		} );
+	}
+
+	/**
+	 * Fetch translation review from OpenAI.
+	 *
+	 * @param {string} rowId The row-id attribute of the current row.
+	 */
+	function fetchOpenAIReviewResponse( rowId ) {
+		var payload = {};
+		var data = {};
+		var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
+		payload.translation_id = translationId;
+
+		data = {
+			action: 'fetch_openai_review',
+			data: payload,
+			_ajax_nonce: $gp_comment_feedback_settings.nonce,
+		};
+
+		$.ajax(
+			{
+				type: 'POST',
+				url: $gp_comment_feedback_settings.url,
+				data: data,
+			}
+		).done(
+			function( response ) {
+				$( '.openai-review .suggestions__loading-indicator' ).hide();
+				if ( response.data ) {
+					$( '.openai-review' ).html( response.data );
+				} else {
+					$( '.openai-review' ).html( 'Oops! No response from ChatGPT.' );
+				}
+			}
+		).fail(
+			function( xhr, msg ) {
+				/* eslint no-console: ["error", { allow: ["error"] }] */
+				console.error( data );
+			}
+		);
 	}
 } );

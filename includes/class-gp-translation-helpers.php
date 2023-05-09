@@ -63,6 +63,7 @@ class GP_Translation_Helpers {
 		add_action( 'gp_pre_tmpl_load', array( $this, 'register_comment_feedback_js' ), 10, 2 );
 		add_action( 'wp_ajax_comment_with_feedback', array( $this, 'comment_with_feedback' ) );
 		add_action( 'wp_ajax_optout_discussion_notifications', array( $this, 'optout_discussion_notifications' ) );
+		add_action( 'wp_ajax_fetch_openai_review', array( $this, 'fetch_openai_review' ) );
 
 		add_thickbox();
 		gp_enqueue_style( 'thickbox' );
@@ -434,6 +435,23 @@ class GP_Translation_Helpers {
 				'admin_ajax_url' => admin_url( 'admin-ajax.php' ),
 			)
 		);
+	}
+	public function fetch_openai_review() {
+		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
+		$translation_id   = sanitize_text_field( $_POST['data']['translation_id'] );
+		$locale_slug      = sanitize_text_field( $_POST['data']['locale_slug'] );
+		$current_set_slug = 'default';
+
+		$translation = GP::$translation->get( $translation_id );
+
+		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
+		$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+
+		$original = GP::$original->get( $translation->original_id );
+
+		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug, $locale_glossary );
+
+		wp_send_json_success( $openai_response['openai']['review'] );
 	}
 
 	/**
