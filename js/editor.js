@@ -242,7 +242,8 @@ jQuery( function( $ ) {
 			function( response ) {
 				$( '.openai-review .suggestions__loading-indicator' ).hide();
 				if ( response.data ) {
-					$( '.openai-review' ).html( response.data );
+
+					$( '.openai-review' ).html( '<h4>Auto-review by ChatGPT' ).append( response.data );
 				} else {
 					$( '.openai-review' ).html( 'Oops! No response from ChatGPT.' );
 				}
