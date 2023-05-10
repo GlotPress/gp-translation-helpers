@@ -18,9 +18,8 @@ class GP_OpenAI_Review {
 	 *
 	 * @return array
 	 */
-	public static function get_openai_review( $original_singular, $translation, $locale, $locale_glossary ): array {
+	public static function get_openai_review( $original_singular, $translation, $locale ): array {
 		$openai_query   = '';
-		$glossary_query = '';
 		$openai_key = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
 
 		if ( empty( trim( $openai_key ) ) ) {
@@ -28,32 +27,11 @@ class GP_OpenAI_Review {
 		}
 		$openai_temperature = 0;
 
-		$glossary_entries = array();
-		foreach ( $locale_glossary->get_entries() as $gp_glossary_entry ) {
-			if ( strpos( strtolower( $original_singular ), strtolower( $gp_glossary_entry->term ) ) !== false ) {
-				// Use the translation as key, because we could have multiple translations with the same term.
-				$glossary_entries[ $gp_glossary_entry->translation ] = $gp_glossary_entry->term;
-			}
-		}
-		if ( ! empty( $glossary_entries ) ) {
-			$glossary_query = ' The following terms are translated as follows: ';
-			foreach ( $glossary_entries as $glossary_translation => $term ) {
-				$glossary_query .= '"' . $term . '" is translated as "' . $glossary_translation . '"';
-				if ( array_key_last( $glossary_entries ) != $glossary_translation ) {
-					$glossary_query .= ', ';
-				}
-			}
-			$glossary_query .= '.';
-		}
-
+		
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= 'For the english text  "' . $original_singular . '", is "' . $translation . '" a correct translation in ' . $gp_locale->english_name . '?';
 
 		$messages = array(
-			array(
-				'role'    => 'system',
-				'content' => $glossary_query,
-			),
 			array(
 				'role'    => 'user',
 				'content' => $openai_query,
