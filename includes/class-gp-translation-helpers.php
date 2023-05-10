@@ -436,6 +436,7 @@ class GP_Translation_Helpers {
 			)
 		);
 	}
+
 	public function fetch_openai_review() {
 		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
 		$translation_id   = sanitize_text_field( $_POST['data']['translation_id'] );
