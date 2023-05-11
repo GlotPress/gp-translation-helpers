@@ -222,10 +222,23 @@ jQuery( function( $ ) {
 	function fetchOpenAIReviewResponse( rowId, currentRow ) {
 		var payload = {};
 		var data = {};
+		var original_str =  currentRow.find( '.original' );
+		var glossary_prompt = 'Using your intelligence and following these rules, ';
 		var translationId = $gp.editor.translation_id_from_row_id( rowId );
+
+		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
+			$.each( $( word ).data( 'translations' ), function( i, e ) {
+				glossary_prompt += 'where "' + word.textContent + '" is translated as "' + e.translation + '" when it is a ' + e.pos;
+				if ( e.comment ) {
+					glossary_prompt += ' (' + e.comment + ')';
+				}
+				glossary_prompt += '. ';
+			} );
+		} );
 
 		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
 		payload.translation_id = translationId;
+		payload.glossary_query = glossary_prompt;
 
 		data = {
 			action: 'fetch_openai_review',

@@ -439,15 +439,14 @@ class GP_Translation_Helpers {
 
 	public function fetch_openai_review() {
 		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
-		$translation_id   = sanitize_text_field( $_POST['data']['translation_id'] );
-		$locale_slug      = sanitize_text_field( $_POST['data']['locale_slug'] );
-		$current_set_slug = 'default';
+		$translation_id = sanitize_text_field( $_POST['data']['translation_id'] );
+		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
+		$glossary_query = sanitize_text_field( $_POST['data']['glossary_query'] );
 
 		$translation = GP::$translation->get( $translation_id );
-
 		$original = GP::$original->get( $translation->original_id );
 
-		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug );
+		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug, $glossary_query );
 
 		wp_send_json_success( $openai_response['openai']['review'] );
 	}

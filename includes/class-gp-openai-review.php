@@ -7,37 +7,39 @@ class GP_OpenAI_Review {
 	 * @var string
 	 */
 	private static $gp_openai_key = '';
-	
+
 	/**
 	 * Get suggestions from OpenAI (ChatGPT).
 	 *
-	 * @param string       $original_singular The singular from the original string.
-	 * @param string       $translation       The translation.
-	 * @param string       $locale            The locale.
-	 * @param \GP_Glossary $locale_glossary   The glossary for the locale.
+	 * @param string $original_singular The singular from the original string.
+	 * @param string $translation       The translation.
+	 * @param string $locale            The locale.
+	 * @param string $glossary_query   The prompt generated to include glossary for the locale.
 	 *
 	 * @return array
 	 */
-	public static function get_openai_review( $original_singular, $translation, $locale ): array {
-		$openai_query   = '';
-		$openai_key = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
+	public static function get_openai_review( $original_singular, $translation, $locale, $glossary_query ): array {
+		$openai_query = '';
+		$openai_key   = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
 
 		if ( empty( trim( $openai_key ) ) ) {
 			return array();
 		}
 		$openai_temperature = 0;
 
-		
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= 'For the english text  "' . $original_singular . '", is "' . $translation . '" a correct translation in ' . $gp_locale->english_name . '?';
 
-		$messages = array(
+		$messages        = array(
+			array(
+				'role'    => 'system',
+				'content' => $glossary_query,
+			),
 			array(
 				'role'    => 'user',
 				'content' => $openai_query,
 			),
 		);
-
 		$openai_response = wp_remote_post(
 			'https://api.openai.com/v1/chat/completions',
 			array(
