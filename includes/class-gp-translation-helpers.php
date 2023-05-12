@@ -442,11 +442,12 @@ class GP_Translation_Helpers {
 		$translation_id = sanitize_text_field( $_POST['data']['translation_id'] );
 		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
 		$glossary_query = sanitize_text_field( $_POST['data']['glossary_query'] );
+		$is_retry = $booleanValue = filter_var($_POST['data']['is_retry'], FILTER_VALIDATE_BOOLEAN);
 
 		$translation = GP::$translation->get( $translation_id );
 		$original = GP::$original->get( $translation->original_id );
 
-		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug, $glossary_query );
+		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug, $glossary_query, $is_retry );
 
 		wp_send_json_success( $openai_response['openai']['review'] );
 	}

@@ -18,7 +18,7 @@ jQuery( function( $ ) {
 		var tr = $( this ).closest( 'tr.editor' );
 		var rowId =  tr.attr( 'row' );
 		loadTabsAndDivs( tr );
-		fetchOpenAIReviewResponse( rowId, tr );
+		fetchOpenAIReviewResponse( rowId, tr, false );
 	} );
 
 	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
@@ -27,7 +27,7 @@ jQuery( function( $ ) {
 		var rowId =  tr.attr( 'row' );
 		tr.find( '.openai-review .auto-review-result' ).html('');
 		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
-		fetchOpenAIReviewResponse( rowId, tr );
+		fetchOpenAIReviewResponse( rowId, tr, true );
 
 	} );
 
@@ -229,7 +229,7 @@ jQuery( function( $ ) {
 	 * @param {string} rowId The row-id attribute of the current row.
 	 * @param {string} currentRow The current row.
 	 */
-	function fetchOpenAIReviewResponse( rowId, currentRow ) {
+	function fetchOpenAIReviewResponse( rowId, currentRow, isRetry ) {
 		var payload = {};
 		var data = {};
 		var original_str =  currentRow.find( '.original' );
@@ -249,6 +249,7 @@ jQuery( function( $ ) {
 		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
 		payload.translation_id = translationId;
 		payload.glossary_query = glossary_prompt;
+		payload.is_retry = isRetry;
 
 		data = {
 			action: 'fetch_openai_review',

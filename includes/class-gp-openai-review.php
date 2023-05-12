@@ -18,7 +18,7 @@ class GP_OpenAI_Review {
 	 *
 	 * @return array
 	 */
-	public static function get_openai_review( $original_singular, $translation, $locale, $glossary_query ): array {
+	public static function get_openai_review( $original_singular, $translation, $locale, $glossary_query, $is_retry ): array {
 		$openai_query = '';
 		$openai_key   = apply_filters( 'gp_get_openai_key', self::$gp_openai_key );
 
@@ -29,7 +29,7 @@ class GP_OpenAI_Review {
 
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= 'For the english text  "' . $original_singular . '", is "' . $translation . '" a correct translation in ' . $gp_locale->english_name . '?';
-
+		$openai_query = ( $is_retry ) ? 'Are you sure that ' . $openai_query : $openai_query;
 		$messages        = array(
 			array(
 				'role'    => 'system',
@@ -37,7 +37,7 @@ class GP_OpenAI_Review {
 			),
 			array(
 				'role'    => 'user',
-				'content' => $openai_query,
+				'content' => 'Are you sure that, ' . $openai_query,
 			),
 		);
 		$openai_response = wp_remote_post(
