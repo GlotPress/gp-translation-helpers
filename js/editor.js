@@ -21,6 +21,16 @@ jQuery( function( $ ) {
 		fetchOpenAIReviewResponse( rowId, tr );
 	} );
 
+	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
+		event.preventDefault();
+		var tr = $( this ).closest( 'tr.editor' );
+		var rowId =  tr.attr( 'row' );
+		tr.find( '.openai-review .auto-review-result' ).html('');
+		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
+		fetchOpenAIReviewResponse( rowId, tr );
+
+	} );
+
 	// Shows/hides the reply form for a comment in the discussion.
 	$gp.editor.table.on( 'click', 'a.comment-reply-link', function( event ) {
 		var commentId = $( this ).attr( 'data-commentid' );
@@ -256,11 +266,11 @@ jQuery( function( $ ) {
 			function( response ) {
 				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 				if ( response.data ) {
-
-					currentRow.find( '.openai-review' ).html( '<h4>Auto-review by ChatGPT' ).append( response.data );
+					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( response.data );
 				} else {
-					currentRow.find( '.openai-review' ).html( 'Oops! No response from ChatGPT.' );
+					currentRow.find( '.openai-review .auto-review-result' ).html( 'Oops! No response from ChatGPT.' );
 				}
+				currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
 			}
 		).fail(
 			function( xhr, msg ) {

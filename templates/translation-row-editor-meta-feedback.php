@@ -4,7 +4,8 @@
 ?>
 <div>
 	<div class="openai-review">
-		<p class="suggestions__loading-indicator">ChatGPT review in progress <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>	
+		<p class="suggestions__loading-indicator">ChatGPT review in progress <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
+		<div class="auto-review-result"></div>
 	</div>
 </div>
 <details open>
