@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings  */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, console  */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
@@ -16,19 +16,18 @@ jQuery( function( $ ) {
 	// divs with the content) for the right sidebar are updated.
 	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
 		var tr = $( this ).closest( 'tr.editor' );
-		var rowId =  tr.attr( 'row' );
+		var rowId = tr.attr( 'row' );
 		loadTabsAndDivs( tr );
 		fetchOpenAIReviewResponse( rowId, tr, false );
 	} );
 
 	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
-		event.preventDefault();
 		var tr = $( this ).closest( 'tr.editor' );
-		var rowId =  tr.attr( 'row' );
-		tr.find( '.openai-review .auto-review-result' ).html('');
+		var rowId = tr.attr( 'row' );
+		event.preventDefault();
+		tr.find( '.openai-review .auto-review-result' ).html( '' );
 		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
 		fetchOpenAIReviewResponse( rowId, tr, true );
-
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -226,13 +225,14 @@ jQuery( function( $ ) {
 	/**
 	 * Fetch translation review from OpenAI.
 	 *
-	 * @param {string} rowId The row-id attribute of the current row.
-	 * @param {string} currentRow The current row.
+	 * @param {string}  rowId      The row-id attribute of the current row.
+	 * @param {string}  currentRow The current row.
+	 * @param {boolean} isRetry    The current row.
 	 */
 	function fetchOpenAIReviewResponse( rowId, currentRow, isRetry ) {
 		var payload = {};
 		var data = {};
-		var original_str =  currentRow.find( '.original' );
+		var original_str = currentRow.find( '.original' );
 		var glossary_prompt = 'Using your intelligence and following these rules, ';
 		var translationId = $gp.editor.translation_id_from_row_id( rowId );
 
@@ -277,6 +277,12 @@ jQuery( function( $ ) {
 			function( xhr, msg ) {
 				/* eslint no-console: ["error", { allow: ["error"] }] */
 				console.error( data );
+				msg = 'An error has occurred';
+				if ( xhr.responseText ) {
+					msg += ': ' + xhr.responseText;
+				}
+				msg += '. Please, take a screenshot of the output in the browser console, send it to the developers, and reload the page to see if it works.';
+				$gp.notices.error( msg );
 			}
 		);
 	}
