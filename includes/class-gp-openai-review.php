@@ -37,7 +37,7 @@ class GP_OpenAI_Review {
 			),
 			array(
 				'role'    => 'user',
-				'content' => 'Are you sure that, ' . $openai_query,
+				'content' => $openai_query,
 			),
 		);
 		$openai_response = wp_remote_post(
