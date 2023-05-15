@@ -63,7 +63,6 @@ class GP_Translation_Helpers {
 		add_action( 'gp_pre_tmpl_load', array( $this, 'register_comment_feedback_js' ), 10, 2 );
 		add_action( 'wp_ajax_comment_with_feedback', array( $this, 'comment_with_feedback' ) );
 		add_action( 'wp_ajax_optout_discussion_notifications', array( $this, 'optout_discussion_notifications' ) );
-		add_action( 'wp_ajax_fetch_openai_review', array( $this, 'fetch_openai_review' ) );
 
 		add_thickbox();
 		gp_enqueue_style( 'thickbox' );
