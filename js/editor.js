@@ -233,7 +233,7 @@ jQuery( function( $ ) {
 		var payload = {};
 		var data = {};
 		var original_str = currentRow.find( '.original' );
-		var glossary_prompt = 'Using your intelligence and following these rules, ';
+		var glossary_prompt = '';
 		var translationId = $gp.editor.translation_id_from_row_id( rowId );
 
 		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
@@ -246,6 +246,9 @@ jQuery( function( $ ) {
 			} );
 		} );
 
+		if ( '' !== glossary_prompt ) {
+			glossary_prompt = 'Using your intelligence and following these rules, ' + glossary_prompt;
+		}
 		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
 		payload.translation_id = translationId;
 		payload.glossary_query = glossary_prompt;
