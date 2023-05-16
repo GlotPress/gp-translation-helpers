@@ -29,15 +29,14 @@ class GP_OpenAI_Review {
 
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= 'For the english text  "' . $original_singular . '", is "' . $translation . '" a correct translation in ' . $gp_locale->english_name . '?';
-		$openai_query = ( $is_retry ) ? 'Are you sure that ' . $openai_query : $openai_query;
+		$openai_query  = ( $is_retry ) ? 'Are you sure that ' . $openai_query : $openai_query;
 		if ( $glossary_query ) {
 			$messages[] = array(
 				'role'    => 'system',
-				'content' => 'You are a helpful assistant that translates English text to ' . $gp_locale->english_name . '. ' . $glossary_query,
+				'content' => $glossary_query,
 			);
 		}
-		$messages[]       = 
-			array(
+		$messages[] = array(
 				'role'    => 'user',
 				'content' => $openai_query,
 		);
@@ -70,7 +69,7 @@ class GP_OpenAI_Review {
 		$output = json_decode( wp_remote_retrieve_body( $openai_response ), true );
 
 		$message                      = $output['choices'][0]['message'];
-		$response['openai']['review'] = $messages; //trim( trim( $message['content'] ), '"' );
+		$response['openai']['review'] = trim( trim( $message['content'] ), '"' );
 		$response['openai']['diff']   = '';
 
 		return $response;
