@@ -443,7 +443,7 @@ class GP_Translation_Helpers {
 	 *
 	 * @return void
 	 */
-	public function fetch_openai_review() {
+	public static function fetch_openai_review() {
 		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
 		$translation_id = sanitize_text_field( $_POST['data']['translation_id'] );
 		$locale_slug    = sanitize_text_field( $_POST['data']['locale_slug'] );
