@@ -242,12 +242,12 @@ jQuery( function( $ ) {
 				if ( e.comment ) {
 					glossary_prompt += ' (' + e.comment + ')';
 				}
-				glossary_prompt += '. ';
+				glossary_prompt += ', ';
 			} );
 		} );
 
 		if ( '' !== glossary_prompt ) {
-			glossary_prompt = 'Using your intelligence and following these rules, ' + glossary_prompt;
+			glossary_prompt = 'You are required to follow these rules, ' + glossary_prompt + 'for words found in the English text you are translating.';
 		}
 		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
 		payload.translation_id = translationId;

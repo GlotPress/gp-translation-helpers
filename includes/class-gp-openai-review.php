@@ -33,7 +33,7 @@ class GP_OpenAI_Review {
 		if ( $glossary_query ) {
 			$messages[] = array(
 				'role'    => 'system',
-				'content' => $glossary_query,
+				'content' => 'You are a helpful assistant that translates English text to ' . $gp_locale->english_name . '. ' . $glossary_query,
 			);
 		}
 		$messages[]       = 
@@ -70,7 +70,7 @@ class GP_OpenAI_Review {
 		$output = json_decode( wp_remote_retrieve_body( $openai_response ), true );
 
 		$message                      = $output['choices'][0]['message'];
-		$response['openai']['review'] = trim( trim( $message['content'] ), '"' );
+		$response['openai']['review'] = $messages; //trim( trim( $message['content'] ), '"' );
 		$response['openai']['diff']   = '';
 
 		return $response;
