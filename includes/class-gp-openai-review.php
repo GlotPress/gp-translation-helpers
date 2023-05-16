@@ -36,9 +36,9 @@ class GP_OpenAI_Review {
 				'content' => $glossary_query,
 			);
 		}
-		$messages[] = array(
-				'role'    => 'user',
-				'content' => $openai_query,
+		$messages[]      = array(
+			'role'    => 'user',
+			'content' => $openai_query,
 		);
 		$openai_response = wp_remote_post(
 			'https://api.openai.com/v1/chat/completions',
