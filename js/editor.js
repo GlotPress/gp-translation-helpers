@@ -270,7 +270,7 @@ jQuery( function( $ ) {
 			function( response ) {
 				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 				if ( response.data ) {
-					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( response.data );
+					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( $( '<span/>' ).text( response.data ) );
 				} else {
 					currentRow.find( '.openai-review .auto-review-result' ).html( 'Oops! No response from ChatGPT.' );
 				}
