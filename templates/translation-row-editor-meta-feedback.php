@@ -1,6 +1,8 @@
 <?php if ( ! $can_approve_translation || ! $translation->translation_status ) {
 	return;
 }
+
+	if ( 'waiting' === $translation->translation_status || 'fuzzy' === $translation->translation_status ):
 ?>
 <div>
 	<div class="openai-review">
@@ -8,6 +10,7 @@
 		<div class="auto-review-result"></div>
 	</div>
 </div>
+<?php endif; ?>
 <details open>
 	<summary class="feedback-summary"><?php esc_html_e( 'Give feedback', 'glotpress' ); ?></summary>
 	<div id="feedback-form">
