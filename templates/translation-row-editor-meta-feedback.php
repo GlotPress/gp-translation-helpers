@@ -2,8 +2,8 @@
 	return;
 }
 
-	if ( 'waiting' === $translation->translation_status || 'fuzzy' === $translation->translation_status ):
-?>
+if ( 'waiting' === $translation->translation_status || 'fuzzy' === $translation->translation_status ) :
+	?>
 <div>
 	<div class="openai-review">
 		<p class="suggestions__loading-indicator">ChatGPT review in progress <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
