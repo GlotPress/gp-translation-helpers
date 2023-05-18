@@ -455,7 +455,7 @@ class GP_Translation_Helpers {
 
 		$openai_response = GP_OpenAI_Review::get_openai_review( $original->singular, $translation->translation_0, $locale_slug, $glossary_query, $is_retry );
 
-		wp_send_json_success( $openai_response['openai']['review'] );
+		wp_send_json_success( $openai_response['openai'] );
 	}
 
 	/**

@@ -40,6 +40,7 @@ class GP_OpenAI_Review {
 			'role'    => 'user',
 			'content' => $openai_query,
 		);
+		$start_time = microtime(true);
 		$openai_response = wp_remote_post(
 			'https://api.openai.com/v1/chat/completions',
 			array(
@@ -59,6 +60,8 @@ class GP_OpenAI_Review {
 				),
 			)
 		);
+		$end_time = microtime(true);
+		$time_taken = $end_time - $start_time;
 		if ( is_wp_error( $openai_response ) ) {
 			return array();
 		}
@@ -70,7 +73,7 @@ class GP_OpenAI_Review {
 
 		$message                      = $output['choices'][0]['message'];
 		$response['openai']['review'] = trim( trim( $message['content'] ), '"' );
-		$response['openai']['diff']   = '';
+		$response['openai']['time_taken']   = $time_taken;
 
 		return $response;
 	}
