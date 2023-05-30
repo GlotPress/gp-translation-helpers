@@ -18,12 +18,16 @@ jQuery( function( $ ) {
 	$gp.editor.table.on( 'focus', 'tr.editor textarea.foreign-text', function() {
 		var tr = $( this ).closest( 'tr.editor' );
 		var rowId = tr.attr( 'row' );
+		var translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
+		
 		if ( focusedRowId === rowId ) {
 			return;
 		}
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
-		fetchOpenAIReviewResponse( rowId, tr, false );
+		if ( $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+			fetchOpenAIReviewResponse( rowId, tr, false );
+		}
 	} );
 
 	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
