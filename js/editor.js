@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, console  */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, console, $gp_editor_options  */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	var focusedRowId = '';
@@ -19,7 +19,7 @@ jQuery( function( $ ) {
 		var tr = $( this ).closest( 'tr.editor' );
 		var rowId = tr.attr( 'row' );
 		var translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
-		
+
 		if ( focusedRowId === rowId ) {
 			return;
 		}
