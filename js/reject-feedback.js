@@ -2,6 +2,28 @@
 ( function( $, $gp ) {
 	$( document ).ready(
 		function() {
+			$( document ).on( 'click', '.pulse', function() {
+				// alert( $( this ).prop( 'title' ) );
+				if ( typeof $( this ).data( 'next-pulse' ) === 'function' ) {
+					$( this ).data( 'next-pulse' )();
+				}
+				$( this ).remove();
+			} );
+
+			function addPulse( field, text, next ) {
+				var div = $( '<div class="pulse-wrapper"><div class="pulse">' );
+				div.find( '.pulse' ).prop( 'title', text ).data( 'next-pulse', next );
+				field.after( div );
+			}
+			addPulse( $( '.source-string .glossary-word:first' ), 'Please follow this translation recommendation', function() {
+				addPulse( $( '.translation-actions__save' ), 'Don\'t forget to submit your translation', function() {
+				} );
+			} );
+			addPulse( $( '.revealing.filter' ), 'Click here to reveal the search field', function() {
+				addPulse( $( '.filters-expanded input.is-primary' ), 'Click here to search', function() {
+					addPulse( $( '.glossary-word' ), 'Please follow this translation recommendation' );
+				} );
+			} );
 			var rowIds = [];
 			var translationIds = [];
 			var originalIds = [];
