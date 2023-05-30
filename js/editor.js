@@ -1,6 +1,7 @@
 /* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, console  */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
+	var focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
 		var tab = $( this );
@@ -14,9 +15,13 @@ jQuery( function( $ ) {
 	// When a new translation row is opened (with double click, clicking in the "Details" button,
 	// or with the hotkeys), the translation textarea is focused, so the tabs (header tabs and
 	// divs with the content) for the right sidebar are updated.
-	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
+	$gp.editor.table.on( 'focus', 'tr.editor textarea.foreign-text', function() {
 		var tr = $( this ).closest( 'tr.editor' );
 		var rowId = tr.attr( 'row' );
+		if ( focusedRowId === rowId ) {
+			return;
+		}
+		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
 		fetchOpenAIReviewResponse( rowId, tr, false );
 	} );
@@ -270,6 +275,7 @@ jQuery( function( $ ) {
 			function( response ) {
 				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 				if ( response.data ) {
+					// console.log('done');
 					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( $( '<span/>' ).text( response.data.review + ' (' + response.data.time_taken.toFixed( 2 ) + 's)' ) );
 				} else {
 					currentRow.find( '.openai-review .auto-review-result' ).html( 'Oops! No response from ChatGPT.' );
