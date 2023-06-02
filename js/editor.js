@@ -1,6 +1,13 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings  */
+/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings  */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
+	/**
+	 * Stores (caches) the content of the translation helpers, to avoid making the query another time.
+	 *
+	 * @type {Array}
+	 */
+	var translationHelpersCache = [];
+
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
 		var tab = $( this );
@@ -16,7 +23,12 @@ jQuery( function( $ ) {
 	// divs with the content) for the right sidebar are updated.
 	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
 		var tr = $( this ).closest( 'tr.editor' );
+		var nextEditor = $gp.editor.current.nextAll( 'tr.editor' ).first();
 		loadTabsAndDivs( tr );
+		// Caches the translation helpers for the next row.
+		if ( nextEditor.length ) {
+			cacheTranslationHelpersForARow( nextEditor );
+		}
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -150,6 +162,12 @@ jQuery( function( $ ) {
 		$( 'tr.preview td' ).trigger( 'dblclick' );
 	}
 
+	$( document ).ready( function() {
+		// Gets the translation helpers for the first row and caches them.
+		var firstEditor = $( '#translations' ).find( 'tr.editor' ).first();
+		cacheTranslationHelpersForARow( firstEditor );
+	} );
+
 	/**
 	 * Hides all tabs and show one of them, the last clicked.
 	 *
@@ -193,21 +211,59 @@ jQuery( function( $ ) {
 	}
 
 	/**
-	 * Load the content in the tabs (header tab and content) for the opened row.
+	 * Loads the content in the tabs (header tab and content) for the opened row.
 	 *
 	 * @param {Object} element The element that triggers the action.
 	 */
 	function loadTabsAndDivs( element ) {
-		var originalId = element.closest( 'tr' ).attr( 'id' ).substring( 7 );
-		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + originalId + '?nohc';
-		$.getJSON( requestUrl, function( data ) {
-			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
-			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
-			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
-			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
-			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
-			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
-			add_copy_button( '#sidebar-div-other-locales-' + originalId );
-		} );
+		var rowId = element.closest( 'tr.editor' ).attr( 'id' ).substring( 7 );
+		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		if ( translationHelpersCache[ rowId ] !== undefined ) {
+			updateDataInTabs( translationHelpersCache[ rowId ], rowId );
+		} else {
+			$.getJSON( requestUrl, function( data ) {
+				translationHelpersCache[ rowId ] = data;
+				updateDataInTabs( data, rowId );
+			} );
+		}
+	}
+
+	/**
+	 * Updates the content of the tabs and divs.
+	 *
+	 * @param {Object} data       The content to update the tabs and divs.
+	 * @param {number} originalId The id of the original string to translate.
+	 *
+	 * @return {void}
+	 */
+	function updateDataInTabs( data, originalId ) {
+		$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
+		$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
+		$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
+		$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+		$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
+		$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+		add_copy_button( '#sidebar-div-other-locales-' + originalId );
+	}
+
+	/**
+	 * Caches the translation helpers for a row.
+	 *
+	 * @param {Object} editor The editor row.
+	 *
+	 * @return {void}
+	 */
+	function cacheTranslationHelpersForARow( editor ) {
+		var rowId = editor.attr( 'row' );
+		var requestUrl = $gp_translation_helpers_editor.translation_helper_url + rowId + '?nohc';
+		if ( ! rowId ) {
+			return;
+		}
+
+		if ( translationHelpersCache[ rowId ] === undefined ) {
+			$.getJSON( requestUrl, function( data ) {
+				translationHelpersCache[ rowId ] = data;
+			} );
+		}
 	}
 } );
