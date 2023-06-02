@@ -278,11 +278,10 @@ jQuery( function( $ ) {
 		).done(
 			function( response ) {
 				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
-				if ( response.data ) {
-					// console.log('done');
+				if ( 200 === response.data.status ) {
 					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( $( '<span/>' ).text( response.data.review + ' (' + response.data.time_taken.toFixed( 2 ) + 's)' ) );
 				} else {
-					currentRow.find( '.openai-review .auto-review-result' ).html( 'Oops! No response from ChatGPT.' );
+					currentRow.find( '.openai-review .auto-review-result' ).text( 'Error ' + response.data.status + ' : ' + response.data.error );
 				}
 				currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
 			}

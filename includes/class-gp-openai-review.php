@@ -40,7 +40,7 @@ class GP_OpenAI_Review {
 			'role'    => 'user',
 			'content' => $openai_query,
 		);
-		$start_time = microtime( true );
+		$start_time      = microtime( true );
 		$openai_response = wp_remote_post(
 			'https://api.openai.com/v1/chat/completions',
 			array(
@@ -60,20 +60,22 @@ class GP_OpenAI_Review {
 				),
 			)
 		);
-		$end_time = microtime( true );
-		$time_taken = $end_time - $start_time;
-		if ( is_wp_error( $openai_response ) ) {
-			return array();
-		}
-		$response_status = wp_remote_retrieve_response_code( $openai_response );
-		if ( 200 !== $response_status ) {
-			return array();
-		}
-		$output = json_decode( wp_remote_retrieve_body( $openai_response ), true );
+		$end_time        = microtime( true );
+		$time_taken      = $end_time - $start_time;
 
-		$message                      = $output['choices'][0]['message'];
-		$response['openai']['review'] = trim( trim( $message['content'] ), '"' );
-		$response['openai']['time_taken']   = $time_taken;
+		$response_status = wp_remote_retrieve_response_code( $openai_response );
+		$output          = json_decode( wp_remote_retrieve_body( $openai_response ), true );
+
+		if ( 200 !== $response_status || is_wp_error( $openai_response ) ) {
+			$response['openai']['status'] = $response_status;
+			$response['openai']['error']  = wp_remote_retrieve_response_message( $openai_response );
+			return $response;
+		}
+
+		$message                          = $output['choices'][0]['message'];
+		$response['openai']['status']     = $response_status;
+		$response['openai']['review']     = trim( trim( $message['content'] ), '"' );
+		$response['openai']['time_taken'] = $time_taken;
 
 		return $response;
 	}
