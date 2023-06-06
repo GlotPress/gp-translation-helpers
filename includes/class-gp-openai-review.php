@@ -11,11 +11,11 @@ class GP_OpenAI_Review {
 	/**
 	 * Get suggestions from OpenAI (ChatGPT).
 	 *
-	 * @param string $original_singular The singular from the original string.
-	 * @param string $translation       The translation.
-	 * @param string $locale            The locale.
-	 * @param string $glossary_query   The prompt generated to include glossary for the locale.
-	 * @param boolean $is_retry   Flag to check if the request is a retry
+	 * @param string  $original_singular The singular from the original string.
+	 * @param string  $translation       The translation.
+	 * @param string  $locale            The locale.
+	 * @param string  $glossary_query   The prompt generated to include glossary for the locale.
+	 * @param boolean $is_retry   Flag to check if the request is a retry.
 	 *
 	 * @return array
 	 */
