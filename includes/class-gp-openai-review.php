@@ -15,6 +15,7 @@ class GP_OpenAI_Review {
 	 * @param string $translation       The translation.
 	 * @param string $locale            The locale.
 	 * @param string $glossary_query   The prompt generated to include glossary for the locale.
+	 * @param boolean $is_retry   Flag to check if the request is a retry
 	 *
 	 * @return array
 	 */
@@ -29,7 +30,6 @@ class GP_OpenAI_Review {
 
 		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
 		$openai_query .= 'For the english text  "' . $original_singular . '", is "' . $translation . '" a correct translation in ' . $gp_locale->english_name . '?';
-		$openai_query  = ( $is_retry ) ? 'Are you sure that ' . $openai_query : $openai_query;
 		if ( $glossary_query ) {
 			$messages[] = array(
 				'role'    => 'system',
