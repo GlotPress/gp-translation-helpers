@@ -25,8 +25,10 @@ jQuery( function( $ ) {
 		}
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
-		if ( $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+		if ( $gp_comment_feedback_settings.has_openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
+		} else {
+			tr.find( '.openai-review' ).hide();
 		}
 	} );
 
@@ -243,7 +245,7 @@ jQuery( function( $ ) {
 		var data = {};
 		var original_str = currentRow.find( '.original' );
 		var glossary_prompt = '';
-		var translationId = $gp.editor.translation_id_from_row_id( rowId );
+		var translation = currentRow.find( '.foreign-text:first' ).val();
 
 		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
 			$.each( $( word ).data( 'translations' ), function( i, e ) {
@@ -258,8 +260,9 @@ jQuery( function( $ ) {
 		if ( '' !== glossary_prompt ) {
 			glossary_prompt = 'You are required to follow these rules, ' + glossary_prompt + 'for words found in the English text you are translating.';
 		}
-		payload.locale_slug = $gp_comment_feedback_settings.locale_slug;
-		payload.translation_id = translationId;
+		payload.language = $gp_comment_feedback_settings.language;
+		payload.original = currentRow.find( '.original-raw' ).text();
+		payload.translation = translation;
 		payload.glossary_query = glossary_prompt;
 		payload.is_retry = isRetry;
 
@@ -272,14 +275,17 @@ jQuery( function( $ ) {
 		$.ajax(
 			{
 				type: 'POST',
-				url: $gp_comment_feedback_settings.url,
+				url: typeof window.useThinFetch !== 'undefined' && window.useThinFetch ? '/wp-content/plugins/wporg-gp-translation-suggestions/ajax-fetch-openai-review.php' : $gp_comment_feedback_settings.url,
 				data: data,
 			}
 		).done(
 			function( response ) {
 				currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
-				if ( 200 === response.data.status ) {
-					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Auto-review by ChatGPT' ).append( $( '<span/>' ).text( response.data.review + ' (' + response.data.time_taken.toFixed( 2 ) + 's)' ) );
+				if ( response.success ) {
+					currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( $( '<span/>' ).text( response.data.review + ' (' + response.data.time_taken.toFixed( 2 ) + 's)' ) );
+				} else if ( 404 === response.data.status ) {
+					currentRow.find( '.openai-review' ).hide();
+					return;
 				} else {
 					currentRow.find( '.openai-review .auto-review-result' ).text( 'Error ' + response.data.status + ' : ' + response.data.error );
 				}
@@ -289,12 +295,6 @@ jQuery( function( $ ) {
 			function( xhr, msg ) {
 				/* eslint no-console: ["error", { allow: ["error"] }] */
 				console.error( data );
-				msg = 'An error has occurred';
-				if ( xhr.responseText ) {
-					msg += ': ' + xhr.responseText;
-				}
-				msg += '. Please, take a screenshot of the output in the browser console, send it to the developers, and reload the page to see if it works.';
-				$gp.notices.error( msg );
 			}
 		);
 	}
