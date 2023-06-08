@@ -332,6 +332,8 @@ td.gtes-involved a{
     color: #4b4c4c;
     font-size: .9em;
     margin-top: 1em;
+	height: 101px;
+	overflow: auto;
 }
 .openai-review h4 {
     margin-top: 0.2em;
