@@ -26,10 +26,19 @@ jQuery( function( $ ) {
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
 		if ( $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
-			fetchOpenAIReviewResponse( rowId, tr );
+			fetchOpenAIReviewResponse( rowId, tr, false );
 		} else {
 			tr.find( '.openai-review' ).hide();
 		}
+	} );
+
+	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
+		const tr = $( this ).closest( 'tr.editor' );
+		const rowId = tr.attr( 'row' );
+		event.preventDefault();
+		tr.find( '.openai-review .auto-review-result' ).html( '' );
+		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
+		fetchOpenAIReviewResponse( rowId, tr, true );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -382,7 +391,7 @@ jQuery( function( $ ) {
 		}
 	}
 
-	async function invokeChatGTP( prompt, response_span ) {
+	async function invokeChatGPT( prompt, response_span ) {
 		const request = {
 			model: 'gpt-3.5-turbo',
 			messages: prompt,
@@ -426,7 +435,7 @@ jQuery( function( $ ) {
 	 * @param {string}  rowId      The row-id attribute of the current row.
 	 * @param {string}  currentRow The current row.
 	 */
-	function fetchOpenAIReviewResponse( rowId, currentRow ) {
+	function fetchOpenAIReviewResponse( rowId, currentRow, isRetry ) {
 		const messages = [];
 		const original_str = currentRow.find( '.original' );
 		let glossary_prompt = '';
@@ -450,12 +459,11 @@ jQuery( function( $ ) {
 		}
 		messages.push( {
 			role: 'system',
-			content: 'For the english text  "' + currentRow.find( '.original-raw' ).text() + '", is "' + currentRow.find( '.foreign-text:first' ).val() + '" a correct translation in ' + $gp_comment_feedback_settings.language + '?',
+			content: ( isRetry ? 'Are you sure that ' : '' ) + 'For the english text  "' + currentRow.find( '.original-raw' ).text() + '", is "' + currentRow.find( '.foreign-text:first' ).val() + '" a correct translation in ' + $gp_comment_feedback_settings.language + '? Don\'t repeat the translation if it is correct and point out differences if there are any.',
 		} );
 
 		currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
-		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span>' );
-		const response_span = currentRow.find( '.openai-review .auto-review-result span' );
-		invokeChatGTP( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then(r => console.log("Done!"));
+		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
+		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then(()=>currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' ));
 	}
 } );
