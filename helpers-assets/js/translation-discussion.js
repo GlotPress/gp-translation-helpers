@@ -1,7 +1,7 @@
 /* global $gp, document, wpApiSettings */
 jQuery( function( $ ) {
 	$( document ).on( 'click', '.helper-translation-discussion .comments-selector a', function( e ) {
-		var $comments, $selector;
+		let $comments, $selector;
 
 		e.preventDefault();
 		$( '.comments-selector a' ).removeClass( 'active-link' );
@@ -22,7 +22,7 @@ jQuery( function( $ ) {
 	} );
 
 	function createShadowPost( formdata, submitComment ) {
-		var data = {
+		const data = {
 			action: 'create_shadow_post',
 			data: formdata,
 			_ajax_nonce: wpApiSettings.nonce,
@@ -32,7 +32,7 @@ jQuery( function( $ ) {
 			{
 				type: 'POST',
 				url: wpApiSettings.admin_ajax_url,
-				data: data,
+				data,
 			}
 		).done(
 			function( response ) {
@@ -43,13 +43,13 @@ jQuery( function( $ ) {
 	}
 
 	$( document ).on( 'submit', '.helper-translation-discussion .comment-form', function( e ) {
-		var $commentform = $( e.target );
-		var postId = $commentform.attr( 'id' ).split( '-' )[ 1 ];
-		var submitComment = function( formdata ) {
+		const $commentform = $( e.target );
+		const postId = $commentform.attr( 'id' ).split( '-' )[ 1 ];
+		const submitComment = function( formdata ) {
 			$.ajax( {
 				url: wpApiSettings.root + 'wp/v2/comments',
 				method: 'POST',
-				beforeSend: function( xhr ) {
+				beforeSend( xhr ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 				},
 				data: formdata,
@@ -64,7 +64,7 @@ jQuery( function( $ ) {
 			} );
 		};
 
-		var formdata = {
+		const formdata = {
 			content: $commentform.find( 'textarea[name=comment]' ).val(),
 			parent: $commentform.find( 'input[name=comment_parent]' ).val(),
 			post: postId,
