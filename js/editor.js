@@ -107,7 +107,7 @@ jQuery( function( $ ) {
 			$.ajax( {
 				url: wpApiSettings.root + 'wp/v2/comments',
 				method: 'POST',
-				beforeSend( xhr ) {
+				beforeSend: function( xhr ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 				},
 				data: formdata,
