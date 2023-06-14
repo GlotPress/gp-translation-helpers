@@ -19,13 +19,14 @@ jQuery( function( $ ) {
 		const tr = $( this ).closest( 'tr.editor' );
 		const rowId = tr.attr( 'row' );
 		const translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
+		const chatgpt_review_enabled = ( 'on' === $gp_comment_feedback_settings.chatgpt_review_enabled );
 
 		if ( focusedRowId === rowId ) {
 			return;
 		}
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
-		if ( $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+		if ( chatgpt_review_enabled && $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
 		} else {
 			tr.find( '.openai-review' ).hide();
