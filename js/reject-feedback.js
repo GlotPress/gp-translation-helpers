@@ -41,7 +41,7 @@
 							}
 							$( this ).prop( 'checked', false );
 							return null;
-						}
+						},
 					).get();
 
 					rowIds.forEach(
@@ -55,7 +55,7 @@
 								translationStatuses[ translationId ] = bulkTranslationStatus[ statusIndex ];
 							}
 							statusIndex++;
-						}
+						},
 					);
 
 					if ( $( 'select[name="bulk[action]"]' ).val() === 'reject' ) {
@@ -69,7 +69,7 @@
 						// eslint-disable-next-line no-undef
 						tb_show( 'Reject with Feedback', '#TB_inline?inlineId=reject-feedback-form' );
 					}
-				}
+				},
 			);
 
 			/**
@@ -98,7 +98,7 @@
 					form.find( 'input[name="modal_feedback_reason"]:checked' ).each(
 						function() {
 							commentReason.push( this.value );
-						}
+						},
 					);
 
 					comment = form.find( 'textarea[name="modal_feedback_comment"]' ).val();
@@ -117,20 +117,20 @@
 
 					commentWithFeedback( commentData, false, 'rejected' );
 					e.preventDefault();
-				}
+				},
 			);
 
 			$( '.feedback-reason-list' ).on(
 				'click',
 				function( e ) {
 					toggleButtons( $( this ), e );
-				}
+				},
 			);
 			$( '.feedback-comment' ).on(
 				'input',
 				function( e ) {
 					toggleButtons( $( this ), e );
-				}
+				},
 			);
 
 			/**
@@ -165,13 +165,13 @@
 				'click',
 				function( e ) {
 					toggleModalButtons( $( this ), e );
-				}
+				},
 			);
 			$( 'textarea[name="modal_feedback_comment"]' ).on(
 				'input',
 				function( e ) {
 					toggleModalButtons( $( this ), e );
-				}
+				},
 			);
 
 			/**
@@ -205,7 +205,7 @@
 			$( '.tooltip' ).tooltip(
 				{
 					tooltipClass: 'hoverTooltip',
-				}
+				},
 			);
 
 			$( 'input[name="feedback_reason"][value="glossary"]' ).change(
@@ -224,14 +224,14 @@
 								const checkbox = $( '<input />', { type: 'checkbox', class: 'glossary-word-item', value: item } );
 								$( '<label></label>' ).html( checkbox ).append( item ).appendTo( li );
 								glossaryList.appendChild( li );
-							}
+							},
 						);
 						$( this ).closest( 'ul' ).after( glossaryList );
 					} else {
 						$( '#glossary-item-list' ).remove();
 						$( this ).closest( '.feedback-reason-list' ).siblings( '.feedback-comment' ).find( 'textarea' ).val( '' );
 					}
-				}
+				},
 			);
 
 			$( 'body' ).on(
@@ -249,7 +249,7 @@
 
 					textArea.val( message );
 				} );
-		}
+		},
 	);
 
 	$gp.editor.hooks.set_status_current = function() {
@@ -278,7 +278,7 @@
 		div.find( 'input[name="feedback_reason"]:checked' ).each(
 			function() {
 				commentReason.push( this.value );
-			}
+			},
 		);
 
 		comment = div.find( 'textarea[name="feedback_comment"]' ).val();
@@ -318,7 +318,7 @@
 
 				url: $gp_comment_feedback_settings.url,
 				data,
-			}
+			},
 		).done(
 			function() {
 				if ( feedbackData.is_bulk_reject ) {
@@ -328,7 +328,7 @@
 					div.find( 'input[name="feedback_reason"]' ).prop( 'checked', false );
 					div.find( 'textarea[name="feedback_comment"]' ).val( '' );
 				}
-			}
+			},
 		).fail(
 			function( xhr, msg ) {
 				/* eslint no-console: ["error", { allow: ["error"] }] */
@@ -339,7 +339,7 @@
 				}
 				msg += '. Please, take a screenshot of the output in the browser console, send it to the developers, and reload the page to see if it works.';
 				$gp.notices.error( msg );
-			}
+			},
 		);
 	}
 

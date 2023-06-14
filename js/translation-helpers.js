@@ -60,7 +60,7 @@ $gp.translation_helpers = (
 							$( '#' + id ).find( '.async-content' ).html( result.content );
 						} );
 						$( '.helper-translation-discussion' ).find( 'form.comment-form' ).removeAttr( 'novalidate' );
-					}
+					},
 				);
 			},
 			tab_select( $tab ) {
@@ -95,11 +95,11 @@ $gp.translation_helpers = (
 						type: 'POST',
 						url: $gp_translation_helpers_settings.ajax_url,
 						data,
-					}
+					},
 				).done(
 					function() {
 						$gp.translation_helpers.fetch( 'discussion' );
-					}
+					},
 				);
 			},
 			hooks: {
