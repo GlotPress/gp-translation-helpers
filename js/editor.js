@@ -443,7 +443,7 @@ jQuery( function( $ ) {
 	 * @param {string} chatGPTResponse The response from ChatGPT.
 	 */
 	function generateGithubIssueURL( original, translation, projectUrl, chatGPTResponse ) {
-		const githubBaseUrl = 'https://github.com/GlotPress/gp-translation-helpers/issues/new?title=ChatGPT%20Review%20Feedback&labels=chatgpt-review&body=';
+		const githubBaseUrl = 'https://github.com/GlotPress/gp-translation-helpers/issues/new?title=' + encodeURIComponent( 'ChatGPT Review Feedback' ) + '&labels=chatgpt-review&body=';
 		let issueUrlParam = '';
 
 		issueUrlParam += '### Original\n\n' + original + '\n\n';
