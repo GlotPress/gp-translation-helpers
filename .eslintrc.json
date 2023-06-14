@@ -1,7 +1,10 @@
 {
   "extends": [
-    "plugin:@wordpress/eslint-plugin/es5"
+    "plugin:@wordpress/eslint-plugin/esnext"
   ],
+  "parserOptions": {
+    "ecmaVersion": 8
+  },
   "globals": {
     "jQuery": true
   },
