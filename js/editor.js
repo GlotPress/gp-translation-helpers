@@ -450,7 +450,7 @@ jQuery( function( $ ) {
 		issueUrlParam += '### Translation\n\n' + translation + '\n\n';
 		issueUrlParam += '### Project or Permalink URL\n\n' + projectUrl + '\n\n';
 		issueUrlParam += '### ChatGPT response received with current prompt at the time\n\n' + chatGPTResponse + '\n\n';
-		issueUrlParam += '### What\'s a bad about the review\n\n';
+		issueUrlParam += '### What\'s bad about the review\n\n';
 		issueUrlParam += '### Idea for a better prompt (optional)\n\n';
 		return githubBaseUrl + encodeURIComponent( issueUrlParam );
 	}
