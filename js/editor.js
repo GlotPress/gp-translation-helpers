@@ -435,15 +435,15 @@ jQuery( function( $ ) {
 	}
 
 	/**
-	 * Generate a Github URL which when clicked, creates an issue with prepopulated body.
+	 * Generate a GitHub URL that creates an issue with a prepopulated body when clicked.
 	 *
-	 * @param {string}  original      The original string.
-	 * @param {string}  translation The translation reviewed by ChatGPT.
-	 * @param {string}  projectUrl The URL of the project or permalink.
-	 * @param {string}  chatGPTResponse The response from ChatGPT.
+	 * @param {string} original        The original string.
+	 * @param {string} translation     The translation reviewed by ChatGPT.
+	 * @param {string} projectUrl      The URL of the project or permalink.
+	 * @param {string} chatGPTResponse The response from ChatGPT.
 	 */
-	function generateGithubIssueURL( original, translation, projectUrl, chatGPTResponse) {
-		let githubBaseUrl = 'https://github.com/GlotPress/gp-translation-helpers/issues/new?title=ChatGPT%20Review%20Feedback&body=';
+	function generateGithubIssueURL( original, translation, projectUrl, chatGPTResponse ) {
+		const githubBaseUrl = 'https://github.com/GlotPress/gp-translation-helpers/issues/new?title=ChatGPT%20Review%20Feedback&body=';
 		let issueUrlParam = '';
 
 		issueUrlParam += 'Original: ' + original + '\n\n';
@@ -453,7 +453,6 @@ jQuery( function( $ ) {
 		issueUrlParam += 'What\'s a bad about the review: ' + '\n\n';
 		issueUrlParam += 'Idea for a better prompt (optional): ' + '\n\n';
 		return githubBaseUrl + encodeURIComponent( issueUrlParam );
-
 	}
 
 	/**
@@ -467,7 +466,6 @@ jQuery( function( $ ) {
 		const messages = [];
 		const original_str = currentRow.find( '.original' );
 		let glossary_prompt = '';
-		let result = '';
 		let githubIssueUrl = '';
 		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
 			$.each( $( word ).data( 'translations' ), function( i, e ) {
@@ -492,9 +490,9 @@ jQuery( function( $ ) {
 
 		currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
-		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then(()=>{
+		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => {
 			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
-			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), currentRow[0].baseURI, $('.auto-review-result span').text() );
+			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), currentRow[ 0 ].baseURI, $('.auto-review-result span').text() );
 			currentRow.find( '.openai-review .auto-review-result' ).append( '<p><a href="'+ githubIssueUrl +'">Report</a></p>' );
 		});
 	}
