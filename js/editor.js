@@ -107,7 +107,7 @@ jQuery( function( $ ) {
 			$.ajax( {
 				url: wpApiSettings.root + 'wp/v2/comments',
 				method: 'POST',
-				beforeSend: function( xhr ) {
+				beforeSend( xhr ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 				},
 				data: formdata,
@@ -510,8 +510,8 @@ jQuery( function( $ ) {
 		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
 		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => {
 			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
-			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), currentRow[ 0 ].baseURI, $('.auto-review-result span').text() );
-			currentRow.find( '.openai-review .auto-review-result' ).append( '<p><a href="'+ githubIssueUrl +'">Report</a></p>' );
-		});
+			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), currentRow[ 0 ].baseURI, $( '.auto-review-result span' ).text() );
+			currentRow.find( '.openai-review .auto-review-result' ).append( '<p><a href="' + githubIssueUrl + '">Report</a></p>' );
+		} );
 	}
 } );
