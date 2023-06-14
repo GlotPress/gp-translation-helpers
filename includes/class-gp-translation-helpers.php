@@ -396,18 +396,21 @@ class GP_Translation_Helpers {
 		);
 		gp_enqueue_script( 'gp-comment-feedback-js' );
 
-		$gp_locale = GP_Locales::by_field( 'slug', $translation_set['locale_slug'] );
+		$gp_locale             = GP_Locales::by_field( 'slug', $translation_set['locale_slug'] );
+		$gp_translate_settings = get_user_option( 'gp_default_sort' );
+
 		wp_localize_script(
 			'gp-comment-feedback-js',
 			'$gp_comment_feedback_settings',
 			array(
-				'url'                => admin_url( 'admin-ajax.php' ),
-				'nonce'              => wp_create_nonce( 'gp_comment_feedback' ),
-				'locale_slug'        => $translation_set['locale_slug'],
-				'language'           => $gp_locale ? $gp_locale->english_name : 'Unknown',
-				'openai_key'         => apply_filters( 'gp_get_openai_key', null ),
-				'openai_temperature' => apply_filters( 'gp_get_openai_temperature', 0.8 ),
-				'comment_reasons'    => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
+				'url'                    => admin_url( 'admin-ajax.php' ),
+				'nonce'                  => wp_create_nonce( 'gp_comment_feedback' ),
+				'locale_slug'            => $translation_set['locale_slug'],
+				'language'               => $gp_locale ? $gp_locale->english_name : 'Unknown',
+				'openai_key'             => apply_filters( 'gp_get_openai_key', null ),
+				'openai_temperature'     => apply_filters( 'gp_get_openai_temperature', 0.8 ),
+				'chatgpt_review_enabled' => $gp_translate_settings['enable_chatgpt_review'],
+				'comment_reasons'        => Helper_Translation_Discussion::get_comment_reasons( $translation_set['locale_slug'] ),
 			)
 		);
 
