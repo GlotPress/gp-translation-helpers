@@ -19,7 +19,8 @@ jQuery( function( $ ) {
 		const tr = $( this ).closest( 'tr.editor' );
 		const rowId = tr.attr( 'row' );
 		const translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
-		const chatgpt_review_enabled = ( 'on' === $gp_comment_feedback_settings.chatgpt_review_enabled );
+		const chatgpt_review_status = JSON.parse( window.localStorage.getItem( 'translate-details-state' ) );
+		const chatgpt_review_enabled = ( 'open' === chatgpt_review_status['details-chatgpt'] );
 
 		if ( focusedRowId === rowId ) {
 			return;
