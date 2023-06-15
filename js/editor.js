@@ -48,6 +48,9 @@ jQuery( function( $ ) {
 		const rowId = tr.attr( 'row' );
 		if ( $( this ).prop( 'open' ) ) {
 			tr.find( '.openai-review' ).show();
+			if ( tr.find( '.openai-review .auto-review-result' ).children().length ) {
+				return;
+			}
 			tr.find( '.openai-review .auto-review-result' ).html( '' );
 			tr.find( '.openai-review .suggestions__loading-indicator' ).show();
 			fetchOpenAIReviewResponse( rowId, tr, true );
