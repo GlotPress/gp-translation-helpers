@@ -261,6 +261,8 @@ jQuery( function( $ ) {
 		}
 
 		if ( translationHelpersCache[ rowId ] === undefined ) {
+			// Store a string with a space to avoid making the same request another time.
+			translationHelpersCache[ rowId ] = ' ';
 			$.getJSON( requestUrl, function( data ) {
 				translationHelpersCache[ rowId ] = data;
 			} );
