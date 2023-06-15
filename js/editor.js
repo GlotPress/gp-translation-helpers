@@ -20,7 +20,7 @@ jQuery( function( $ ) {
 		const rowId = tr.attr( 'row' );
 		const translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
 		const chatgpt_review_status = JSON.parse( window.localStorage.getItem( 'translate-details-state' ) );
-		const chatgpt_review_enabled = ( 'open' === chatgpt_review_status['details-chatgpt'] );
+		const chatgpt_review_enabled = ( chatgpt_review_status && 'open' === chatgpt_review_status['details-chatgpt'] ) || ! chatgpt_review_status;
 
 		if ( focusedRowId === rowId ) {
 			return;
@@ -42,6 +42,19 @@ jQuery( function( $ ) {
 		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
 		fetchOpenAIReviewResponse( rowId, tr, true );
 	} );
+
+	$( 'details.details-chatgpt' ).on( 'toggle', function() {
+		const tr = $( this ).closest( 'tr.editor' );
+		const rowId = tr.attr( 'row' );
+		if ($(this).prop( 'open' )) {
+			tr.find( '.openai-review' ).show();
+			tr.find( '.openai-review .auto-review-result' ).html( '' );
+			tr.find( '.openai-review .suggestions__loading-indicator' ).show();
+		  fetchOpenAIReviewResponse( rowId, tr, true );
+		} else {
+			tr.find( '.openai-review' ).hide();
+		}
+} );
 
 	// Shows/hides the reply form for a comment in the discussion.
 	$gp.editor.table.on( 'click', 'a.comment-reply-link', function( event ) {
