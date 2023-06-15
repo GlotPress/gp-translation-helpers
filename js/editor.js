@@ -1,4 +1,4 @@
-/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings  */
+/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	/**
@@ -7,7 +7,7 @@ jQuery( function( $ ) {
 	 * @type {Array}
 	 */
 	var translationHelpersCache = [];
-
+	let focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
 		var tab = $( this );
@@ -21,14 +21,34 @@ jQuery( function( $ ) {
 	// When a new translation row is opened (with double click, clicking in the "Details" button,
 	// or with the hotkeys), the translation textarea is focused, so the tabs (header tabs and
 	// divs with the content) for the right sidebar are updated.
-	$gp.editor.table.on( 'focus input', 'tr.editor textarea.foreign-text', function() {
-		var tr = $( this ).closest( 'tr.editor' );
-		var nextEditor = $gp.editor.current.nextAll( 'tr.editor' ).first();
+	$gp.editor.table.on( 'focus', 'tr.editor textarea.foreign-text', function() {
+		const tr = $( this ).closest( 'tr.editor' );
+		const rowId = tr.attr( 'row' );
+		const translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
+		const nextEditor = $gp.editor.current.nextAll( 'tr.editor' ).first();
+
+		if ( focusedRowId === rowId ) {
+			return;
+		}
+		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
-		// Caches the translation helpers for the next row.
 		if ( nextEditor.length ) {
 			cacheTranslationHelpersForARow( nextEditor );
 		}
+		if ( $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+			fetchOpenAIReviewResponse( rowId, tr, false );
+		} else {
+			tr.find( '.openai-review' ).hide();
+		}
+	} );
+
+	$gp.editor.table.on( 'click', 'a.retry-auto-review', function( event ) {
+		const tr = $( this ).closest( 'tr.editor' );
+		const rowId = tr.attr( 'row' );
+		event.preventDefault();
+		tr.find( '.openai-review .auto-review-result' ).html( '' );
+		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
+		fetchOpenAIReviewResponse( rowId, tr, true );
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
