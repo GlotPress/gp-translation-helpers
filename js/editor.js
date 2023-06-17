@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, window */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	let focusedRowId = '';
@@ -509,8 +509,11 @@ jQuery( function( $ ) {
 		currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
 		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => {
+			const ids = currentRow[ 0 ].id.split( /-/ );
+			const permalink = new URL( window.location.href );
+			permalink.searchParams = new URLSearchParams( { 'filters[status]': 'either', 'filters[original_id]': ids[ 1 ], 'filters[translation_id]': ids[ 2 ] } );
 			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
-			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), currentRow[ 0 ].baseURI, $( '.auto-review-result span' ).text() );
+			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), permalink.toString(), $( '.auto-review-result span' ).text() );
 			currentRow.find( '.openai-review .auto-review-result' ).append( '<p><a href="' + githubIssueUrl + '">Report</a></p>' );
 		} );
 	}
