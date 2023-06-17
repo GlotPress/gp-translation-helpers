@@ -514,7 +514,7 @@ jQuery( function( $ ) {
 			permalink.searchParams = new URLSearchParams( { 'filters[status]': 'either', 'filters[original_id]': ids[ 1 ], 'filters[translation_id]': ids[ 2 ] } );
 			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
 			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), permalink.toString(), $( '.auto-review-result span' ).text() );
-			currentRow.find( '.openai-review .auto-review-result' ).append( '<p><a href="' + githubIssueUrl + '">Report</a></p>' );
+			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="' + githubIssueUrl + '">Give Feedback</a>' );
 		} );
 	}
 } );
