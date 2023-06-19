@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	let focusedRowId = '';
@@ -19,13 +19,15 @@ jQuery( function( $ ) {
 		const tr = $( this ).closest( 'tr.editor' );
 		const rowId = tr.attr( 'row' );
 		const translation_status = tr.find( '.panel-header' ).find( 'span' ).html();
+		const chatgpt_review_status = JSON.parse( window.localStorage.getItem( 'translate-details-state' ) );
+		const chatgpt_review_enabled = ( chatgpt_review_status && 'open' === chatgpt_review_status[ 'details-chatgpt' ] ) || ! chatgpt_review_status;
 
 		if ( focusedRowId === rowId ) {
 			return;
 		}
 		focusedRowId = rowId;
 		loadTabsAndDivs( tr );
-		if ( $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
+		if ( chatgpt_review_enabled && $gp_comment_feedback_settings.openai_key && $gp_editor_options.can_approve && ( 'waiting' === translation_status || 'fuzzy' === translation_status ) ) {
 			fetchOpenAIReviewResponse( rowId, tr, false );
 		} else {
 			tr.find( '.openai-review' ).hide();
@@ -39,6 +41,22 @@ jQuery( function( $ ) {
 		tr.find( '.openai-review .auto-review-result' ).html( '' );
 		tr.find( '.openai-review .suggestions__loading-indicator' ).show();
 		fetchOpenAIReviewResponse( rowId, tr, true );
+	} );
+
+	$( 'details.details-chatgpt' ).on( 'toggle', function() {
+		const tr = $( this ).closest( 'tr.editor' );
+		const rowId = tr.attr( 'row' );
+		if ( $( this ).prop( 'open' ) ) {
+			tr.find( '.openai-review' ).show();
+			if ( tr.find( '.openai-review .auto-review-result' ).children().length ) {
+				return;
+			}
+			tr.find( '.openai-review .auto-review-result' ).html( '' );
+			tr.find( '.openai-review .suggestions__loading-indicator' ).show();
+			fetchOpenAIReviewResponse( rowId, tr, true );
+		} else {
+			tr.find( '.openai-review' ).hide();
+		}
 	} );
 
 	// Shows/hides the reply form for a comment in the discussion.
@@ -491,9 +509,12 @@ jQuery( function( $ ) {
 		currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
 		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => {
+			const ids = currentRow[ 0 ].id.split( /-/ );
+			const permalink = new URL( window.location.href );
+			permalink.searchParams = new URLSearchParams( { 'filters[status]': 'either', 'filters[original_id]': ids[ 1 ], 'filters[translation_id]': ids[ 2 ] } );
 			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
-			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), currentRow[ 0 ].baseURI, $( '.auto-review-result span' ).text() );
-			currentRow.find( '.openai-review .auto-review-result' ).append( '<p><a href="' + githubIssueUrl + '">Report</a></p>' );
+			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), permalink.toString(), $( '.auto-review-result span' ).text() );
+			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="' + githubIssueUrl + '">Give Feedback</a>' );
 		} );
 	}
 } );
