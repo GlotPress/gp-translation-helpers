@@ -1,4 +1,4 @@
-/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, window */
+/* global $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	let focusedRowId = '';
@@ -453,6 +453,27 @@ jQuery( function( $ ) {
 	}
 
 	/**
+	 * Generate a GitHub URL that creates an issue with a prepopulated body when clicked.
+	 *
+	 * @param {string} original        The original string.
+	 * @param {string} translation     The translation reviewed by ChatGPT.
+	 * @param {string} projectUrl      The URL of the project or permalink.
+	 * @param {string} chatGPTResponse The response from ChatGPT.
+	 */
+	function generateGithubIssueURL( original, translation, projectUrl, chatGPTResponse ) {
+		const githubBaseUrl = 'https://github.com/GlotPress/gp-translation-helpers/issues/new?title=' + encodeURIComponent( 'ChatGPT Review Feedback' ) + '&labels=chatgpt-review&body=';
+		let issueUrlParam = '';
+
+		issueUrlParam += '### Original\n\n' + original + '\n\n';
+		issueUrlParam += '### Translation\n\n' + translation + '\n\n';
+		issueUrlParam += '### Project or Permalink URL\n\n' + projectUrl + '\n\n';
+		issueUrlParam += '### ChatGPT response received with current prompt at the time\n\n' + chatGPTResponse + '\n\n';
+		issueUrlParam += '### What\'s bad about the review\n\n';
+		issueUrlParam += '### Idea for a better prompt (optional)\n\n';
+		return githubBaseUrl + encodeURIComponent( issueUrlParam );
+	}
+
+	/**
 	 * Fetch translation review from OpenAI.
 	 *
 	 * @param {string}  rowId      The row-id attribute of the current row.
@@ -463,7 +484,7 @@ jQuery( function( $ ) {
 		const messages = [];
 		const original_str = currentRow.find( '.original' );
 		let glossary_prompt = '';
-
+		let githubIssueUrl = '';
 		$.each( $( original_str ).find( '.glossary-word' ), function( k, word ) {
 			$.each( $( word ).data( 'translations' ), function( i, e ) {
 				glossary_prompt += 'where "' + word.textContent + '" is translated as "' + e.translation + '" when it is a ' + e.pos;
@@ -487,6 +508,13 @@ jQuery( function( $ ) {
 
 		currentRow.find( '.openai-review .suggestions__loading-indicator' ).hide();
 		currentRow.find( '.openai-review .auto-review-result' ).html( '<h4>Review by ChatGPT' ).append( '<span style="white-space: pre-line">' );
-		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' ) );
+		invokeChatGPT( messages, currentRow.find( '.openai-review .auto-review-result span' ) ).then( () => {
+			const ids = currentRow[ 0 ].id.split( /-/ );
+			const permalink = new URL( window.location.href );
+			permalink.searchParams = new URLSearchParams( { 'filters[status]': 'either', 'filters[original_id]': ids[ 1 ], 'filters[translation_id]': ids[ 2 ] } );
+			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="#" class="retry-auto-review">Retry</a>' );
+			githubIssueUrl = generateGithubIssueURL( original_str.text(), currentRow.find( '.foreign-text:first' ).val(), permalink.toString(), $( '.auto-review-result span' ).text() );
+			currentRow.find( '.openai-review .auto-review-result' ).append( ' <a href="' + githubIssueUrl + '">Give Feedback</a>' );
+		} );
 	}
 } );
