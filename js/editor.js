@@ -278,13 +278,19 @@ jQuery( function( $ ) {
 	 * @return {void}
 	 */
 	function updateDataInTabs( data, originalId ) {
-		$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
-		$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
-		$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
-		$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
-		$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
-		$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
-		add_copy_button( '#sidebar-div-other-locales-' + originalId );
+		if ( data[ 'helper-translation-discussion-' + originalId ] !== undefined ) {
+			$( '[data-tab="sidebar-tab-discussion-' + originalId + '"]' ).html( 'Discussion&nbsp;(' + data[ 'helper-translation-discussion-' + originalId ].count + ')' );
+			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
+		}
+		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
+			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
+			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+		}
+		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
+			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
+			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+			add_copy_button( '#sidebar-div-other-locales-' + originalId );
+		}
 	}
 
 	/**
@@ -306,6 +312,7 @@ jQuery( function( $ ) {
 			translationHelpersCache[ rowId ] = ' ';
 			$.getJSON( requestUrl, function( data ) {
 				translationHelpersCache[ rowId ] = data;
+				updateDataInTabs( data, rowId );
 			} );
 		}
 	}
