@@ -232,6 +232,7 @@ jQuery( function( $ ) {
 	function change_visible_div( tabId, originalId ) {
 		$( '#sidebar-div-meta-' + originalId ).hide();
 		$( '#sidebar-div-discussion-' + originalId ).hide();
+		$( '#sidebar-div-others-' + originalId ).hide();
 		$( '#sidebar-div-history-' + originalId ).hide();
 		$( '#sidebar-div-other-locales-' + originalId ).hide();
 		$( '#' + tabId ).show();
@@ -249,6 +250,17 @@ jQuery( function( $ ) {
 			html += '<button class="sidebar-other-locales button is-small copy-suggestion"> Copy </button>';
 			$( this ).html( html );
 		} );
+	}
+
+	function add_amount_to_others_tab( sidebarTab, data, originalId ) {
+		let elements = 0;
+		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
+			elements += data[ 'helper-history-' + originalId ].count;
+		}
+		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
+			elements += data[ 'helper-other-locales-' + originalId ].count;
+		}
+		$( '[data-tab="' + sidebarTab + '"]' ).html( 'Others&nbsp;(' + elements + ')' );
 	}
 
 	/**
@@ -283,13 +295,17 @@ jQuery( function( $ ) {
 			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
 		}
 		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
-			$( '[data-tab="sidebar-tab-history-' + originalId + '"]' ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
-			$( '#sidebar-div-history-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+			$( '#sidebar-div-others-history-content-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
+			add_amount_to_others_tab( '#sidebar-tab-others-' + originalId, data, originalId );
+		} else {
+			$( '#sidebar-div-others-history-content-' + originalId ).html( '' );
 		}
 		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
-			$( '[data-tab="sidebar-tab-other-locales-' + originalId + '"]' ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
-			$( '#sidebar-div-other-locales-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
-			add_copy_button( '#sidebar-div-other-locales-' + originalId );
+			$( '#sidebar-div-others-other-locales-content-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
+			add_copy_button( '#sidebar-div-others-other-locales-content-' + originalId );
+			add_amount_to_others_tab( 'sidebar-tab-others-' + originalId, data, originalId );
+		} else {
+			$( '#sidebar-div-others-other-locales-content-' + originalId ).html( '' );
 		}
 	}
 
