@@ -233,8 +233,6 @@ jQuery( function( $ ) {
 		$( '#sidebar-div-meta-' + originalId ).hide();
 		$( '#sidebar-div-discussion-' + originalId ).hide();
 		$( '#sidebar-div-others-' + originalId ).hide();
-		$( '#sidebar-div-history-' + originalId ).hide();
-		$( '#sidebar-div-other-locales-' + originalId ).hide();
 		$( '#' + tabId ).show();
 	}
 
@@ -252,6 +250,13 @@ jQuery( function( $ ) {
 		} );
 	}
 
+	/**
+	 * Adds the amount of elements to the "Others" tab.
+	 *
+	 * @param {string} sidebarTab The tab where we add the amount of elements.
+	 * @param {Object} data       The object where we have the data to add.
+	 * @param {number} originalId The id of the original string to translate.
+	 */
 	function add_amount_to_others_tab( sidebarTab, data, originalId ) {
 		let elements = 0;
 		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
@@ -295,12 +300,14 @@ jQuery( function( $ ) {
 			$( '#sidebar-div-discussion-' + originalId ).html( data[ 'helper-translation-discussion-' + originalId ].content );
 		}
 		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
+			$( '#summary-history-' + originalId ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
 			$( '#sidebar-div-others-history-content-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
 			add_amount_to_others_tab( '#sidebar-tab-others-' + originalId, data, originalId );
 		} else {
 			$( '#sidebar-div-others-history-content-' + originalId ).html( '' );
 		}
 		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
+			$( '#summary-other-locales-' + originalId ).html( 'Other&nbsp;locales&nbsp;(' + data[ 'helper-other-locales-' + originalId ].count + ')' );
 			$( '#sidebar-div-others-other-locales-content-' + originalId ).html( data[ 'helper-other-locales-' + originalId ].content );
 			add_copy_button( '#sidebar-div-others-other-locales-content-' + originalId );
 			add_amount_to_others_tab( 'sidebar-tab-others-' + originalId, data, originalId );
