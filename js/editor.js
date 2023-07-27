@@ -1,4 +1,4 @@
-/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window */
+/* global document, $gp, $gp_translation_helpers_editor, wpApiSettings, $gp_comment_feedback_settings, $gp_editor_options, fetch, TextDecoderStream, URL, URLSearchParams, window, translationHelpersCache, add_amount_to_others_tab */
 /* eslint camelcase: "off" */
 jQuery( function( $ ) {
 	/**
@@ -9,12 +9,6 @@ jQuery( function( $ ) {
 	// eslint-disable-next-line prefer-const
 	window.translationHelpersCache = {};
 
-	/**
-	 * Stores the number of items in the "Others" tab.
-	 *
-	 * @type {integer}
-	 */
-	let itemsInOthersTab = 0;
 	let focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
@@ -265,16 +259,16 @@ jQuery( function( $ ) {
 	 * @param {number} originalId The id of the original string to translate.
 	 */
 	if ( typeof window.add_amount_to_others_tab === 'undefined' ) {
-		add_amount_to_others_tab = function(sidebarTab, data, originalId) {
+		add_amount_to_others_tab = function( sidebarTab, data, originalId ) {
 			let elements = 0;
-			if (data['helper-history-' + originalId] !== undefined) {
-				elements += data['helper-history-' + originalId].count;
+			if ( data[ 'helper-history-' + originalId ] !== undefined ) {
+				elements += data[ 'helper-history-' + originalId ].count;
 			}
-			if (data['helper-other-locales-' + originalId] !== undefined) {
-				elements += data['helper-other-locales-' + originalId].count;
+			if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
+				elements += data[ 'helper-other-locales-' + originalId ].count;
 			}
-			$('[data-tab="' + sidebarTab + '"]').html('Others&nbsp;(' + elements + ')');
-		}
+			$( '[data-tab="' + sidebarTab + '"]' ).html( 'Others&nbsp;(' + elements + ')' );
+		};
 	}
 
 	/**
