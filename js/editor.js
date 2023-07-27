@@ -4,10 +4,17 @@ jQuery( function( $ ) {
 	/**
 	 * Stores (caches) the content of the translation helpers, to avoid making the query another time.
 	 *
-	 * @type {Array}
+	 * @type {Object}
 	 */
 	// eslint-disable-next-line prefer-const
-	let translationHelpersCache = [];
+	window.translationHelpersCache = {};
+
+	/**
+	 * Stores the number of items in the "Others" tab.
+	 *
+	 * @type {integer}
+	 */
+	let itemsInOthersTab = 0;
 	let focusedRowId = '';
 	// When a user clicks on a sidebar tab, the visible tab and div changes.
 	$gp.editor.table.on( 'click', '.sidebar-tabs li', function() {
@@ -257,15 +264,17 @@ jQuery( function( $ ) {
 	 * @param {Object} data       The object where we have the data to add.
 	 * @param {number} originalId The id of the original string to translate.
 	 */
-	function add_amount_to_others_tab( sidebarTab, data, originalId ) {
-		let elements = 0;
-		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
-			elements += data[ 'helper-history-' + originalId ].count;
+	if ( typeof window.add_amount_to_others_tab === 'undefined' ) {
+		add_amount_to_others_tab = function(sidebarTab, data, originalId) {
+			let elements = 0;
+			if (data['helper-history-' + originalId] !== undefined) {
+				elements += data['helper-history-' + originalId].count;
+			}
+			if (data['helper-other-locales-' + originalId] !== undefined) {
+				elements += data['helper-other-locales-' + originalId].count;
+			}
+			$('[data-tab="' + sidebarTab + '"]').html('Others&nbsp;(' + elements + ')');
 		}
-		if ( data[ 'helper-other-locales-' + originalId ] !== undefined ) {
-			elements += data[ 'helper-other-locales-' + originalId ].count;
-		}
-		$( '[data-tab="' + sidebarTab + '"]' ).html( 'Others&nbsp;(' + elements + ')' );
 	}
 
 	/**
@@ -302,7 +311,7 @@ jQuery( function( $ ) {
 		if ( data[ 'helper-history-' + originalId ] !== undefined ) {
 			$( '#summary-history-' + originalId ).html( 'History&nbsp;(' + data[ 'helper-history-' + originalId ].count + ')' );
 			$( '#sidebar-div-others-history-content-' + originalId ).html( data[ 'helper-history-' + originalId ].content );
-			add_amount_to_others_tab( '#sidebar-tab-others-' + originalId, data, originalId );
+			add_amount_to_others_tab( 'sidebar-tab-others-' + originalId, data, originalId );
 		} else {
 			$( '#sidebar-div-others-history-content-' + originalId ).html( '' );
 		}
