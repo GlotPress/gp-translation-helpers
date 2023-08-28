@@ -753,13 +753,6 @@ class WPorg_GlotPress_Notifications {
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_wporg_gte( $user ) ) {
-			$output  = __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
-			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
-			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
-			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
-			return $output;
-		}
 		if ( self::is_user_an_wporg_pte_for_the_project( $original_id, $user ) ) {
 			$output  = __( 'You are going to receive notifications for the questions in your language because you are a PTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
@@ -770,6 +763,13 @@ class WPorg_GlotPress_Notifications {
 		if ( self::is_user_an_wporg_clpte_for_the_project( $original_id, $user ) ) {
 			$output  = __( 'You are going to receive notifications for the questions because you are a CLPTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for their language or CLPTE participates in a thread where you do not take part. ' );
+			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
+			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
+			return $output;
+		}
+		if ( self::is_user_an_wporg_gte( $user ) ) {
+			$output  = __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
+			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
