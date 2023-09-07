@@ -230,7 +230,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		usort(
 			$sections,
 			function( $s1, $s2 ) {
-				return $s1['priority'] > $s2['priority'];
+				return $s1['priority'] <=> $s2['priority'];
 			}
 		);
 
