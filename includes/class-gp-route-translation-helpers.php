@@ -309,7 +309,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			};
 		}
 
-		echo wp_json_encode( $sections );
+		wp_send_json( $sections );
 	}
 
 	/**
