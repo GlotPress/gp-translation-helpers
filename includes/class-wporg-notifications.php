@@ -338,6 +338,9 @@ class WPorg_GlotPress_Notifications {
 		}
 
 		$project = self::get_project_from_original_id( $original_id );
+		if ( ! $project ) {
+			return array();
+		}
 		// todo: remove the deleted users in the SQL query.
 		$translation_editors = $wpdb->get_results(
 			$wpdb->prepare(
@@ -377,6 +380,9 @@ class WPorg_GlotPress_Notifications {
 
 		$email_addresses = array();
 		$project         = GP_Notifications::get_project_from_original_id( $original_id );
+		if ( ! $project ) {
+			return array();
+		}
 		if ( 'wp-themes' === substr( $project->path, 0, 9 ) ) {
 			$author = $wpdb->get_row(
 				$wpdb->prepare(
@@ -513,6 +519,9 @@ class WPorg_GlotPress_Notifications {
 	 */
 	public static function get_project_from_original_id( int $original_id ) {
 		$original      = GP::$original->get( $original_id );
+		if ( ! $original ) {
+			return false;
+		}
 		$project_id    = $original->project_id;
 		$project       = GP::$project->get( $project_id );
 		$main_projects = self::get_main_projects();
@@ -693,6 +702,9 @@ class WPorg_GlotPress_Notifications {
 	 */
 	public static function is_an_special_user_in_a_special_project( int $original_id, WP_User $user ):bool {
 		$project = self::get_project_from_original_id( $original_id );
+		if ( ! $project ) {
+			return false;
+		}
 		if ( 'wp-themes' !== substr( $project->path, 0, 9 ) && ( 'wp-plugins' !== substr( $project->path, 0, 10 ) ) ) {
 			if ( empty( self::$i18n_email ) || empty( array_intersect( array( $user->user_email ), self::$i18n_email ) ) ) {
 				return false;
