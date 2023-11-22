@@ -509,9 +509,9 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @param int $original_id The id of the original string used for the discussion.
 	 *
-	 * @return GP_Project The project the original_id belongs to.
+	 * @return false|GP_Project The project the original_id belongs to.
 	 */
-	public static function get_project_from_original_id( int $original_id ): GP_Project {
+	public static function get_project_from_original_id( int $original_id ) {
 		$original      = GP::$original->get( $original_id );
 		$project_id    = $original->project_id;
 		$project       = GP::$project->get( $project_id );
