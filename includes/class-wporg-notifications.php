@@ -524,6 +524,10 @@ class WPorg_GlotPress_Notifications {
 		}
 		$project_id    = $original->project_id;
 		$project       = GP::$project->get( $project_id );
+
+		if ( ! $project ) {
+			return false;
+		}
 		$main_projects = self::get_main_projects();
 
 		// If the parent project is not a main project, get the parent project. We need to do this
