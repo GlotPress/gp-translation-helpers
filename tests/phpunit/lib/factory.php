@@ -281,7 +281,12 @@ class GP_UnitTest_Generator_Sequence {
 
 	function next() {
 		$generated = sprintf( $this->template_string, $this->next );
-		$this->next++;
+		// Use str_increment() on PHP 8.3+ for string values, otherwise use ++ operator.
+		if ( is_string( $this->next ) && function_exists( 'str_increment' ) ) {
+			$this->next = str_increment( $this->next );
+		} else {
+			$this->next++;
+		}
 		return $generated;
 	}
 }

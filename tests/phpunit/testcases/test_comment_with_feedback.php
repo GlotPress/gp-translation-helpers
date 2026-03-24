@@ -2,6 +2,13 @@
 
 class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 
+	public function setUp(): void {
+		parent::setUp();
+
+		// Allow WordPress 6.9+ deprecation of seems_utf8() function.
+		$this->setExpectedDeprecated( 'seems_utf8' );
+	}
+
 	/**
 	 * Test that an email is fired when translation status is updated to changesrequested and also with a feedback.
 	 */
@@ -20,7 +27,7 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$_POST['nonce']                      = wp_create_nonce( 'gp_comment_feedback' );
 		$_POST['data']                       = array();
 		$_POST['data']['locale_slug']        = 'af';
-		$_POST['data']['translation_status'] = $translation->status;
+		$_POST['data']['translation_status'] = array( $translation->status );
 		$_POST['data']['translation_id']     = array( $translation->id );
 		$_POST['data']['original_id']        = array( $translation->original_id );
 		$_POST['data']['reason']             = 'context';

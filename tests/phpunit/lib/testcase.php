@@ -19,6 +19,9 @@ class GP_UnitTestCase extends WP_UnitTestCase {
 
 		$this->factory = new GP_UnitTest_Factory();
 
+		// Allow WordPress 6.9+ deprecation of seems_utf8() function.
+		$this->setExpectedDeprecated( 'seems_utf8' );
+
 		global $wp_rewrite;
 		if ( GP_TESTS_PERMALINK_STRUCTURE != $wp_rewrite->permalink_structure ) {
 			$this->set_permalink_structure( GP_TESTS_PERMALINK_STRUCTURE );
