@@ -124,7 +124,7 @@ class Helper_History extends GP_Translation_Helper {
 					$output_translation = esc_translation( $translation->translation_0 );
 			} else {
 				$output_translation = '<ul>';
-				for ( $i = 0; $i <= 5; $i ++ ) {
+				for ( $i = 0; $i <= 5; $i++ ) {
 					if ( null !== $translation->{'translation_' . $i} ) {
 						$output_translation .= sprintf( '<li>%s</li>', esc_translation( $translation->{'translation_' . $i} ) );
 					}
@@ -199,6 +199,4 @@ class Helper_History extends GP_Translation_Helper {
 	public function empty_content(): string {
 		return esc_html__( 'No translation history for this string.' );
 	}
-
-
 }

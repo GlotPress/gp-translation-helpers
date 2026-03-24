@@ -22,9 +22,9 @@
 
 					$reject_reason = get_comment_meta( $_comment->comment_ID, 'reject_reason', true );
 					if ( ! empty( $reject_reason ) ) {
-						$count_rejection_feedback++;
+						++$count_rejection_feedback;
 					}
-					$locale_comments_count++;
+					++$locale_comments_count;
 				}
 			}
 			?>
@@ -77,8 +77,8 @@
 						<option value="typo">Typo in the English text</option>
 						<option value="context">Where does this string appear? (more context)</option>
 					</optgroup>' .
-			   $optgroup_question .
-			   '</select>';
+				$optgroup_question .
+				'</select>';
 
 	add_action(
 		'comment_form_logged_in_after',
@@ -99,11 +99,11 @@
 							$options,
 							array(
 								'select'   =>
-										   array(
-											   'required' => true,
-											   'name'     => true,
-											   'id'       => true,
-										   ),
+											array(
+												'required' => true,
+												'name'     => true,
+												'id'       => true,
+											),
 								'optgroup' =>
 										array(
 											'label' => true,
@@ -180,7 +180,7 @@
 			<?php
 	} else {
 		/* translators: Log in URL. */
-		echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
+		printf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
 	}
 	?>
 </div><!-- .discussion-wrapper -->

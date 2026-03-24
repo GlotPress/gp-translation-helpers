@@ -15,7 +15,7 @@ class GP_Sidebar {
 			'gp_tmpl_load_locations',
 			function ( $locations, $template, $args, $template_path ) {
 				if ( 'translation-row-editor-meta' === $template ) {
-					array_unshift( $locations, dirname( __FILE__, 2 ) . '/templates/gp-templates-overrides/' );
+					array_unshift( $locations, dirname( __DIR__ ) . '/templates/gp-templates-overrides/' );
 				}
 
 				return $locations;

@@ -96,20 +96,20 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_mentions_list',
-				function( $result, $comments, $locale, $original_id ) {
+				function ( $result, $comments, $locale, $original_id ) {
 					$validator_email_addresses  = ( $locale && $original_id ) ? WPorg_GlotPress_Notifications::get_validator_details_for_original_id( $locale, $original_id ) : array();
 					$commenters_email_addresses = array_values( GP_Notifications::get_commenters_email_addresses( $comments ) );
 
 					// Remove commenter email if it already exists as a GTE.
 					$commenters_email_addresses = array_filter(
 						$commenters_email_addresses,
-						function( $commenter_email ) use ( $validator_email_addresses ) {
+						function ( $commenter_email ) use ( $validator_email_addresses ) {
 							return ( ! in_array( $commenter_email, array_column( $validator_email_addresses, 'email' ) ) );
 						}
 					);
 
 					$commenters_email_role = array_map(
-						function( $commenter_email ) {
+						function ( $commenter_email ) {
 							return(
 							array(
 								'role'  => 'commenter',
@@ -139,7 +139,7 @@ class WPorg_GlotPress_Notifications {
 					}
 
 					$users = array_map(
-						function( $mentionable_user ) {
+						function ( $mentionable_user ) {
 							$email = $mentionable_user;
 							$role  = '';
 							if ( is_array( $mentionable_user ) ) {
@@ -207,7 +207,7 @@ class WPorg_GlotPress_Notifications {
 	 */
 	public static function get_validator_details_for_original_id( $locale, $original_id ): array {
 		$gtes_email_and_role = array_map(
-			function( $gte_email ) {
+			function ( $gte_email ) {
 				return array(
 					'role'  => 'GTE',
 					'email' => $gte_email,
@@ -217,7 +217,7 @@ class WPorg_GlotPress_Notifications {
 		);
 
 		$ptes_email_and_role = array_map(
-			function( $pte_email ) {
+			function ( $pte_email ) {
 				return array(
 					'role'  => 'GTE',
 					'email' => $pte_email,
@@ -227,7 +227,7 @@ class WPorg_GlotPress_Notifications {
 		);
 
 		$clptes_email_and_role = array_map(
-			function( $clpte_email ) {
+			function ( $clpte_email ) {
 				return array(
 					'role'  => 'GTE',
 					'email' => $clpte_email,
@@ -460,7 +460,7 @@ class WPorg_GlotPress_Notifications {
 			$reasons         = array();
 			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
 			$reasons         = array_map(
-				function( $reason ) use ( $comment_reasons ) {
+				function ( $reason ) use ( $comment_reasons ) {
 					if ( array_key_exists( $reason, $comment_reasons ) ) {
 						return $comment_reasons[ $reason ]['name'];
 					}
@@ -518,12 +518,12 @@ class WPorg_GlotPress_Notifications {
 	 * @return false|GP_Project The project the original_id belongs to.
 	 */
 	public static function get_project_from_original_id( int $original_id ) {
-		$original      = GP::$original->get( $original_id );
+		$original = GP::$original->get( $original_id );
 		if ( ! $original ) {
 			return false;
 		}
-		$project_id    = $original->project_id;
-		$project       = GP::$project->get( $project_id );
+		$project_id = $original->project_id;
+		$project    = GP::$project->get( $project_id );
 
 		if ( ! $project ) {
 			return false;
@@ -546,7 +546,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return array The id of the main projects.
 	 */
-	private static function get_main_projects():array {
+	private static function get_main_projects(): array {
 		global $wpdb;
 
 		return $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL" );
@@ -704,7 +704,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return bool Whether the user is a special user or not for projects different than themes and plugins.
 	 */
-	public static function is_an_special_user_in_a_special_project( int $original_id, WP_User $user ):bool {
+	public static function is_an_special_user_in_a_special_project( int $original_id, WP_User $user ): bool {
 		$project = self::get_project_from_original_id( $original_id );
 		if ( ! $project ) {
 			return false;
@@ -728,7 +728,7 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @return bool Whether the user has made a comment in the discussion.
 	 */
-	private static function is_user_a_commenter_in_the_discussion( int $original_id, WP_User $user ):bool {
+	private static function is_user_a_commenter_in_the_discussion( int $original_id, WP_User $user ): bool {
 		$post_id  = GP_Notifications::get_post_id( $original_id );
 		$comments = get_comments(
 			array(
@@ -814,5 +814,4 @@ class WPorg_GlotPress_Notifications {
 		$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 		return $output;
 	}
-
 }

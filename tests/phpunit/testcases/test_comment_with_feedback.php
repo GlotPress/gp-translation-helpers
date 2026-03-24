@@ -2,6 +2,23 @@
 
 class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 
+	public function setUp(): void {
+		parent::setUp();
+
+		// WordPress 6.9+ deprecates seems_utf8(), but GlotPress develop may
+		// no longer call it. Dynamically mark it as expected only when called.
+		$test = $this;
+		add_action(
+			'deprecated_function_run',
+			static function ( $function ) use ( $test ) {
+				if ( 'seems_utf8' === $function ) {
+					$test->setExpectedDeprecated( 'seems_utf8' );
+				}
+			},
+			1
+		);
+	}
+
 	/**
 	 * Test that an email is fired when translation status is updated to changesrequested and also with a feedback.
 	 */
@@ -20,7 +37,7 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$_POST['nonce']                      = wp_create_nonce( 'gp_comment_feedback' );
 		$_POST['data']                       = array();
 		$_POST['data']['locale_slug']        = 'af';
-		$_POST['data']['translation_status'] = $translation->status;
+		$_POST['data']['translation_status'] = array( $translation->status );
 		$_POST['data']['translation_id']     = array( $translation->id );
 		$_POST['data']['original_id']        = array( $translation->original_id );
 		$_POST['data']['reason']             = 'context';

@@ -20,7 +20,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         ports:
           - 3306/tcp
         env:
@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        php: [ '7.4' ]
+        php: [ '7.4', '8.5' ]
 #        wordpress: [ 'latest', 'nightly' ]
         wordpress: [ 'latest' ]
         glotpress: [ 'develop' ]
@@ -51,6 +51,12 @@ jobs:
             glotpress: 'latest'
             multisite: false
             experimental: false
+          - os: ubuntu-latest
+            php: '8.5'
+            wordpress: 'latest'
+            glotpress: 'latest'
+            multisite: false
+            experimental: false
 #          - os: ubuntu-latest
 #            php: '7.4'
 #            wordpress: 'latest'
@@ -60,7 +66,7 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -69,9 +75,13 @@ jobs:
           tools: composer
 
       - name: Install Composer dependencies
-        uses: ramsey/composer-install@v1
+        uses: ramsey/composer-install@v2
         with:
+          dependency-versions: highest
           composer-options: "--no-progress --no-ansi --no-interaction"
+
+      - name: Install SVN
+        run: sudo apt-get install -y subversion
 
       - name: Install WordPress test setup
         env:

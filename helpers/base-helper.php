@@ -33,7 +33,7 @@ class GP_Translation_Helper {
 	 * @throws LogicException If the class has not a must-have property.
 	 */
 	final public function __construct() {
-		$this->assets_dir = dirname( dirname( __FILE__ ) ) . '/helpers-assets/';
+		$this->assets_dir = dirname( __DIR__ ) . '/helpers-assets/';
 
 		$required_properties = array(
 			'title',
@@ -41,7 +41,7 @@ class GP_Translation_Helper {
 
 		foreach ( $required_properties as $prop ) {
 			if ( ! isset( $this->{$prop} ) ) {
-				throw new LogicException( get_class( $this ) . ' must have a property ' . $prop );
+				throw new LogicException( get_class( $this ) . ' must have a property ' . $prop ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Values are class name and property name, not user input.
 			}
 		}
 

@@ -9,7 +9,7 @@ class GP_Test_Notifications extends GP_UnitTestCase {
 	public $translation;
 	private $post_id;
 
-	function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->user1_id = $this->factory->user->create();
