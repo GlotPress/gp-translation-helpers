@@ -11,4 +11,3 @@ class Gth_Temporary_Post {
 		return strval( $this->ID );
 	}
 }
-

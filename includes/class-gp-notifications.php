@@ -235,7 +235,7 @@ class GP_Notifications {
 		$path_to_root = array_slice( $project->path_to_root(), 1 );
 		$permissions  = GP::$validator_permission->by_project_id( $project->id );
 
-		$sort_by_locale_slug = function( $x, $y ) {
+		$sort_by_locale_slug = function ( $x, $y ) {
 			return strcmp( $x->locale_slug, $y->locale_slug );
 		};
 		usort( $permissions, $sort_by_locale_slug );
@@ -267,7 +267,7 @@ class GP_Notifications {
 	 *
 	 * @return array The GlotPress admins' email addresses.
 	 */
-	public static function get_admins_email_addresses( WP_Comment $comment, array $comment_meta ):array {
+	public static function get_admins_email_addresses( WP_Comment $comment, array $comment_meta ): array {
 		global $wpdb;
 		/**
 		 * Filters the validators' emails.
@@ -426,7 +426,7 @@ class GP_Notifications {
 			$reasons         = array();
 			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
 			$reasons         = array_map(
-				function( $reason ) use ( $comment_reasons ) {
+				function ( $reason ) use ( $comment_reasons ) {
 					if ( array_key_exists( $reason, $comment_reasons ) ) {
 						return $comment_reasons[ $reason ]['name'];
 					}
@@ -784,6 +784,5 @@ class GP_Notifications {
 			return $output;
 		}
 		return __( 'You will not receive notifications for this discussion. We will send you notifications as soon as you get involved.' ); // Regular user without comments.
-
 	}
 }

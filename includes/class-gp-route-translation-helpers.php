@@ -22,7 +22,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 */
 	public function __construct() {
 		$this->helpers       = GP_Translation_Helpers::load_helpers();
-		$this->template_path = dirname( __FILE__ ) . '/../templates/';
+		$this->template_path = __DIR__ . '/../templates/';
 	}
 
 	/**
@@ -190,7 +190,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 
 		add_action(
 			'gp_head',
-			function() use ( $original, $no_of_translations ) {
+			function () use ( $original, $no_of_translations ) {
 				echo '<meta property="og:title" content="' . esc_html( $original->singular ) . ' | ' . esc_html( $no_of_translations ) . ' translations" />';
 			}
 		);
@@ -229,7 +229,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 
 		usort(
 			$sections,
-			function( $s1, $s2 ) {
+			function ( $s1, $s2 ) {
 				return $s1['priority'] <=> $s2['priority'];
 			}
 		);
@@ -306,7 +306,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 					'content' => $translation_helper->get_async_output(),
 					'count'   => $translation_helper->get_count(),
 				);
-			};
+			}
 		}
 
 		wp_send_json( $sections );
