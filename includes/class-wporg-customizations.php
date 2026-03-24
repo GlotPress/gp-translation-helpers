@@ -56,7 +56,7 @@ class WPorg_GlotPress_Customizations {
 			add_filter( 'jetpack_mentions_should_load_ui', '__return_true' );
 			add_filter(
 				'jetpack_mentions_allowed_post_types',
-				function( $post_types ) {
+				function ( $post_types ) {
 					$post_types[] = Helper_Translation_Discussion::POST_TYPE;
 					return $post_types;
 				}
@@ -69,7 +69,6 @@ class WPorg_GlotPress_Customizations {
 					$pte_emails   = WPorg_GlotPress_Notifications::get_pte_email_addresses_by_project_and_locale( $original_id, $locale_slug );
 					$clpte_emails = WPorg_GlotPress_Notifications::get_clpte_email_addresses_by_project( $original_id );
 					return array_intersect( array_merge( $gte_emails, $pte_emails, $clpte_emails ), $comment_authors );
-
 				},
 				10,
 				4

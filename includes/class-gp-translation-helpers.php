@@ -87,11 +87,11 @@ class GP_Translation_Helpers {
 		add_filter( 'preprocess_comment', array( $this, 'preprocess_comment' ) );
 		add_filter(
 			'gp_tmpl_load_locations',
-			function( $locations, $template, $args, $template_path ) {
+			function ( $locations, $template, $args, $template_path ) {
 				if ( 'translation-row-editor-meta-status' === $template ) {
-					array_unshift( $locations, dirname( dirname( __FILE__ ) ) . '/templates/gp-templates-overrides/' );
+					array_unshift( $locations, dirname( __DIR__ ) . '/templates/gp-templates-overrides/' );
 				} else {
-					$locations[] = dirname( dirname( __FILE__ ) ) . '/templates/';
+					$locations[] = dirname( __DIR__ ) . '/templates/';
 				}
 
 				return $locations;
@@ -179,7 +179,7 @@ class GP_Translation_Helpers {
 	 *
 	 * @return void
 	 */
-	public function pre_tmpl_load( string $template, array $args ):void {
+	public function pre_tmpl_load( string $template, array $args ): void {
 		$allowed_templates = apply_filters( 'gp_translations_helpers_templates', array( 'original-permalink' ) );
 
 		if ( ! in_array( $template, $allowed_templates, true ) ) {
@@ -197,7 +197,7 @@ class GP_Translation_Helpers {
 
 		add_filter(
 			'gp_translation_row_editor_clospan',
-			function( $colspan ) {
+			function ( $colspan ) {
 				return ( $colspan - 3 );
 			}
 		);
@@ -242,7 +242,7 @@ class GP_Translation_Helpers {
 	 * @return array
 	 */
 	public static function load_helpers(): array {
-		$base_dir = dirname( dirname( __FILE__ ) ) . '/helpers/';
+		$base_dir = dirname( __DIR__ ) . '/helpers/';
 		require_once $base_dir . '/base-helper.php';
 
 		$helpers_files = array(
@@ -308,7 +308,7 @@ class GP_Translation_Helpers {
 		}
 		usort(
 			$sections,
-			function( $s1, $s2 ) {
+			function ( $s1, $s2 ) {
 				return $s1['priority'] > $s2['priority'];
 			}
 		);
@@ -477,11 +477,11 @@ class GP_Translation_Helpers {
 		$translation_status   = ! empty( $_POST['data']['translation_status'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_status' ), $_POST['data']['translation_status'] ) : null;
 		$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
 		$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
-		$comment_reason       = ! empty( $_POST['data']['reason'] ) ? $_POST['data']['reason'] : array( 'other' );
+		$comment_reason       = ! empty( $_POST['data']['reason'] ) ? (array) $_POST['data']['reason'] : array( 'other' );
 		$all_comment_reasons  = array_keys( Helper_Translation_Discussion::get_comment_reasons( $locale_slug ) );
 		$comment_reason       = array_filter(
 			$comment_reason,
-			function( $reason ) use ( $all_comment_reasons ) {
+			function ( $reason ) use ( $all_comment_reasons ) {
 				return in_array( $reason, $all_comment_reasons );
 			}
 		);
@@ -552,7 +552,7 @@ class GP_Translation_Helpers {
 			} elseif ( 'optin' === $opt_type ) {
 				delete_user_meta( $user_id, 'gp_opt_out', $original_id );
 			}
-			 wp_send_json_success();
+			wp_send_json_success();
 		}
 	}
 
@@ -591,5 +591,4 @@ class GP_Translation_Helpers {
 			)
 		);
 	}
-
 }

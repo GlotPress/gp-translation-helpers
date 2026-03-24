@@ -154,13 +154,13 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 			);
 
 			if ( ( null === $translation->translation_1 ) && ( null === $translation->translation_2 ) &&
-				 ( null === $translation->translation_3 ) && ( null === $translation->translation_4 ) &&
-				 ( null === $translation->translation_5 ) ) {
+				( null === $translation->translation_3 ) && ( null === $translation->translation_4 ) &&
+				( null === $translation->translation_5 ) ) {
 				$output .= sprintf( '<li><span class="locale unique">%s</span>%s</li>', $locale, gp_link_get( $translation_permalink, esc_translation( $translation->translation_0 ) ) );
 			} else {
 				$output .= sprintf( '<li><span class="locale">%s</span>', $locale );
 				$output .= '<ul>';
-				for ( $i = 0; $i <= 5; $i ++ ) {
+				for ( $i = 0; $i <= 5; $i++ ) {
 					if ( null !== $translation->{'translation_' . $i} ) {
 						$output .= sprintf( '<li>%s</li>', gp_link_get( $translation_permalink, esc_translation( $translation->{'translation_' . $i} ) ) );
 					}
@@ -192,7 +192,7 @@ class Helper_Other_Locales extends GP_Translation_Helper {
 	 * @return string
 	 */
 	public function get_css(): string {
-		return <<<CSS
+		return <<<'CSS'
 	.other-locales {
 		list-style: none;
 	}

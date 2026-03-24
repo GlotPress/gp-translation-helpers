@@ -13,12 +13,12 @@
     "php": ">=7.4"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
-    "wp-coding-standards/wpcs": "^2.2",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2 || ^1.0",
+    "wp-coding-standards/wpcs": "^3.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "gettext/languages": "^2.6",
-    "phpunit/phpunit": "^7",
-    "yoast/phpunit-polyfills": "^1.0"
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^1.1"
   },
   "scripts": {
     "format": "@php ./vendor/bin/phpcbf --report=summary,source",

@@ -347,7 +347,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 *
 	 * @since 0.0.1
 	 *
-	 * @param $post_id  The post ID.
+	 * @param int $post_id  The post ID.
 	 *
 	 * @return false|string
 	 */
@@ -535,7 +535,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		// Link comment author to their profile.
 		add_filter(
 			'get_comment_author_link',
-			function( $return, $author, $comment_id ) {
+			function ( $return, $author, $comment_id ) {
 				$comment = get_comment( $comment_id );
 				if ( ! empty( $comment->user_id ) ) {
 					$user = get_userdata( $comment->user_id );
@@ -551,7 +551,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		add_filter(
 			'comment_form_logged_in',
-			function( $logged_in_as, $commenter, $user_identity ) {
+			function ( $logged_in_as, $commenter, $user_identity ) {
 				/* translators: Username with which the user is logged in */
 				return sprintf( '<p class="logged-in-as">%s</p>', sprintf( __( 'Logged in as %s.' ), $user_identity ) );
 			},
@@ -561,7 +561,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 
 		add_filter(
 			'comment_form_fields',
-			function( $comment_fields ) {
+			function ( $comment_fields ) {
 				$comment_fields['comment'] = str_replace( '</label>', ' (required)</label>', $comment_fields['comment'] );
 				return $comment_fields;
 			}
@@ -641,7 +641,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			$comment_topic = 'unknown';
 		}
 		return $comment_topic;
-
 	}
 
 	/**
@@ -706,7 +705,6 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			$translation_status = 'unknown';
 		}
 		return $translation_status;
-
 	}
 
 	/**
@@ -839,6 +837,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		return $reasons;
 	}
 }
+
+// phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed -- Backward-compatible functions kept in the same file as the class.
 
 /**
  * Gets the slug for the post ID.
@@ -1077,7 +1077,7 @@ function gth_discussion_callback( WP_Comment $comment, array $args, int $depth )
 					);
 				} else {
 					/* translators: Log in URL. */
-					echo sprintf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
+					printf( __( 'You have to be <a href="%s">logged in</a> to comment.' ), esc_html( wp_login_url() ) );
 				}
 				?>
 			</div>

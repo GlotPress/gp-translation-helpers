@@ -26,7 +26,7 @@ class GP_OpenAI_Review {
 		if ( empty( trim( $openai_key ) ) ) {
 			return array(
 				'status' => 404,
-				'error' => 'no-openai-key',
+				'error'  => 'no-openai-key',
 			);
 		}
 
@@ -52,10 +52,10 @@ class GP_OpenAI_Review {
 				),
 				'body'    => wp_json_encode(
 					array(
-						'model'       => 'gpt-3.5-turbo',
-						'max_tokens'  => 1000,
-						'n'           => 1,
-						'messages'    => $messages,
+						'model'      => 'gpt-3.5-turbo',
+						'max_tokens' => 1000,
+						'n'          => 1,
+						'messages'   => $messages,
 					)
 				),
 			)
@@ -65,7 +65,7 @@ class GP_OpenAI_Review {
 
 		$response_status = wp_remote_retrieve_response_code( $openai_response );
 		$output          = json_decode( wp_remote_retrieve_body( $openai_response ), true );
-		$response = array();
+		$response        = array();
 
 		if ( 200 !== $response_status || is_wp_error( $openai_response ) ) {
 			$response['status'] = $response_status;
@@ -73,7 +73,7 @@ class GP_OpenAI_Review {
 			return $response;
 		}
 
-		$message                          = $output['choices'][0]['message'];
+		$message                = $output['choices'][0]['message'];
 		$response['status']     = $response_status;
 		$response['review']     = trim( trim( $message['content'] ), '"' );
 		$response['time_taken'] = $time_taken;

@@ -76,7 +76,7 @@ foreach ( $bulk_comments as $original_id => $_comments ) {
 
 uksort(
 	$comments_by_post_id,
-	function( $a, $b ) use ( $latest_comment_date_by_post_id ) {
+	function ( $a, $b ) use ( $latest_comment_date_by_post_id ) {
 		return $latest_comment_date_by_post_id[ $b ] <=> $latest_comment_date_by_post_id[ $a ];
 	}
 );
@@ -127,7 +127,7 @@ $args = array(
 			$validators_involved_emails = apply_filters( 'gp_validators_involved', $validators_involved_emails, $locale_slug, $original_id, $comment_authors );
 
 			$validator_involved_names = array_map(
-				function( $validator ) {
+				function ( $validator ) {
 					$validator_user = get_user_by( 'email', $validator );
 					return '<a href="' . esc_url( gp_url_profile( $validator_user->user_nicename ) ) . '">' . esc_html( $validator_user->display_name ) . '</a>';
 				},
@@ -183,29 +183,29 @@ $args = array(
 						}
 						?>
 				</td>
-				 <td>
-					 <?php
-						if ( ! $first_comment->comment_content ) :
-							?>
+				<td>
+					<?php
+					if ( ! $first_comment->comment_content ) :
+						?>
 						
-							   <?php
-								$comment_reason       = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
-								$number_of_items      = count( $comment_reason );
-								$counter              = 0;
-								$all_comment_reasons  = Helper_Translation_Discussion::get_comment_reasons();
-								$comment_reasons_text = '';
-								foreach ( $comment_reason as $reason ) {
-									$comment_reasons_text .= $all_comment_reasons[ $reason ]['name'];
-									if ( ++$counter < $number_of_items ) {
-										 $comment_reasons_text .= ', ';
-									}
+							<?php
+							$comment_reason       = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
+							$number_of_items      = count( $comment_reason );
+							$counter              = 0;
+							$all_comment_reasons  = Helper_Translation_Discussion::get_comment_reasons();
+							$comment_reasons_text = '';
+							foreach ( $comment_reason as $reason ) {
+								$comment_reasons_text .= $all_comment_reasons[ $reason ]['name'];
+								if ( ++$counter < $number_of_items ) {
+									$comment_reasons_text .= ', ';
 								}
-								?>
+							}
+							?>
 							<a href="<?php echo esc_url( $comment_link ); ?>"><?php echo esc_html( $comment_reasons_text ); ?></a>
 						
-					   <?php else : ?>
+						<?php else : ?>
 						<a href="<?php echo esc_url( $comment_link ); ?>"><?php echo esc_html( get_comment_excerpt( $first_comment ) ); ?></a>
-						   <?php if ( $no_of_other_comments > 0 ) : ?>
+							<?php if ( $no_of_other_comments > 0 ) : ?>
 							<br>
 								<?php /* translators: number of comments. */ ?>
 							<a class="other-comments" href="<?php echo esc_url( $comment_link ); ?>"> + <?php printf( _n( '%s Comment', '%s Comments', $no_of_other_comments ), number_format_i18n( $no_of_other_comments ) ); ?></a>
