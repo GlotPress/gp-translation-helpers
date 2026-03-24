@@ -347,6 +347,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 *
 	 * @return string                       The full permalink.
 	 */
+	// TODO: Restore `string|int|null` type hint for $original_id when minimum PHP version is 8.0+.
 	public static function get_permalink( string $project_path, $original_id, ?string $set_slug = null, ?string $locale_slug = null ): string {
 		$permalink = $project_path . '/' . $original_id;
 		if ( $set_slug && $locale_slug ) {
