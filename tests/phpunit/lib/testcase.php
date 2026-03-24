@@ -14,7 +14,7 @@ class GP_UnitTestCase extends WP_UnitTestCase {
 	 */
 	public $factory;
 
-	function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->factory = new GP_UnitTest_Factory();
@@ -42,7 +42,7 @@ class GP_UnitTestCase extends WP_UnitTestCase {
 		parent::set_permalink_structure( $structure );
 	}
 
-	function clean_up_global_scope() {
+	public function clean_up_global_scope(): void {
 		parent::clean_up_global_scope();
 
 		$locales          = &GP_Locales::instance();
