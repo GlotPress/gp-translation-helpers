@@ -5,10 +5,16 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Allow WordPress 6.9+ deprecation of seems_utf8() function.
-		if ( function_exists( 'seems_utf8' ) && version_compare( $GLOBALS['wp_version'], '6.9', '>=' ) ) {
-			$this->setExpectedDeprecated( 'seems_utf8' );
-		}
+		// WordPress 6.9+ deprecates seems_utf8(), but it may not be called in
+		// all test configurations. Suppress without requiring it to fire.
+		add_filter(
+			'deprecated_function_trigger_error',
+			static function ( $trigger, $function ) {
+				return 'seems_utf8' === $function ? false : $trigger;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
