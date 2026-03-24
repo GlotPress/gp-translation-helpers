@@ -19,16 +19,18 @@ class GP_UnitTestCase extends WP_UnitTestCase {
 
 		$this->factory = new GP_UnitTest_Factory();
 
-		// WordPress 6.9+ deprecates seems_utf8(), but it may not be called in
-		// all test configurations (e.g., GlotPress develop may no longer use it).
-		// Suppress the deprecation notice without requiring it to fire.
-		add_filter(
-			'deprecated_function_trigger_error',
-			static function ( $trigger, $function ) {
-				return 'seems_utf8' === $function ? false : $trigger;
+		// WordPress 6.9+ deprecates seems_utf8(), but GlotPress develop may
+		// no longer call it. Dynamically mark it as expected only when called,
+		// so the test passes whether or not the deprecation fires.
+		$test = $this;
+		add_action(
+			'deprecated_function_run',
+			static function ( $function ) use ( $test ) {
+				if ( 'seems_utf8' === $function ) {
+					$test->setExpectedDeprecated( 'seems_utf8' );
+				}
 			},
-			10,
-			2
+			1
 		);
 
 		global $wp_rewrite;
