@@ -17,8 +17,8 @@
     "wp-coding-standards/wpcs": "^3.0",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "gettext/languages": "^2.6",
-    "phpunit/phpunit": "^9.5 || ^10",
-    "yoast/phpunit-polyfills": "^1.1 || ^2.0"
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^1.1"
   },
   "scripts": {
     "format": "@php ./vendor/bin/phpcbf --report=summary,source",
