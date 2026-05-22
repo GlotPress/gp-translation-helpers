@@ -47,8 +47,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$filter              = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
 		$gp_locale           = GP_Locales::by_slug( $locale_slug );
 
-		$participating          = $this->get_user_comments( $locale_slug, $user_id );
-		$participating_post_ids = array_values( array_unique( array_column( $participating, 'comment_post_ID' ) ) );
+		$participating_post_ids = $this->get_user_participating_post_ids( $locale_slug, $user_id );
 
 		$all_count               = $this->get_locale_post_count( $locale_slug );
 		$participating_count     = count( $participating_post_ids );
@@ -396,23 +395,42 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
-	 * Gets distinct post_ids for all comments made by user
+	 * Returns the distinct post IDs the user has commented on in the given locale.
 	 *
-	 * @param      string $locale_slug           The locale slug.
-	 * @param      int    $user_id           The user id.
+	 * @param string $locale_slug The locale slug.
+	 * @param int    $user_id     The user ID.
 	 *
-	 * @return     array    The array of comment_post_IDs.
+	 * @return int[] Distinct comment_post_IDs.
 	 */
-	private function get_user_comments( $locale_slug, $user_id ) {
-		$args     = array(
-			'meta_key'   => 'locale',
-			'meta_value' => $locale_slug,
-			'user_id'    => $user_id,
-		);
-		$query    = new WP_Comment_Query( $args );
-		$comments = $query->comments;
+	private function get_user_participating_post_ids( $locale_slug, $user_id ) {
+		$cache_group  = 'wporg-translate-discussions';
+		$last_changed = wp_cache_get_last_changed( 'comment' ) . ':' . wp_cache_get_last_changed( 'comment_meta' );
+		$cache_key    = 'discussions_participating:' . $locale_slug . ':' . $user_id . ':' . $last_changed;
 
-		return $comments;
+		$post_ids = wp_cache_get( $cache_key, $cache_group );
+		if ( false !== $post_ids ) {
+			return $post_ids;
+		}
+
+		global $wpdb;
+		$post_ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT c.comment_post_ID
+					 FROM {$wpdb->commentmeta} cm
+					 JOIN {$wpdb->comments} c ON c.comment_ID = cm.comment_id
+					 WHERE cm.meta_key = %s AND cm.meta_value = %s
+					 AND c.user_id = %d",
+					'locale',
+					$locale_slug,
+					$user_id
+				)
+			)
+		);
+
+		wp_cache_set( $cache_key, $post_ids, $cache_group, DAY_IN_SECONDS );
+		return $post_ids;
 	}
 
 	/**
