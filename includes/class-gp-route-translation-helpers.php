@@ -40,41 +40,44 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 		$user_id = wp_get_current_user()->ID;
 
-		$all_comments_post_ids = $this->get_comment_post_ids( $locale_slug );
-		$comments_count        = count( $all_comments_post_ids );
-		$comment_post_ids      = $all_comments_post_ids;
-
-		$participating          = $this->get_user_comments( $locale_slug, $user_id );
-		$participating_post_ids = array_unique( array_column( $participating, 'comment_post_ID' ) );
-
-		$not_participating_post_ids = array_diff( $all_comments_post_ids, $participating_post_ids );
-
 		$comments_per_page   = 12;
 		$page_num_from_query = (int) get_query_var( 'page' );
-		$offset              = $page_num_from_query > 0 ? ( $page_num_from_query - 1 ) * $comments_per_page : 0;
+		$page_number         = max( 1, $page_num_from_query );
+		$offset              = ( $page_number - 1 ) * $comments_per_page;
 		$filter              = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
-		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
 		$gp_locale           = GP_Locales::by_slug( $locale_slug );
-		if ( 'participating' == $filter ) {
-			$comment_post_ids = $participating_post_ids;
-			$comments_count   = count( $participating_post_ids );
-		}
-		if ( 'not_participating' == $filter ) {
-			$comment_post_ids = $not_participating_post_ids;
-			$comments_count   = count( $not_participating_post_ids );
-		}
-		$total_pages = (int) ceil( $comments_count / $comments_per_page );
 
-		$post_ids = array();
+		$participating_post_ids = $this->get_user_participating_post_ids( $locale_slug, $user_id );
 
-		$post_ids       = array_splice( $comment_post_ids, $offset, $comments_per_page );
-		$args           = array(
-			'meta_key'   => 'locale',
-			'meta_value' => $locale_slug,
-			'post__in'   => $post_ids,
-		);
-		$comments_query = new WP_Comment_Query( $args );
-		$comments       = $comments_query->comments;
+		$all_count               = $this->get_locale_post_count( $locale_slug );
+		$participating_count     = count( $participating_post_ids );
+		$not_participating_count = max( 0, $all_count - $participating_count );
+
+		switch ( $filter ) {
+			case 'participating':
+				$page_post_ids = array_slice( $participating_post_ids, $offset, $comments_per_page );
+				$total_pages   = (int) ceil( $participating_count / $comments_per_page );
+				break;
+			case 'not_participating':
+				$page_post_ids = $this->get_paged_locale_post_ids( $locale_slug, $offset, $comments_per_page, $participating_post_ids );
+				$total_pages   = (int) ceil( $not_participating_count / $comments_per_page );
+				break;
+			default:
+				$page_post_ids = $this->get_paged_locale_post_ids( $locale_slug, $offset, $comments_per_page );
+				$total_pages   = (int) ceil( $all_count / $comments_per_page );
+		}
+
+		$comments = array();
+		if ( $page_post_ids ) {
+			$comments_query = new WP_Comment_Query(
+				array(
+					'meta_key'   => 'locale',
+					'meta_value' => $locale_slug,
+					'post__in'   => $page_post_ids,
+				)
+			);
+			$comments       = $comments_query->comments;
+		}
 
 		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
 	}
@@ -392,39 +395,113 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
-	 * Gets distinct post_ids for all comments made by user
+	 * Returns the distinct post IDs the user has commented on in the given locale.
 	 *
-	 * @param      string $locale_slug           The locale slug.
-	 * @param      int    $user_id           The user id.
+	 * @param string $locale_slug The locale slug.
+	 * @param int    $user_id     The user ID.
 	 *
-	 * @return     array    The array of comment_post_IDs.
+	 * @return int[] Distinct comment_post_IDs.
 	 */
-	private function get_user_comments( $locale_slug, $user_id ) {
-		$args     = array(
-			'meta_key'   => 'locale',
-			'meta_value' => $locale_slug,
-			'user_id'    => $user_id,
-		);
-		$query    = new WP_Comment_Query( $args );
-		$comments = $query->comments;
+	private function get_user_participating_post_ids( $locale_slug, $user_id ) {
+		$cache_group  = 'wporg-translate-discussions';
+		$last_changed = wp_cache_get_last_changed( 'comment' ) . ':' . wp_cache_get_last_changed( 'comment_meta' );
+		$cache_key    = 'discussions_participating:' . $locale_slug . ':' . $user_id . ':' . $last_changed;
 
-		return $comments;
+		$post_ids = wp_cache_get( $cache_key, $cache_group );
+		if ( false !== $post_ids ) {
+			return $post_ids;
+		}
+
+		global $wpdb;
+		$post_ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT c.comment_post_ID
+					 FROM {$wpdb->commentmeta} cm
+					 JOIN {$wpdb->comments} c ON c.comment_ID = cm.comment_id
+					 WHERE cm.meta_key = %s AND cm.meta_value = %s
+					 AND c.user_id = %d",
+					'locale',
+					$locale_slug,
+					$user_id
+				)
+			)
+		);
+
+		wp_cache_set( $cache_key, $post_ids, $cache_group, DAY_IN_SECONDS );
+		return $post_ids;
 	}
 
 	/**
-	 * Run a query to fetch comment_post_ID of all comments
+	 * Fetches one page of comment_post_IDs for a locale, ordered by latest comment date.
 	 *
-	 * @param string $locale_slug           The locale slug.
+	 * @param string $locale_slug      The locale slug.
+	 * @param int    $offset           Page offset.
+	 * @param int    $per_page         Page size.
+	 * @param array  $exclude_post_ids Post IDs to exclude (used for the "not participating" filter).
 	 *
-	 * @return array Array of unique comment_post_IDs for all comments.
+	 * @return int[] Post IDs.
 	 */
-	private function get_comment_post_ids( $locale_slug ) {
+	private function get_paged_locale_post_ids( $locale_slug, $offset, $per_page, $exclude_post_ids = array() ) {
 		global $wpdb;
-		return $wpdb->get_col(
+
+		$exclude_sql = '';
+		if ( $exclude_post_ids ) {
+			$exclude_sql = ' AND c.comment_post_ID NOT IN (' . implode( ',', array_map( 'intval', $exclude_post_ids ) ) . ')';
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $exclude_sql is composed from intval'd integers.
+		$sql = $wpdb->prepare(
+			"SELECT c.comment_post_ID
+			 FROM {$wpdb->commentmeta} cm
+			 JOIN {$wpdb->comments} c ON c.comment_ID = cm.comment_id
+			 WHERE cm.meta_key = %s AND cm.meta_value = %s
+			 $exclude_sql
+			 GROUP BY c.comment_post_ID
+			 ORDER BY MAX(c.comment_date) DESC
+			 LIMIT %d, %d",
+			'locale',
+			$locale_slug,
+			$offset,
+			$per_page
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is built via $wpdb->prepare() above.
+		return array_map( 'intval', $wpdb->get_col( $sql ) );
+	}
+
+	/**
+	 * Returns the number of posts that have at least one comment in the given locale.
+	 *
+	 * @param string $locale_slug The locale slug.
+	 *
+	 * @return int
+	 */
+	private function get_locale_post_count( $locale_slug ) {
+		$cache_group  = 'wporg-translate-discussions';
+		$last_changed = wp_cache_get_last_changed( 'comment' ) . ':' . wp_cache_get_last_changed( 'comment_meta' );
+		$cache_key    = 'discussions_post_count:' . $locale_slug . ':' . $last_changed;
+
+		$count = wp_cache_get( $cache_key, $cache_group );
+		if ( false !== $count ) {
+			return (int) $count;
+		}
+
+		global $wpdb;
+		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s ORDER BY comment_date DESC",
+				"SELECT COUNT(DISTINCT c.comment_post_ID)
+				 FROM {$wpdb->commentmeta} cm
+				 JOIN {$wpdb->comments} c ON c.comment_ID = cm.comment_id
+				 WHERE cm.meta_key = %s AND cm.meta_value = %s",
+				'locale',
 				$locale_slug
 			)
 		);
+
+		wp_cache_set( $cache_key, $count, $cache_group, DAY_IN_SECONDS );
+		return $count;
 	}
 }
