@@ -878,7 +878,7 @@ function gth_print_translation( $comment_translation_id, $args, $prefix = '' ) {
 			<?php
 			echo esc_html( $prefix );
 			if ( $translation_permalink ) {
-				echo wp_kses( gp_link( $translation_permalink, $translation->translation_0 ), array( 'a' => array( 'href' => true ) ) );
+				gp_link( $translation_permalink, $translation->translation_0 );
 			} else {
 				echo esc_html( $translation->translation_0 );
 			}
