@@ -24,6 +24,14 @@ class GP_Translation_Helper {
 	public $data;
 
 	/**
+	 * The number of items returned by the helper. Set by set_count().
+	 *
+	 * @since 0.0.1
+	 * @var int
+	 */
+	public $count;
+
+	/**
 	 * GP_Translation_Helper constructor.
 	 *
 	 * Will throw a LogicException if the title property is not set.

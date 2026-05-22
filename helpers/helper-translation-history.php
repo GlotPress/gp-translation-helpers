@@ -73,7 +73,7 @@ class Helper_History extends GP_Translation_Helper {
 			function ( $t1, $t2 ) {
 				$cmp_prop_t1 = $t1->date_modified ?? $t1->date_added;
 				$cmp_prop_t2 = $t2->date_modified ?? $t2->date_added;
-				return $cmp_prop_t1 < $cmp_prop_t2;
+				return $cmp_prop_t2 <=> $cmp_prop_t1;
 			}
 		);
 
