@@ -70,11 +70,13 @@ class GP_Route_Translation_Helpers extends GP_Route {
 
 		$comments = array();
 		if ( $page_post_ids ) {
-			$comments_query = new WP_Comment_Query( array(
-				'meta_key'   => 'locale',
-				'meta_value' => $locale_slug,
-				'post__in'   => $page_post_ids,
-			) );
+			$comments_query = new WP_Comment_Query(
+				array(
+					'meta_key'   => 'locale',
+					'meta_value' => $locale_slug,
+					'post__in'   => $page_post_ids,
+				)
+			);
 			$comments       = $comments_query->comments;
 		}
 
@@ -431,6 +433,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$exclude_sql = ' AND c.comment_post_ID NOT IN (' . implode( ',', array_map( 'intval', $exclude_post_ids ) ) . ')';
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $exclude_sql is composed from intval'd integers.
 		$sql = $wpdb->prepare(
 			"SELECT c.comment_post_ID
 			 FROM {$wpdb->commentmeta} cm
@@ -445,7 +448,9 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$offset,
 			$per_page
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is built via $wpdb->prepare() above.
 		return array_map( 'intval', $wpdb->get_col( $sql ) );
 	}
 
