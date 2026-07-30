@@ -94,12 +94,14 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 */
 	public function original_permalink( $project_path, $original_id, $locale_slug = null, $translation_set_slug = null, $translation_id = null ) {
 		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
+		if ( ! $original || ! $this->can_view_original( $original ) ) {
 			$this->die_with_404();
+			return;
 		}
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {
 			$this->die_with_404();
+			return;
 		}
 
 		if ( $project->id !== $original->project_id ) {
@@ -255,6 +257,23 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
+	 * Determines whether the current user may view an original.
+	 *
+	 * Originals with a hidden priority are only visible to users who can write
+	 * to the original's project, matching the visibility of the translation listing.
+	 *
+	 * @param GP_Original $original The original to check.
+	 * @return bool Whether the current user may view the original.
+	 */
+	private function can_view_original( GP_Original $original ): bool {
+		if ( (int) $original->priority > -2 ) {
+			return true;
+		}
+
+		return $this->can( 'write', 'project', $original->project_id );
+	}
+
+	/**
 	 * Returns the content of each section (tab).
 	 *
 	 * @since 0.0.1
@@ -271,6 +290,13 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$project = GP::$project->by_path( $project_path );
 		if ( ! $project ) {
 			$this->die_with_404();
+			return;
+		}
+
+		$original = GP::$original->get( $original_id );
+		if ( ! $original || ! $this->can_view_original( $original ) ) {
+			$this->die_with_404();
+			return;
 		}
 
 		$permalink = self::get_permalink( $project->path, $original_id, $set_slug, $locale_slug );
