@@ -402,7 +402,7 @@ class GP_Translation_Helpers {
 			'$gp_comment_feedback_settings',
 			array(
 				'url'                => admin_url( 'admin-ajax.php' ),
-				'nonce'              => wp_create_nonce( 'gp_comment_feedback' ),
+				'nonce'              => is_user_logged_in() ? wp_create_nonce( 'gp_comment_feedback' ) : '',
 				'locale_slug'        => $translation_set['locale_slug'],
 				'language'           => $gp_locale ? $gp_locale->english_name : 'Unknown',
 				'openai_key'         => apply_filters( 'gp_get_openai_key', null ),
