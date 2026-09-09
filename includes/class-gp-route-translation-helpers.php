@@ -65,16 +65,19 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 		$total_pages = (int) ceil( $comments_count / $comments_per_page );
 
-		$post_ids = array();
+		$post_ids = $this->filter_viewable_post_ids( array_splice( $comment_post_ids, $offset, $comments_per_page ) );
+		$comments = array();
 
-		$post_ids       = array_splice( $comment_post_ids, $offset, $comments_per_page );
-		$args           = array(
-			'meta_key'   => 'locale',
-			'meta_value' => $locale_slug,
-			'post__in'   => $post_ids,
-		);
-		$comments_query = new WP_Comment_Query( $args );
-		$comments       = $comments_query->comments;
+		// An empty post__in is ignored by WP_Comment_Query, which would list every discussion.
+		if ( $post_ids ) {
+			$args           = array(
+				'meta_key'   => 'locale',
+				'meta_value' => $locale_slug,
+				'post__in'   => $post_ids,
+			);
+			$comments_query = new WP_Comment_Query( $args );
+			$comments       = $comments_query->comments;
+		}
 
 		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
 	}
@@ -94,7 +97,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 */
 	public function original_permalink( $project_path, $original_id, $locale_slug = null, $translation_set_slug = null, $translation_id = null ) {
 		$original = GP::$original->get( $original_id );
-		if ( ! $original || ! $this->can_view_original( $original ) ) {
+		if ( ! $original || ! self::can_view_original( $original ) ) {
 			$this->die_with_404();
 			return;
 		}
@@ -265,12 +268,12 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 * @param GP_Original $original The original to check.
 	 * @return bool Whether the current user may view the original.
 	 */
-	private function can_view_original( GP_Original $original ): bool {
+	public static function can_view_original( GP_Original $original ): bool {
 		if ( (int) $original->priority > -2 ) {
 			return true;
 		}
 
-		return $this->can( 'write', 'project', $original->project_id );
+		return GP::$permission->current_user_can( 'write', 'project', $original->project_id );
 	}
 
 	/**
@@ -294,7 +297,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 
 		$original = GP::$original->get( $original_id );
-		if ( ! $original || ! $this->can_view_original( $original ) ) {
+		if ( ! $original || ! self::can_view_original( $original ) ) {
 			$this->die_with_404();
 			return;
 		}
@@ -452,5 +455,27 @@ class GP_Route_Translation_Helpers extends GP_Route {
 				$locale_slug
 			)
 		);
+	}
+
+	/**
+	 * Keeps the discussion posts of a dashboard page whose original the current user may view.
+	 *
+	 * Posts whose original no longer exists are dropped as well, as the dashboard
+	 * cannot render a row for them.
+	 *
+	 * @param array $post_ids The comment_post_IDs of one page, in display order.
+	 *
+	 * @return array The comment_post_IDs that can be listed, in the same order.
+	 */
+	private function filter_viewable_post_ids( array $post_ids ): array {
+		$viewable_post_ids = array();
+
+		foreach ( $post_ids as $post_id ) {
+			if ( Helper_Translation_Discussion::can_view_shadow_post( $post_id ) ) {
+				$viewable_post_ids[] = $post_id;
+			}
+		}
+
+		return $viewable_post_ids;
 	}
 }

@@ -343,6 +343,23 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
+	 * Determines whether the current user may view the discussion of a shadow post.
+	 *
+	 * True when the post is linked to an original that still exists and that the
+	 * user may view. Shared by the dashboard, the REST controller and the comment form.
+	 *
+	 * @param int|string $post_id The shadow post ID.
+	 *
+	 * @return bool
+	 */
+	public static function can_view_shadow_post( $post_id ): bool {
+		$original_id = self::get_original_from_post_id( $post_id );
+		$original    = $original_id ? GP::$original->get( $original_id ) : false;
+
+		return $original && GP_Route_Translation_Helpers::can_view_original( $original );
+	}
+
+	/**
 	 * Gets the slug for the post ID.
 	 *
 	 * @since 0.0.1
@@ -769,8 +786,13 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function ajax_create_shadow_post() {
 		check_ajax_referer( 'wp_rest', 'nonce' );
 
-		$original_id = self::get_original_id_from_temporary_post_id( $_POST['data']['post'] );
-		$post_id     = self::get_or_create_shadow_post_id( $original_id );
+		$original_id = self::get_original_id_from_temporary_post_id( $_POST['data']['post'] ?? '' );
+		$original    = $original_id ? GP::$original->get( $original_id ) : false;
+		if ( ! $original || ! GP_Route_Translation_Helpers::can_view_original( $original ) ) {
+			wp_send_json_error( 'Invalid original ID', 404 );
+		}
+
+		$post_id = self::get_or_create_shadow_post_id( $original->id );
 		wp_send_json_success( $post_id );
 	}
 

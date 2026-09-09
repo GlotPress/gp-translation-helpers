@@ -14,6 +14,26 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		);
 	}
 
+	private function create_discussion( $original, $locale_slug, $user_id, $content = 'A discussion comment' ) {
+		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original->id );
+		$user    = get_user_by( 'id', $user_id );
+
+		return wp_insert_comment(
+			array(
+				'comment_post_ID'      => $post_id,
+				'comment_content'      => $content,
+				'comment_author'       => $user->display_name,
+				'comment_author_email' => $user->user_email,
+				'user_id'              => $user_id,
+				'comment_meta'         => array(
+					'reject_reason'  => array(),
+					'translation_id' => 0,
+					'locale'         => $locale_slug,
+				),
+			)
+		);
+	}
+
 	private function request_route( $method, ...$args ) {
 		try {
 			$this->route->$method( ...$args );
@@ -21,6 +41,15 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 			// A halted request (die_with_404()) throws when the loaded GlotPress
 			// makes exit_() halt a faked request.
 		}
+	}
+
+	private function dashboard_output( $locale_slug, $filter = '' ) {
+		$_GET['filter']         = $filter;
+		$_SERVER['REQUEST_URI'] = '/locale/' . $locale_slug . '/default/discussions/';
+
+		$this->request_route( 'discussions_dashboard', $locale_slug );
+
+		return (string) $this->route->template_output;
 	}
 
 	function test_original_permalink_hides_a_hidden_original_from_anonymous_users() {
@@ -78,5 +107,131 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->request_route( 'ajax_translation_helpers_locale', $set->project->path, $set->locale, $set->slug, $hidden->id );
 
 		$this->assert404();
+	}
+
+	function test_discussions_dashboard_is_not_available_to_anonymous_users() {
+		$set = $this->factory->translation_set->create_with_project_and_locale();
+
+		$this->request_route( 'discussions_dashboard', $set->locale );
+
+		$this->assert404();
+	}
+
+	function test_discussions_dashboard_lists_discussions_for_a_logged_in_user() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$this->create_discussion( $first, $set->locale, $author );
+		$this->create_discussion( $second, $set->locale, $author );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertEquals( 'discussions-dashboard', $this->route->loaded_template );
+		$this->assertStringContainsString( 'First string', $output );
+		$this->assertStringContainsString( 'Second string', $output );
+		$this->assertStringContainsString( 'All&nbsp;(2)', $output );
+	}
+
+	function test_discussions_dashboard_hides_a_discussion_on_a_hidden_original_from_a_user_who_cannot_write() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$hidden = $this->create_original( $set, -2, 'Hidden string' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$this->create_discussion( $hidden, $set->locale, $author );
+		$this->create_discussion( $public, $set->locale, $author );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringContainsString( 'Public string', $output );
+		$this->assertStringNotContainsString( 'Hidden string', $output );
+	}
+
+	function test_discussions_dashboard_shows_a_discussion_on_a_hidden_original_to_a_user_who_can_write() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$hidden = $this->create_original( $set, -2, 'Hidden string' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$this->create_discussion( $hidden, $set->locale, $author );
+		$this->create_discussion( $public, $set->locale, $author );
+
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringContainsString( 'Public string', $output );
+		$this->assertStringContainsString( 'Hidden string', $output );
+		$this->assertStringContainsString( 'All&nbsp;(2)', $output );
+	}
+
+	function test_discussions_dashboard_hides_a_hidden_original_from_the_participation_filters() {
+		$admin  = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$hidden = $this->create_original( $set, -2, 'Hidden string' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$this->create_discussion( $public, $set->locale, $admin );
+
+		// The user took part in the hidden discussion but cannot write to the project.
+		$user = $this->set_normal_user_as_current();
+		$this->create_discussion( $hidden, $set->locale, $user );
+
+		$participating = $this->dashboard_output( $set->locale, 'participating' );
+		$this->assertStringNotContainsString( 'Hidden string', $participating );
+		$this->assertStringContainsString( 'There are no discussions in this locale', $participating );
+
+		$not_participating = $this->dashboard_output( $set->locale, 'not_participating' );
+		$this->assertStringContainsString( 'Public string', $not_participating );
+		$this->assertStringNotContainsString( 'Hidden string', $not_participating );
+		$this->assertStringContainsString( 'Not participating&nbsp;(1)', $not_participating );
+	}
+
+	function test_discussions_dashboard_re_adds_the_first_comment_of_a_bulk_thread() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$first_comment_id = $this->create_discussion( $first, $set->locale, $author, 'First feedback' );
+		$this->create_discussion( $second, $set->locale, $author, get_comment_link( $first_comment_id ) );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringContainsString( 'First string', $output );
+		$this->assertStringContainsString( 'Second string', $output );
+		$this->assertSame( 2, substr_count( $output, 'First feedback' ) );
+	}
+
+	function test_discussions_dashboard_does_not_re_add_a_comment_from_a_hidden_discussion() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$hidden = $this->create_original( $set, -2, 'Hidden string' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$first_comment_id = $this->create_discussion( $hidden, $set->locale, $author, 'Hidden feedback' );
+		$this->create_discussion( $public, $set->locale, $author, get_comment_link( $first_comment_id ) );
+
+		$admin_output = $this->dashboard_output( $set->locale );
+		$this->assertStringContainsString( 'Hidden feedback', $admin_output );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringNotContainsString( 'Hidden string', $output );
+		$this->assertStringNotContainsString( 'Hidden feedback', $output );
+	}
+
+	function test_discussions_dashboard_skips_a_discussion_whose_original_no_longer_exists() {
+		$author  = $this->set_admin_user_as_current();
+		$set     = $this->factory->translation_set->create_with_project_and_locale();
+		$deleted = $this->create_original( $set, 0, 'Deleted string' );
+		$public  = $this->create_original( $set, 0, 'Public string' );
+		$this->create_discussion( $deleted, $set->locale, $author );
+		$this->create_discussion( $public, $set->locale, $author );
+		$deleted->delete();
+
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertEquals( 'discussions-dashboard', $this->route->loaded_template );
+		$this->assertStringContainsString( 'Public string', $output );
+		$this->assertStringNotContainsString( 'Deleted string', $output );
 	}
 }

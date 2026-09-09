@@ -61,14 +61,18 @@ foreach ( $comments as $_comment ) {
 foreach ( $bulk_comments as $original_id => $_comments ) {
 	foreach ( $_comments as $_comment ) {
 		if ( ! isset( $comments_by_post_id[ $_comment->comment_post_ID ] ) ) {
-			$linked_comment = $_comment->comment_content;
-			$parts          = wp_parse_url( $linked_comment );
-			$comment_id     = intval( str_replace( 'comment-', '', $parts['fragment'] ) );
-			if ( $comment_id ) {
-				$comments_by_post_id[ $_comment->comment_post_ID ][] = get_comment( $comment_id );
-				if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
-					$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
-				}
+			$linked_comment       = $_comment->comment_content;
+			$parts                = wp_parse_url( $linked_comment );
+			$comment_id           = intval( str_replace( 'comment-', '', $parts['fragment'] ?? '' ) );
+			$linked_first_comment = $comment_id ? get_comment( $comment_id ) : null;
+			// The linked comment can live on a discussion the current user may not view.
+			if ( ! $linked_first_comment || '1' !== $linked_first_comment->comment_approved || ! Helper_Translation_Discussion::can_view_shadow_post( $linked_first_comment->comment_post_ID ) ) {
+				continue;
+			}
+
+			$comments_by_post_id[ $_comment->comment_post_ID ][] = $linked_first_comment;
+			if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
+				$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;
 			}
 		}
 	}
