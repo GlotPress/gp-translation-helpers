@@ -496,6 +496,16 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 						'comment_status' => 'open',
 					)
 				);
+				// wp_insert_post() drops tax_input when the current user may not assign terms,
+				// which left a shadow post nothing could find. The link comes from the id, not
+				// from the request, so set it directly in that case.
+				if ( $post_id && ! self::get_original_from_post_id( $post_id ) ) {
+					$linked = wp_set_object_terms( $post_id, array( strval( $original_id ) ), self::LINK_TAXONOMY );
+					if ( is_wp_error( $linked ) || empty( $linked ) ) {
+						wp_delete_post( $post_id, true );
+						$post_id = 0;
+					}
+				}
 			} else {
 				$post_id = self::POST_TYPE . strval( $original_id );
 			}

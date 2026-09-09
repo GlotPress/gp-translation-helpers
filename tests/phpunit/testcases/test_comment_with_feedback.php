@@ -324,6 +324,17 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$this->assertSame( 0, GP_Notifications::get_post_id( $hidden->id ) );
 	}
 
+	function test_shadow_post_is_linked_to_its_original_regardless_of_the_current_user() {
+		$set      = $this->create_set( 'de' );
+		$original = $this->create_original( $set, 0, 'Public string' );
+
+		wp_set_current_user( 0 );
+		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original->id );
+
+		$this->assertGreaterThan( 0, $post_id );
+		$this->assertEquals( $original->id, Helper_Translation_Discussion::get_original_from_post_id( $post_id ) );
+	}
+
 	function test_create_shadow_post_is_rejected_for_an_unknown_original() {
 		wp_set_current_user( $this->gp->user->create() );
 
