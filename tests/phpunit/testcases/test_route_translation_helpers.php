@@ -219,6 +219,19 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->assertStringNotContainsString( 'Hidden feedback', $output );
 	}
 
+	function test_comment_form_submission_on_a_hidden_discussion_is_refused() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$hidden = $this->create_original( $set, -2, 'Hidden string' );
+		$this->create_discussion( $hidden, $set->locale, $author );
+		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $hidden->id );
+
+		$this->set_normal_user_as_current();
+
+		$this->expectException( 'WPDieException' );
+		wp_handle_comment_submission( array( 'comment_post_ID' => $post_id, 'comment' => 'From the form' ) );
+	}
+
 	function test_discussions_dashboard_skips_a_discussion_whose_original_no_longer_exists() {
 		$author  = $this->set_admin_user_as_current();
 		$set     = $this->factory->translation_set->create_with_project_and_locale();

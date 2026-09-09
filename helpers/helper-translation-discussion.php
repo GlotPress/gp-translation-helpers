@@ -103,6 +103,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 		add_filter( 'comment_reply_link', array( $this, 'comment_reply_link' ), 10, 4 );
 		add_filter( 'wp_ajax_create_shadow_post', array( $this, 'ajax_create_shadow_post' ) );
+		add_action( 'pre_comment_on_post', array( $this, 'refuse_comment_on_hidden_discussion' ) );
+		add_filter( 'rest_comment_query', array( $this, 'keep_discussions_out_of_unscoped_comment_queries' ), 10, 2 );
 	}
 
 	/**
@@ -127,16 +129,17 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		);
 
 		$post_type_args = array(
-			'supports'          => array( 'comments' ),
-			'show_ui'           => false,
-			'show_in_menu'      => false,
-			'show_in_admin_bar' => false,
-			'show_in_nav_menus' => false,
-			'can_export'        => false,
-			'has_archive'       => false,
-			'show_in_rest'      => true,
-			'taxonomies'        => array( self::LINK_TAXONOMY ),
-			'rewrite'           => false,
+			'supports'              => array( 'comments' ),
+			'show_ui'               => false,
+			'show_in_menu'          => false,
+			'show_in_admin_bar'     => false,
+			'show_in_nav_menus'     => false,
+			'can_export'            => false,
+			'has_archive'           => false,
+			'show_in_rest'          => true,
+			'rest_controller_class' => 'GTH_Shadow_Post_REST_Controller',
+			'taxonomies'            => array( self::LINK_TAXONOMY ),
+			'rewrite'               => false,
 		);
 
 		register_post_type( self::POST_TYPE, $post_type_args );
@@ -357,6 +360,47 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		$original    = $original_id ? GP::$original->get( $original_id ) : false;
 
 		return $original && GP_Route_Translation_Helpers::can_view_original( $original );
+	}
+
+	/**
+	 * Stops a comment form submission on a discussion the current user may not view.
+	 *
+	 * This is the wp-comments-post.php path used without JavaScript. The REST path
+	 * goes through GTH_Shadow_Post_REST_Controller::check_read_permission().
+	 *
+	 * @param int $comment_post_id The post the comment is submitted for.
+	 *
+	 * @return void
+	 */
+	public function refuse_comment_on_hidden_discussion( $comment_post_id ) {
+		if ( self::POST_TYPE !== get_post_type( $comment_post_id ) ) {
+			return;
+		}
+
+		if ( ! self::can_view_shadow_post( $comment_post_id ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to comment on this discussion.', 'glotpress' ), 403 );
+		}
+	}
+
+	/**
+	 * Keeps discussion comments out of REST comment queries that do not name a post.
+	 *
+	 * A query for one post is checked against the original's visibility by the REST
+	 * controller. A query across all posts filters what it returns but still counts
+	 * every match, so its total would tell whether a word appears in a discussion the
+	 * user may not view. Nothing in the plugin lists comments this way.
+	 *
+	 * @param array           $args    The WP_Comment_Query arguments.
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return array
+	 */
+	public function keep_discussions_out_of_unscoped_comment_queries( $args, $request ) {
+		if ( empty( $request['post'] ) ) {
+			$args['post_type'] = array_values( array_diff( get_post_types(), array( self::POST_TYPE ) ) );
+		}
+
+		return $args;
 	}
 
 	/**

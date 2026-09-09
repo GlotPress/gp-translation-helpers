@@ -120,6 +120,32 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		return json_decode( $this->_last_response );
 	}
 
+	private function rest( $method, $route, array $params = array() ) {
+		$request = new WP_REST_Request( $method, $route );
+		foreach ( $params as $name => $value ) {
+			$request->set_param( $name, $value );
+		}
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	private function create_discussion( $original, $user_id, $content = 'A discussion comment' ) {
+		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original->id );
+		$user    = get_user_by( 'id', $user_id );
+		wp_insert_comment(
+			array(
+				'comment_post_ID'      => $post_id,
+				'comment_content'      => $content,
+				'comment_author'       => $user->display_name,
+				'comment_author_email' => $user->user_email,
+				'user_id'              => $user_id,
+				'comment_meta'         => array( 'locale' => 'de' ),
+			)
+		);
+
+		return $post_id;
+	}
+
 	private function comments_on( $original ) {
 		$post_id = GP_Notifications::get_post_id( $original->id );
 		if ( ! $post_id ) {
@@ -322,6 +348,92 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 
 		$this->assertFalse( $response->success );
 		$this->assertSame( 0, GP_Notifications::get_post_id( $hidden->id ) );
+	}
+
+	function test_rest_refuses_the_collection_of_shadow_posts() {
+		$set    = $this->create_set( 'de' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$this->create_discussion( $public, $this->gp->user->create_admin() );
+
+		wp_set_current_user( 0 );
+		$response = $this->rest( 'GET', '/wp/v2/gth_original' );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	function test_rest_does_not_list_comments_of_a_hidden_discussion() {
+		$set     = $this->create_set( 'de' );
+		$hidden  = $this->create_original( $set, -2, 'Hidden string' );
+		$public  = $this->create_original( $set, 0, 'Public string' );
+		$admin   = $this->gp->user->create_admin();
+		$hidden_post = $this->create_discussion( $hidden, $admin, 'Hidden feedback' );
+		$public_post = $this->create_discussion( $public, $admin, 'Public feedback' );
+
+		wp_set_current_user( 0 );
+		$by_post = $this->rest( 'GET', '/wp/v2/comments', array( 'post' => $hidden_post ) );
+		$this->assertContains( $by_post->get_status(), array( 401, 403 ) );
+
+		$all      = $this->rest( 'GET', '/wp/v2/comments' );
+		$contents = wp_list_pluck( wp_list_pluck( $all->get_data(), 'content' ), 'rendered' );
+		$this->assertSame( 200, $all->get_status() );
+		$this->assertStringNotContainsString( 'Hidden feedback', implode( ' ', $contents ) );
+
+		$public_by_post = $this->rest( 'GET', '/wp/v2/comments', array( 'post' => $public_post ) );
+		$this->assertSame( 200, $public_by_post->get_status() );
+	}
+
+	function test_rest_refuses_a_comment_on_a_hidden_discussion_for_a_user_who_cannot_write() {
+		$set         = $this->create_set( 'de' );
+		$hidden      = $this->create_original( $set, -2, 'Hidden string' );
+		$hidden_post = $this->create_discussion( $hidden, $this->gp->user->create_admin() );
+
+		wp_set_current_user( $this->gp->user->create() );
+		$response = $this->rest( 'POST', '/wp/v2/comments', array( 'post' => $hidden_post, 'content' => 'REST write' ) );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertCount( 1, $this->comments_on( $hidden ) );
+	}
+
+	function test_rest_accepts_a_comment_on_a_visible_discussion() {
+		$set         = $this->create_set( 'de' );
+		$public      = $this->create_original( $set, 0, 'Public string' );
+		$public_post = $this->create_discussion( $public, $this->gp->user->create_admin() );
+
+		wp_set_current_user( $this->gp->user->create() );
+		$response = $this->rest( 'POST', '/wp/v2/comments', array( 'post' => $public_post, 'content' => 'REST write' ) );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertCount( 2, $this->comments_on( $public ) );
+	}
+
+	function test_rest_serves_a_hidden_discussion_to_a_user_who_can_write() {
+		$set         = $this->create_set( 'de' );
+		$hidden      = $this->create_original( $set, -2, 'Hidden string' );
+		$admin       = $this->gp->user->create_admin();
+		$hidden_post = $this->create_discussion( $hidden, $admin, 'Hidden feedback' );
+
+		wp_set_current_user( $admin );
+		$response = $this->rest( 'GET', '/wp/v2/comments', array( 'post' => $hidden_post ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+	}
+
+	function test_rest_comment_total_does_not_count_a_hidden_discussion() {
+		$set    = $this->create_set( 'de' );
+		$hidden = $this->create_original( $set, -2, 'Hidden string' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$admin  = $this->gp->user->create_admin();
+		$this->create_discussion( $hidden, $admin, 'Hidden feedback' );
+		$this->create_discussion( $public, $admin, 'Public feedback' );
+
+		wp_set_current_user( 0 );
+		$hidden_search = $this->rest( 'GET', '/wp/v2/comments', array( 'search' => 'Hidden feedback' ) );
+		$public_search = $this->rest( 'GET', '/wp/v2/comments', array( 'search' => 'Public feedback' ) );
+
+		$this->assertSame( '0', $hidden_search->get_headers()['X-WP-Total'] );
+		$this->assertSame( '0', $public_search->get_headers()['X-WP-Total'], 'Discussion comments stay out of comment queries that do not name a post.' );
+		$this->assertCount( 0, $public_search->get_data() );
 	}
 
 	function test_shadow_post_is_linked_to_its_original_regardless_of_the_current_user() {
