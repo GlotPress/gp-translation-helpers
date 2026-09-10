@@ -215,7 +215,7 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 	}
 
 	function test_a_request_whose_ids_are_not_arrays_is_rejected() {
-		$set         = $this->create_set( 'de' );
+		$set = $this->create_set( 'de' );
 		wp_set_current_user( $this->create_validator( $set ) );
 		$original    = $this->create_original( $set, 0, 'Public string' );
 		$translation = $this->create_translation( $set, $original );

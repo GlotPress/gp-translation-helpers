@@ -94,7 +94,7 @@ $args = array(
 	<a class="<?php echo ( 'participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo esc_html( count( $participating_post_ids ) ); ?>)</a> <span class="separator">•</span>
 	<a class="<?php echo ( 'not_participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo esc_html( count( $not_participating_post_ids ) ); ?>)</a>
 </div>
-<?php if ( ! $comments ) : ?>
+<?php if ( ! $comments_by_post_id ) : ?>
 	<p><?php echo $all_comments_post_ids ? 'There are no discussions on this page' : 'There are no discussions in this locale'; ?></p>
 <?php else : ?>
 <table id="translations" class="translations clear">
@@ -238,6 +238,7 @@ $args = array(
 	</tbody>
 	
 </table>
+<?php endif; ?>
 	<?php
 	$current_page = max( 1, get_query_var( 'page' ) );
 	echo wp_kses(
@@ -261,7 +262,6 @@ $args = array(
 	);
 
 	?>
-<?php endif; ?>
 
 	</li>
 </ul>

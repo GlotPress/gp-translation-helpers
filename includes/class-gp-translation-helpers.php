@@ -528,10 +528,7 @@ class GP_Translation_Helpers {
 			}
 		}
 
-		if ( $first_comment_id ) {
-			$comment = get_comment( $first_comment_id );
-			GP_Notifications::init( $comment, null, null );
-		}
+		GP_Notifications::init( get_comment( $first_comment_id ), null, null );
 
 		wp_send_json_success( 'success' );
 	}

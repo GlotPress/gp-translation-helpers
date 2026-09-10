@@ -397,7 +397,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public function keep_discussions_out_of_unscoped_comment_queries( $args, $request ) {
 		if ( empty( $request['post'] ) ) {
-			$post_types = empty( $args['post_type'] ) ? array() : (array) $args['post_type'];
+			$post_types = empty( $args['post_type'] ) ? array() : wp_parse_list( $args['post_type'] );
 			if ( ! $post_types || in_array( 'any', $post_types, true ) ) {
 				$post_types = get_post_types();
 			}
