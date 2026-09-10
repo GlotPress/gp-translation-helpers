@@ -472,13 +472,14 @@ class GP_Translation_Helpers {
 	public function comment_with_feedback() {
 		check_ajax_referer( 'gp_comment_feedback', 'nonce' );
 
-		$helper_discussion  = new Helper_Translation_Discussion();
-		$locale_slug        = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
-		$translation_status = ! empty( $_POST['data']['translation_status'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_status' ), $_POST['data']['translation_status'] ) : null;
+		$helper_discussion = new Helper_Translation_Discussion();
+		$locale_slug       = $helper_discussion->sanitize_comment_locale( sanitize_text_field( $_POST['data']['locale_slug'] ) );
 		try {
+			$translation_status   = ! empty( $_POST['data']['translation_status'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_status' ), $_POST['data']['translation_status'] ) : array();
 			$translation_id_array = ! empty( $_POST['data']['translation_id'] ) ? array_map( array( $helper_discussion, 'sanitize_translation_id' ), $_POST['data']['translation_id'] ) : null;
 			$original_id_array    = ! empty( $_POST['data']['original_id'] ) ? array_map( array( $helper_discussion, 'sanitize_original_id' ), $_POST['data']['original_id'] ) : null;
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
+			// The sanitizers throw for unknown ids, array_map() for values that are not arrays.
 			wp_send_json_error( 'Oops! Invalid original or translation ID' );
 		}
 		$comment_reason      = ! empty( $_POST['data']['reason'] ) ? (array) $_POST['data']['reason'] : array( 'other' );
@@ -504,22 +505,26 @@ class GP_Translation_Helpers {
 			wp_send_json_error( 'Oops! No comment and reason found' );
 		}
 
-		$feedback_pairs = $this->pair_originals_with_translations( $original_id_array, $translation_id_array, $locale_slug );
+		$feedback_pairs = $this->pair_originals_with_translations( $original_id_array, $translation_id_array, $locale_slug, $translation_status );
 		if ( is_wp_error( $feedback_pairs ) ) {
 			wp_send_json_error( $feedback_pairs->get_error_message() );
 		}
 
 		// Post comment on discussion page for the first string.
 		$first_pair       = array_shift( $feedback_pairs );
-		$first_comment_id = $this->insert_comment( $comment, $first_pair['original_id'], $comment_reason, $first_pair['translation_id'], $locale_slug, $_SERVER, $translation_status );
+		$first_comment_id = $this->insert_comment( $comment, $first_pair['original_id'], $comment_reason, $first_pair['translation_id'], $locale_slug, $_SERVER, $first_pair['translation_status'] );
+		if ( ! $first_comment_id ) {
+			wp_send_json_error( 'Oops! The discussion could not be created' );
+		}
 
 		if ( $feedback_pairs ) {
 			// For other strings post link to the comment.
 			$comment = get_comment_link( $first_comment_id );
 			foreach ( $feedback_pairs as $pair ) {
-				$comment_id = $this->insert_comment( $comment, $pair['original_id'], $comment_reason, $pair['translation_id'], $locale_slug, $_SERVER, $translation_status );
-				$_comment   = get_comment( $comment_id );
-				GP_Notifications::add_related_comment( $_comment );
+				$comment_id = $this->insert_comment( $comment, $pair['original_id'], $comment_reason, $pair['translation_id'], $locale_slug, $_SERVER, $pair['translation_status'] );
+				if ( $comment_id ) {
+					GP_Notifications::add_related_comment( get_comment( $comment_id ) );
+				}
 			}
 		}
 
@@ -539,13 +544,14 @@ class GP_Translation_Helpers {
 	 * must belong to that original and to the locale the feedback is for, and the
 	 * current user must be able to approve it, which is when the feedback form is shown.
 	 *
-	 * @param array  $original_ids    The original IDs, in request order.
-	 * @param array  $translation_ids The translation IDs, in request order.
-	 * @param string $locale_slug     The locale slug the feedback is for.
+	 * @param array  $original_ids       The original IDs, in request order.
+	 * @param array  $translation_ids    The translation IDs, in request order.
+	 * @param string $locale_slug        The locale slug the feedback is for.
+	 * @param array  $translation_status The translation statuses, keyed by translation ID for a bulk request and a single-element list otherwise.
 	 *
-	 * @return array|WP_Error Arrays with the 'original_id' and 'translation_id' of each pair, or an error.
+	 * @return array|WP_Error Arrays with the 'original_id', 'translation_id' and 'translation_status' of each pair, or an error.
 	 */
-	private function pair_originals_with_translations( array $original_ids, array $translation_ids, string $locale_slug ) {
+	private function pair_originals_with_translations( array $original_ids, array $translation_ids, string $locale_slug, array $translation_status = array() ) {
 		$original_ids    = array_values( $original_ids );
 		$translation_ids = array_values( $translation_ids );
 		if ( count( $original_ids ) !== count( $translation_ids ) ) {
@@ -569,13 +575,16 @@ class GP_Translation_Helpers {
 				return new WP_Error( 'gth_mismatched_locale', 'Oops! The translation does not belong to the locale' );
 			}
 
+			// The translation passed as extra is what maps this check to the set's validator permission.
 			if ( ! GP::$permission->current_user_can( 'approve', 'translation', $translation->id, array( 'translation' => $translation ) ) ) {
 				return new WP_Error( 'gth_cannot_approve', 'Oops! You cannot give feedback on this translation' );
 			}
 
+			$status  = $translation_status[ $translation->id ] ?? $translation_status[ $index ] ?? 'unknown';
 			$pairs[] = array(
-				'original_id'    => (int) $original->id,
-				'translation_id' => (int) $translation->id,
+				'original_id'        => (int) $original->id,
+				'translation_id'     => (int) $translation->id,
+				'translation_status' => array( (int) $translation->id => $status ),
 			);
 		}
 
@@ -629,7 +638,10 @@ class GP_Translation_Helpers {
 	 */
 	private function insert_comment( $comment, $original_id, $reason, $translation_id, $locale_slug, $server, $translation_status ) {
 		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original_id );
-		$user    = wp_get_current_user();
+		if ( ! $post_id ) {
+			return false;
+		}
+		$user = wp_get_current_user();
 		return wp_insert_comment(
 			array(
 				'comment_post_ID'      => $post_id,

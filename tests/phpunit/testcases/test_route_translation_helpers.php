@@ -134,6 +134,33 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->assertStringContainsString( 'All&nbsp;(2)', $output );
 	}
 
+	function test_discussions_dashboard_keeps_its_toolbar_on_a_page_past_the_end() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$this->create_discussion( $first, $set->locale, $author );
+		$this->create_discussion( $second, $set->locale, $author );
+
+		set_query_var( 'page', 99 );
+		$output = $this->dashboard_output( $set->locale );
+		set_query_var( 'page', 0 );
+
+		$this->assertStringNotContainsString( 'First string', $output );
+		$this->assertStringNotContainsString( 'Second string', $output );
+		$this->assertStringContainsString( 'There are no discussions on this page', $output );
+		$this->assertStringContainsString( 'All&nbsp;(2)', $output );
+	}
+
+	function test_discussions_dashboard_says_so_when_a_locale_has_no_discussions() {
+		$set = $this->factory->translation_set->create_with_project_and_locale();
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringContainsString( 'There are no discussions in this locale', $output );
+	}
+
 	function test_discussions_dashboard_hides_a_discussion_on_a_hidden_original_from_a_user_who_cannot_write() {
 		$author = $this->set_admin_user_as_current();
 		$set    = $this->factory->translation_set->create_with_project_and_locale();
@@ -177,7 +204,8 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 
 		$participating = $this->dashboard_output( $set->locale, 'participating' );
 		$this->assertStringNotContainsString( 'Hidden string', $participating );
-		$this->assertStringContainsString( 'There are no discussions in this locale', $participating );
+		$this->assertStringContainsString( 'There are no discussions on this page', $participating );
+		$this->assertStringContainsString( 'Not participating&nbsp;(1)', $participating, 'The filter toolbar is rendered on an empty page.' );
 
 		$not_participating = $this->dashboard_output( $set->locale, 'not_participating' );
 		$this->assertStringContainsString( 'Public string', $not_participating );

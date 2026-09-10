@@ -87,11 +87,11 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		);
 	}
 
-	private function post_feedback( $locale_slug, array $original_ids, array $translation_ids ) {
+	private function post_feedback( $locale_slug, $original_ids, $translation_ids, $translation_status = null ) {
 		$_POST['nonce'] = wp_create_nonce( 'gp_comment_feedback' );
 		$_POST['data']  = array(
 			'locale_slug'        => $locale_slug,
-			'translation_status' => array_fill( 0, count( $translation_ids ), 'waiting' ),
+			'translation_status' => $translation_status ?? array_fill( 0, count( (array) $translation_ids ), 'waiting' ),
 			'translation_id'     => $translation_ids,
 			'original_id'        => $original_ids,
 			'reason'             => array( 'typo' ),
@@ -212,6 +212,40 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$this->assertSame( '1', $comments[0]->comment_approved );
 		$this->assertEquals( $translation->id, get_comment_meta( $comments[0]->comment_ID, 'translation_id', true ) );
 		$this->assertSame( 'de', get_comment_meta( $comments[0]->comment_ID, 'locale', true ) );
+	}
+
+	function test_a_request_whose_ids_are_not_arrays_is_rejected() {
+		$set         = $this->create_set( 'de' );
+		wp_set_current_user( $this->create_validator( $set ) );
+		$original    = $this->create_original( $set, 0, 'Public string' );
+		$translation = $this->create_translation( $set, $original );
+
+		$response = $this->post_feedback( 'de', array( $original->id ), (string) $translation->id );
+
+		$this->assertFalse( $response->success );
+		$this->assertCount( 0, $this->comments_on( $original ) );
+	}
+
+	function test_each_comment_stores_the_status_of_its_own_translation_only() {
+		$set = $this->create_set( 'de' );
+		wp_set_current_user( $this->create_validator( $set ) );
+		$first        = $this->create_original( $set, 0, 'First string' );
+		$second       = $this->create_original( $set, 0, 'Second string' );
+		$first_trans  = $this->create_translation( $set, $first );
+		$second_trans = $this->create_translation( $set, $second );
+
+		$status   = array(
+			'not-a-translation-id' => 'current',
+			$first_trans->id       => 'waiting',
+			$second_trans->id      => 'fuzzy',
+		);
+		$response = $this->post_feedback( 'de', array( $first->id, $second->id ), array( $first_trans->id, $second_trans->id ), $status );
+
+		$this->assertTrue( $response->success );
+		$first_comment  = $this->comments_on( $first )[0];
+		$second_comment = $this->comments_on( $second )[0];
+		$this->assertSame( array( $first_trans->id => 'waiting' ), get_comment_meta( $first_comment->comment_ID, 'translation_status', true ) );
+		$this->assertSame( array( $second_trans->id => 'fuzzy' ), get_comment_meta( $second_comment->comment_ID, 'translation_status', true ) );
 	}
 
 	function test_bulk_feedback_links_the_other_originals_to_the_first_comment() {

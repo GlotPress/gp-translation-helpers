@@ -104,7 +104,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'comment_reply_link', array( $this, 'comment_reply_link' ), 10, 4 );
 		add_filter( 'wp_ajax_create_shadow_post', array( $this, 'ajax_create_shadow_post' ) );
 		add_action( 'pre_comment_on_post', array( $this, 'refuse_comment_on_hidden_discussion' ) );
-		add_filter( 'rest_comment_query', array( $this, 'keep_discussions_out_of_unscoped_comment_queries' ), 10, 2 );
+		add_filter( 'rest_comment_query', array( $this, 'keep_discussions_out_of_unscoped_comment_queries' ), 20, 2 );
 	}
 
 	/**
@@ -397,7 +397,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public function keep_discussions_out_of_unscoped_comment_queries( $args, $request ) {
 		if ( empty( $request['post'] ) ) {
-			$args['post_type'] = array_values( array_diff( get_post_types(), array( self::POST_TYPE ) ) );
+			$post_types = empty( $args['post_type'] ) ? array() : (array) $args['post_type'];
+			if ( ! $post_types || in_array( 'any', $post_types, true ) ) {
+				$post_types = get_post_types();
+			}
+			$args['post_type'] = array_values( array_diff( $post_types, array( self::POST_TYPE ) ) );
 		}
 
 		return $args;
@@ -555,7 +559,10 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 			}
 		}
 
-		wp_cache_set( $cache_key, $post_id );
+		// A failed creation is not the discussion for this original, so it is not remembered.
+		if ( $post_id ) {
+			wp_cache_set( $cache_key, $post_id );
+		}
 		return $post_id;
 	}
 
@@ -847,6 +854,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		}
 
 		$post_id = self::get_or_create_shadow_post_id( $original->id );
+		if ( ! $post_id ) {
+			wp_send_json_error( 'The discussion could not be created', 500 );
+		}
 		wp_send_json_success( $post_id );
 	}
 

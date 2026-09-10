@@ -16,11 +16,6 @@ gp_tmpl_header();
 </style>
 
 <?php
-if ( ! $comments ) {
-	echo 'There are no discussions in this locale';
-	return;
-}
-
 $comments_by_post_id            = array();
 $bulk_comments                  = array();
 $latest_comment_date_by_post_id = array();
@@ -99,6 +94,9 @@ $args = array(
 	<a class="<?php echo ( 'participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo esc_html( count( $participating_post_ids ) ); ?>)</a> <span class="separator">•</span>
 	<a class="<?php echo ( 'not_participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo esc_html( count( $not_participating_post_ids ) ); ?>)</a>
 </div>
+<?php if ( ! $comments ) : ?>
+	<p><?php echo $all_comments_post_ids ? 'There are no discussions on this page' : 'There are no discussions in this locale'; ?></p>
+<?php else : ?>
 <table id="translations" class="translations clear">
 	<thead class="discussions-table-head">
 	<tr>
@@ -240,7 +238,7 @@ $args = array(
 	</tbody>
 	
 </table>
-<?php
+	<?php
 	$current_page = max( 1, get_query_var( 'page' ) );
 	echo wp_kses(
 		paginate_links(
@@ -263,6 +261,7 @@ $args = array(
 	);
 
 	?>
+<?php endif; ?>
 
 	</li>
 </ul>
