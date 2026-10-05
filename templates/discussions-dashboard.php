@@ -88,6 +88,12 @@ $args = array(
 	'reverse_children' => false,
 );
 
+// The route passes the filter counts. Fall back to the post ID arrays an older
+// route passed, so a template deployed ahead of its route doesn't break the toolbar.
+$all_count               = $all_count ?? count( $all_comments_post_ids ?? array() );
+$participating_count     = $participating_count ?? count( $participating_post_ids ?? array() );
+$not_participating_count = $not_participating_count ?? count( $not_participating_post_ids ?? array() );
+
 ?>
 
 <div class="filter-toolbar">
