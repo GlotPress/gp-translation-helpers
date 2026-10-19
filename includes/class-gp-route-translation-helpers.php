@@ -71,6 +71,8 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		// An empty post__in is ignored by WP_Comment_Query, which would list every discussion.
 		if ( $post_ids ) {
 			$args           = array(
+				'status'     => 'approve',
+				'type'       => 'comment',
 				'meta_key'   => 'locale',
 				'meta_value' => $locale_slug,
 				'post__in'   => $post_ids,
@@ -421,15 +423,17 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
-	 * Gets distinct post_ids for all comments made by user
+	 * Gets the approved discussion comments a user made in a locale.
 	 *
-	 * @param      string $locale_slug           The locale slug.
-	 * @param      int    $user_id           The user id.
+	 * @param string $locale_slug The locale slug. E.g. "es".
+	 * @param int    $user_id     The user id.
 	 *
-	 * @return     array    The array of comment_post_IDs.
+	 * @return WP_Comment[] The user's approved comments in the locale.
 	 */
 	private function get_user_comments( $locale_slug, $user_id ) {
 		$args     = array(
+			'status'     => 'approve',
+			'type'       => 'comment',
 			'meta_key'   => 'locale',
 			'meta_value' => $locale_slug,
 			'user_id'    => $user_id,
@@ -441,17 +445,17 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
-	 * Run a query to fetch comment_post_ID of all comments
+	 * Gets the posts that have an approved discussion comment in a locale.
 	 *
-	 * @param string $locale_slug           The locale slug.
+	 * @param string $locale_slug The locale slug. E.g. "es".
 	 *
-	 * @return array Array of unique comment_post_IDs for all comments.
+	 * @return string[] Unique comment_post_IDs, newest comment first.
 	 */
 	private function get_comment_post_ids( $locale_slug ) {
 		global $wpdb;
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s ORDER BY comment_date DESC",
+				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s AND comment_approved = '1' AND comment_type = 'comment' ORDER BY comment_date DESC",
 				$locale_slug
 			)
 		);

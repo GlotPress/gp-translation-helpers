@@ -65,6 +65,14 @@ foreach ( $bulk_comments as $original_id => $_comments ) {
 				continue;
 			}
 
+			// Only re-add a comment from this locale that sits on the original the link names.
+			if ( get_comment_meta( $linked_first_comment->comment_ID, 'locale', true ) !== $locale_slug ) {
+				continue;
+			}
+			if ( (int) Helper_Translation_Discussion::get_original_from_post_id( $linked_first_comment->comment_post_ID ) !== (int) $original_id ) {
+				continue;
+			}
+
 			$comments_by_post_id[ $_comment->comment_post_ID ][] = $linked_first_comment;
 			if ( ! isset( $latest_comment_date_by_post_id[ $_comment->comment_post_ID ] ) ) {
 				$latest_comment_date_by_post_id[ $_comment->comment_post_ID ] = $_comment->comment_date;

@@ -14,22 +14,36 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		);
 	}
 
-	private function create_discussion( $original, $locale_slug, $user_id, $content = 'A discussion comment' ) {
+	/**
+	 * Creates a discussion comment on an original's shadow post.
+	 *
+	 * @param GP_Original $original    The original to discuss.
+	 * @param string      $locale_slug The locale the comment is filed under.
+	 * @param int         $user_id     The comment author.
+	 * @param string      $content     The comment content.
+	 * @param array       $args        Overrides for wp_insert_comment(), e.g. comment_approved.
+	 *
+	 * @return int|false The comment id.
+	 */
+	private function create_discussion( $original, $locale_slug, $user_id, $content = 'A discussion comment', $args = array() ) {
 		$post_id = Helper_Translation_Discussion::get_or_create_shadow_post_id( $original->id );
 		$user    = get_user_by( 'id', $user_id );
 
 		return wp_insert_comment(
-			array(
-				'comment_post_ID'      => $post_id,
-				'comment_content'      => $content,
-				'comment_author'       => $user->display_name,
-				'comment_author_email' => $user->user_email,
-				'user_id'              => $user_id,
-				'comment_meta'         => array(
-					'reject_reason'  => array(),
-					'translation_id' => 0,
-					'locale'         => $locale_slug,
+			array_merge(
+				array(
+					'comment_post_ID'      => $post_id,
+					'comment_content'      => $content,
+					'comment_author'       => $user->display_name,
+					'comment_author_email' => $user->user_email,
+					'user_id'              => $user_id,
+					'comment_meta'         => array(
+						'reject_reason'  => array(),
+						'translation_id' => 0,
+						'locale'         => $locale_slug,
+					),
 				),
+				$args
 			)
 		);
 	}
@@ -245,6 +259,80 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 
 		$this->assertStringNotContainsString( 'Hidden string', $output );
 		$this->assertStringNotContainsString( 'Hidden feedback', $output );
+	}
+
+	/**
+	 * Only approved comments are listed and counted.
+	 */
+	function test_discussions_dashboard_lists_only_approved_comments() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$this->create_discussion( $first, $set->locale, $author, 'Approved feedback' );
+		$this->create_discussion( $second, $set->locale, $author, 'Pending feedback', array( 'comment_approved' => 0 ) );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringContainsString( 'Approved feedback', $output );
+		$this->assertStringNotContainsString( 'Pending feedback', $output );
+		$this->assertStringNotContainsString( 'Second string', $output );
+		$this->assertStringContainsString( 'All&nbsp;(1)', $output );
+	}
+
+	/**
+	 * Only an approved comment is re-added for a bulk thread.
+	 */
+	function test_discussions_dashboard_re_adds_only_an_approved_comment() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$first_comment_id = $this->create_discussion( $first, $set->locale, $author, 'Pending feedback', array( 'comment_approved' => 0 ) );
+		$this->create_discussion( $second, $set->locale, $author, get_comment_link( $first_comment_id ) );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringNotContainsString( 'Pending feedback', $output );
+	}
+
+	/**
+	 * Only a comment from the dashboard's locale is re-added for a bulk thread.
+	 */
+	function test_discussions_dashboard_re_adds_only_a_comment_from_its_locale() {
+		$author    = $this->set_admin_user_as_current();
+		$set       = $this->factory->translation_set->create_with_project_and_locale();
+		$other_set = $this->factory->translation_set->create_with_project_and_locale();
+		$first     = $this->create_original( $set, 0, 'First string' );
+		$second    = $this->create_original( $set, 0, 'Second string' );
+		$first_comment_id = $this->create_discussion( $first, $other_set->locale, $author, 'Other locale feedback' );
+		$this->create_discussion( $second, $set->locale, $author, get_comment_link( $first_comment_id ) );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringNotContainsString( 'Other locale feedback', $output );
+	}
+
+	/**
+	 * A bulk-thread link is only followed to a comment on the original it names.
+	 */
+	function test_discussions_dashboard_re_adds_only_a_comment_on_the_original_the_link_names() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$third  = $this->create_original( $set, 0, 'Third string' );
+		$first_comment_id = $this->create_discussion( $first, $set->locale, $author, 'First feedback' );
+		$link             = GP_Route_Translation_Helpers::get_permalink( $set->project->path, $third->id ) . '#comment-' . $first_comment_id;
+		$this->create_discussion( $second, $set->locale, $author, $link );
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale );
+
+		$this->assertStringNotContainsString( 'Second string', $output );
 	}
 
 	function test_comment_form_submission_on_a_hidden_discussion_is_refused() {
