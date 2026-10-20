@@ -470,6 +470,33 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$this->assertCount( 0, $public_search->get_data() );
 	}
 
+	function test_rest_excludes_discussions_when_the_same_query_was_cached_without_the_exclusion() {
+		$set    = $this->create_set( 'de' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$this->create_discussion( $public, $this->gp->user->create_admin(), 'Public feedback' );
+
+		wp_set_current_user( 0 );
+		$query_args = null;
+		$spy        = function ( $args ) use ( &$query_args ) {
+			$query_args = $args;
+			return $args;
+		};
+		add_filter( 'rest_comment_query', $spy, 30 );
+		$this->rest( 'GET', '/wp/v2/comments', array( 'search' => 'Public feedback' ) );
+		remove_filter( 'rest_comment_query', $spy, 30 );
+		wp_cache_flush();
+
+		// The same query without the exclusion fills the cache with the discussion comment.
+		$query_args                 = wp_array_slice_assoc( $query_args, array_keys( ( new WP_Comment_Query() )->query_var_defaults ) );
+		$query_args['cache_domain'] = 'core';
+		$this->assertCount( 1, ( new WP_Comment_Query( $query_args ) )->comments );
+
+		$response = $this->rest( 'GET', '/wp/v2/comments', array( 'search' => 'Public feedback' ) );
+
+		$this->assertSame( '0', $response->get_headers()['X-WP-Total'] );
+		$this->assertCount( 0, $response->get_data() );
+	}
+
 	function test_rest_keeps_listing_comments_without_a_post_while_excluding_discussions() {
 		$set    = $this->create_set( 'de' );
 		$public = $this->create_original( $set, 0, 'Public string' );

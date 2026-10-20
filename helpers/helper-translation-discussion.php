@@ -56,6 +56,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	const POST_TYPE = 'gth_original';
 
 	/**
+	 * The cache domain of a comment query that excludes the comments on shadow posts.
+	 */
+	const EXCLUDE_DISCUSSIONS_CACHE_DOMAIN = 'gth_exclude_discussions';
+
+	/**
 	 * The comment post status. Creates it as published.
 	 *
 	 * @since 0.0.1
@@ -398,7 +403,8 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public function keep_discussions_out_of_unscoped_comment_queries( $args, $request ) {
 		if ( empty( $request['post'] ) ) {
-			$args['gth_exclude_discussions'] = true;
+			// The cache domain is part of the query's cache key, a custom argument would not be.
+			$args['cache_domain'] = self::EXCLUDE_DISCUSSIONS_CACHE_DOMAIN;
 		}
 
 		return $args;
@@ -420,7 +426,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function exclude_discussions_from_comment_clauses( $clauses, $query ) {
 		global $wpdb;
 
-		if ( empty( $query->query_vars['gth_exclude_discussions'] ) ) {
+		if ( self::EXCLUDE_DISCUSSIONS_CACHE_DOMAIN !== $query->query_vars['cache_domain'] ) {
 			return $clauses;
 		}
 
