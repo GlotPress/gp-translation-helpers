@@ -470,6 +470,28 @@ class Ajax_Request_Test extends WP_Ajax_UnitTestCase {
 		$this->assertCount( 0, $public_search->get_data() );
 	}
 
+	function test_rest_keeps_listing_comments_without_a_post_while_excluding_discussions() {
+		$set    = $this->create_set( 'de' );
+		$public = $this->create_original( $set, 0, 'Public string' );
+		$admin  = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->create_discussion( $public, $admin, 'Public feedback' );
+		$orphan_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => 0,
+				'comment_content'  => 'Orphan comment',
+				'comment_approved' => 1,
+			)
+		);
+
+		wp_set_current_user( $admin );
+		$response = $this->rest( 'GET', '/wp/v2/comments' );
+		$contents = wp_list_pluck( wp_list_pluck( $response->get_data(), 'content' ), 'rendered' );
+
+		$this->assertContains( $orphan_id, wp_list_pluck( $response->get_data(), 'id' ) );
+		$this->assertStringNotContainsString( 'Public feedback', implode( ' ', $contents ) );
+		$this->assertSame( '1', $response->get_headers()['X-WP-Total'], 'Only the discussion comment is excluded.' );
+	}
+
 	function test_shadow_post_is_linked_to_its_original_regardless_of_the_current_user() {
 		$set      = $this->create_set( 'de' );
 		$original = $this->create_original( $set, 0, 'Public string' );

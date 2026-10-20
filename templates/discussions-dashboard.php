@@ -30,6 +30,10 @@ foreach ( $comments as $_comment ) {
 		$path_parts     = explode( '/', $parts['path'] );
 
 		$linking_comment_original_id = array_pop( $path_parts );
+		// With paged comments the link ends in the comment page rather than in the original id.
+		if ( preg_match( '/^' . preg_quote( $GLOBALS['wp_rewrite']->comments_pagination_base, '/' ) . '-\d+$/', $linking_comment_original_id ) ) {
+			$linking_comment_original_id = array_pop( $path_parts );
+		}
 
 		if ( ! isset( $bulk_comments[ $linking_comment_original_id ] ) ) {
 			$bulk_comments[ $linking_comment_original_id ] = array();

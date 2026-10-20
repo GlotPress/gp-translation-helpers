@@ -243,6 +243,33 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->assertSame( 2, substr_count( $output, 'First feedback' ) );
 	}
 
+	/**
+	 * With paged comments the link ends in the comment page rather than in the original id.
+	 */
+	function test_discussions_dashboard_re_adds_the_first_comment_of_a_bulk_thread_with_paged_comments() {
+		$page_comments         = get_option( 'page_comments' );
+		$default_comments_page = get_option( 'default_comments_page' );
+		update_option( 'page_comments', 1 );
+		update_option( 'default_comments_page', 'newest' );
+
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$first  = $this->create_original( $set, 0, 'First string' );
+		$second = $this->create_original( $set, 0, 'Second string' );
+		$first_comment_id = $this->create_discussion( $first, $set->locale, $author, 'First feedback' );
+		$link             = get_comment_link( $first_comment_id );
+		$this->create_discussion( $second, $set->locale, $author, $link );
+
+		$output = $this->dashboard_output( $set->locale );
+
+		update_option( 'page_comments', $page_comments );
+		update_option( 'default_comments_page', $default_comments_page );
+
+		$this->assertStringContainsString( '/comment-page-1#', $link );
+		$this->assertStringContainsString( 'Second string', $output );
+		$this->assertSame( 2, substr_count( $output, 'First feedback' ) );
+	}
+
 	function test_discussions_dashboard_does_not_re_add_a_comment_from_a_hidden_discussion() {
 		$author = $this->set_admin_user_as_current();
 		$set    = $this->factory->translation_set->create_with_project_and_locale();

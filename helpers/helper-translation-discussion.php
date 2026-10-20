@@ -105,6 +105,7 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'wp_ajax_create_shadow_post', array( $this, 'ajax_create_shadow_post' ) );
 		add_action( 'pre_comment_on_post', array( $this, 'refuse_comment_on_hidden_discussion' ) );
 		add_filter( 'rest_comment_query', array( $this, 'keep_discussions_out_of_unscoped_comment_queries' ), 20, 2 );
+		add_filter( 'comments_clauses', array( $this, 'exclude_discussions_from_comment_clauses' ), 10, 2 );
 	}
 
 	/**
@@ -397,14 +398,36 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	 */
 	public function keep_discussions_out_of_unscoped_comment_queries( $args, $request ) {
 		if ( empty( $request['post'] ) ) {
-			$post_types = empty( $args['post_type'] ) ? array() : wp_parse_list( $args['post_type'] );
-			if ( ! $post_types || in_array( 'any', $post_types, true ) ) {
-				$post_types = get_post_types();
-			}
-			$args['post_type'] = array_values( array_diff( $post_types, array( self::POST_TYPE ) ) );
+			$args['gth_exclude_discussions'] = true;
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Excludes the comments on shadow posts from a query flagged by
+	 * keep_discussions_out_of_unscoped_comment_queries().
+	 *
+	 * A subquery keeps the posts table out of the join. Restricting post_type
+	 * instead would also drop comments on unregistered post types and comments
+	 * without a post for every REST consumer.
+	 *
+	 * @param array            $clauses The SQL clauses of the comment query.
+	 * @param WP_Comment_Query $query   The comment query.
+	 *
+	 * @return array
+	 */
+	public function exclude_discussions_from_comment_clauses( $clauses, $query ) {
+		global $wpdb;
+
+		if ( empty( $query->query_vars['gth_exclude_discussions'] ) ) {
+			return $clauses;
+		}
+
+		$exclusion        = $wpdb->prepare( "{$wpdb->comments}.comment_post_ID NOT IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = %s )", self::POST_TYPE );
+		$clauses['where'] = $clauses['where'] ? $clauses['where'] . ' AND ' . $exclusion : $exclusion;
+
+		return $clauses;
 	}
 
 	/**
