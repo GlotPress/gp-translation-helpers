@@ -68,6 +68,9 @@ class GP_UnitTestCase extends WP_UnitTestCase {
 		 */
 		GP::$translation_set = new GP_Translation_Set();
 		GP::$original        = new GP_Original();
+
+		// wp_list_comments() returns early without resetting it, which skews get_comment_link() in later tests.
+		$GLOBALS['in_comment_loop'] = false;
 	}
 
 	function set_normal_user_as_current() {

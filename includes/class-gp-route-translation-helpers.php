@@ -37,6 +37,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	public function discussions_dashboard( $locale_slug ) {
 		if ( ! is_user_logged_in() ) {
 			$this->die_with_404();
+			return;
 		}
 		$user_id = wp_get_current_user()->ID;
 
