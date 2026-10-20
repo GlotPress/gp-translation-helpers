@@ -37,6 +37,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	public function discussions_dashboard( $locale_slug ) {
 		if ( ! is_user_logged_in() ) {
 			$this->die_with_404();
+			return;
 		}
 		$user_id = wp_get_current_user()->ID;
 
@@ -65,16 +66,21 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 		$total_pages = (int) ceil( $comments_count / $comments_per_page );
 
-		$post_ids = array();
+		$post_ids = $this->filter_viewable_post_ids( array_splice( $comment_post_ids, $offset, $comments_per_page ) );
+		$comments = array();
 
-		$post_ids       = array_splice( $comment_post_ids, $offset, $comments_per_page );
-		$args           = array(
-			'meta_key'   => 'locale',
-			'meta_value' => $locale_slug,
-			'post__in'   => $post_ids,
-		);
-		$comments_query = new WP_Comment_Query( $args );
-		$comments       = $comments_query->comments;
+		// An empty post__in is ignored by WP_Comment_Query, which would list every discussion.
+		if ( $post_ids ) {
+			$args           = array(
+				'status'     => 'approve',
+				'type'       => 'comment',
+				'meta_key'   => 'locale',
+				'meta_value' => $locale_slug,
+				'post__in'   => $post_ids,
+			);
+			$comments_query = new WP_Comment_Query( $args );
+			$comments       = $comments_query->comments;
+		}
 
 		$this->tmpl( 'discussions-dashboard', get_defined_vars() );
 	}
@@ -94,7 +100,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 */
 	public function original_permalink( $project_path, $original_id, $locale_slug = null, $translation_set_slug = null, $translation_id = null ) {
 		$original = GP::$original->get( $original_id );
-		if ( ! $original || ! $this->can_view_original( $original ) ) {
+		if ( ! $original || ! self::can_view_original( $original ) ) {
 			$this->die_with_404();
 			return;
 		}
@@ -265,12 +271,12 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	 * @param GP_Original $original The original to check.
 	 * @return bool Whether the current user may view the original.
 	 */
-	private function can_view_original( GP_Original $original ): bool {
+	public static function can_view_original( GP_Original $original ): bool {
 		if ( (int) $original->priority > -2 ) {
 			return true;
 		}
 
-		return $this->can( 'write', 'project', $original->project_id );
+		return GP::$permission->current_user_can( 'write', 'project', $original->project_id );
 	}
 
 	/**
@@ -294,7 +300,7 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		}
 
 		$original = GP::$original->get( $original_id );
-		if ( ! $original || ! $this->can_view_original( $original ) ) {
+		if ( ! $original || ! self::can_view_original( $original ) ) {
 			$this->die_with_404();
 			return;
 		}
@@ -418,15 +424,17 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
-	 * Gets distinct post_ids for all comments made by user
+	 * Gets the approved discussion comments a user made in a locale.
 	 *
-	 * @param      string $locale_slug           The locale slug.
-	 * @param      int    $user_id           The user id.
+	 * @param string $locale_slug The locale slug. E.g. "es".
+	 * @param int    $user_id     The user id.
 	 *
-	 * @return     array    The array of comment_post_IDs.
+	 * @return WP_Comment[] The user's approved comments in the locale.
 	 */
 	private function get_user_comments( $locale_slug, $user_id ) {
 		$args     = array(
+			'status'     => 'approve',
+			'type'       => 'comment',
 			'meta_key'   => 'locale',
 			'meta_value' => $locale_slug,
 			'user_id'    => $user_id,
@@ -438,19 +446,41 @@ class GP_Route_Translation_Helpers extends GP_Route {
 	}
 
 	/**
-	 * Run a query to fetch comment_post_ID of all comments
+	 * Gets the posts that have an approved discussion comment in a locale.
 	 *
-	 * @param string $locale_slug           The locale slug.
+	 * @param string $locale_slug The locale slug. E.g. "es".
 	 *
-	 * @return array Array of unique comment_post_IDs for all comments.
+	 * @return string[] Unique comment_post_IDs, newest comment first.
 	 */
 	private function get_comment_post_ids( $locale_slug ) {
 		global $wpdb;
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s ORDER BY comment_date DESC",
+				"SELECT DISTINCT {$wpdb->comments}.comment_post_ID FROM {$wpdb->comments} INNER JOIN {$wpdb->commentmeta} ON {$wpdb->comments}.comment_ID = {$wpdb->commentmeta}.comment_id WHERE meta_key='locale' AND meta_value = %s AND comment_approved = '1' AND comment_type = 'comment' ORDER BY comment_date DESC",
 				$locale_slug
 			)
 		);
+	}
+
+	/**
+	 * Keeps the discussion posts of a dashboard page whose original the current user may view.
+	 *
+	 * Posts whose original no longer exists are dropped as well, as the dashboard
+	 * cannot render a row for them.
+	 *
+	 * @param array $post_ids The comment_post_IDs of one page, in display order.
+	 *
+	 * @return array The comment_post_IDs that can be listed, in the same order.
+	 */
+	private function filter_viewable_post_ids( array $post_ids ): array {
+		$viewable_post_ids = array();
+
+		foreach ( $post_ids as $post_id ) {
+			if ( Helper_Translation_Discussion::can_view_shadow_post( $post_id ) ) {
+				$viewable_post_ids[] = $post_id;
+			}
+		}
+
+		return $viewable_post_ids;
 	}
 }

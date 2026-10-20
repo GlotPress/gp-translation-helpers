@@ -56,6 +56,11 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	const POST_TYPE = 'gth_original';
 
 	/**
+	 * The cache domain of a comment query that excludes the comments on shadow posts.
+	 */
+	const EXCLUDE_DISCUSSIONS_CACHE_DOMAIN = 'gth_exclude_discussions';
+
+	/**
 	 * The comment post status. Creates it as published.
 	 *
 	 * @since 0.0.1
@@ -103,6 +108,9 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		add_filter( 'post_type_link', array( $this, 'rewrite_original_post_type_permalink' ), 10, 2 );
 		add_filter( 'comment_reply_link', array( $this, 'comment_reply_link' ), 10, 4 );
 		add_filter( 'wp_ajax_create_shadow_post', array( $this, 'ajax_create_shadow_post' ) );
+		add_action( 'pre_comment_on_post', array( $this, 'refuse_comment_on_hidden_discussion' ) );
+		add_filter( 'rest_comment_query', array( $this, 'keep_discussions_out_of_unscoped_comment_queries' ), 20, 2 );
+		add_filter( 'comments_clauses', array( $this, 'exclude_discussions_from_comment_clauses' ), 10, 2 );
 	}
 
 	/**
@@ -127,16 +135,17 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 		);
 
 		$post_type_args = array(
-			'supports'          => array( 'comments' ),
-			'show_ui'           => false,
-			'show_in_menu'      => false,
-			'show_in_admin_bar' => false,
-			'show_in_nav_menus' => false,
-			'can_export'        => false,
-			'has_archive'       => false,
-			'show_in_rest'      => true,
-			'taxonomies'        => array( self::LINK_TAXONOMY ),
-			'rewrite'           => false,
+			'supports'              => array( 'comments' ),
+			'show_ui'               => false,
+			'show_in_menu'          => false,
+			'show_in_admin_bar'     => false,
+			'show_in_nav_menus'     => false,
+			'can_export'            => false,
+			'has_archive'           => false,
+			'show_in_rest'          => true,
+			'rest_controller_class' => 'GTH_Shadow_Post_REST_Controller',
+			'taxonomies'            => array( self::LINK_TAXONOMY ),
+			'rewrite'               => false,
 		);
 
 		register_post_type( self::POST_TYPE, $post_type_args );
@@ -343,6 +352,91 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	}
 
 	/**
+	 * Determines whether the current user may view the discussion of a shadow post.
+	 *
+	 * True when the post is linked to an original that still exists and that the
+	 * user may view. Shared by the dashboard, the REST controller and the comment form.
+	 *
+	 * @param int|string $post_id The shadow post ID.
+	 *
+	 * @return bool
+	 */
+	public static function can_view_shadow_post( $post_id ): bool {
+		$original_id = self::get_original_from_post_id( $post_id );
+		$original    = $original_id ? GP::$original->get( $original_id ) : false;
+
+		return $original && GP_Route_Translation_Helpers::can_view_original( $original );
+	}
+
+	/**
+	 * Stops a comment form submission on a discussion the current user may not view.
+	 *
+	 * This is the wp-comments-post.php path used without JavaScript. The REST path
+	 * goes through GTH_Shadow_Post_REST_Controller::check_read_permission().
+	 *
+	 * @param int $comment_post_id The post the comment is submitted for.
+	 *
+	 * @return void
+	 */
+	public function refuse_comment_on_hidden_discussion( $comment_post_id ) {
+		if ( self::POST_TYPE !== get_post_type( $comment_post_id ) ) {
+			return;
+		}
+
+		if ( ! self::can_view_shadow_post( $comment_post_id ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to comment on this discussion.', 'glotpress' ), 403 );
+		}
+	}
+
+	/**
+	 * Keeps discussion comments out of REST comment queries that do not name a post.
+	 *
+	 * A query for one post is checked against the original's visibility by the REST
+	 * controller. A query across all posts filters what it returns but still counts
+	 * every match, so its total would tell whether a word appears in a discussion the
+	 * user may not view. Nothing in the plugin lists comments this way.
+	 *
+	 * @param array           $args    The WP_Comment_Query arguments.
+	 * @param WP_REST_Request $request The request.
+	 *
+	 * @return array
+	 */
+	public function keep_discussions_out_of_unscoped_comment_queries( $args, $request ) {
+		if ( empty( $request['post'] ) ) {
+			// The cache domain is part of the query's cache key, a custom argument would not be.
+			$args['cache_domain'] = self::EXCLUDE_DISCUSSIONS_CACHE_DOMAIN;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Excludes the comments on shadow posts from a query flagged by
+	 * keep_discussions_out_of_unscoped_comment_queries().
+	 *
+	 * A subquery keeps the posts table out of the join. Restricting post_type
+	 * instead would also drop comments on unregistered post types and comments
+	 * without a post for every REST consumer.
+	 *
+	 * @param array            $clauses The SQL clauses of the comment query.
+	 * @param WP_Comment_Query $query   The comment query.
+	 *
+	 * @return array
+	 */
+	public function exclude_discussions_from_comment_clauses( $clauses, $query ) {
+		global $wpdb;
+
+		if ( self::EXCLUDE_DISCUSSIONS_CACHE_DOMAIN !== $query->query_vars['cache_domain'] ) {
+			return $clauses;
+		}
+
+		$exclusion        = $wpdb->prepare( "{$wpdb->comments}.comment_post_ID NOT IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = %s )", self::POST_TYPE );
+		$clauses['where'] = $clauses['where'] ? $clauses['where'] . ' AND ' . $exclusion : $exclusion;
+
+		return $clauses;
+	}
+
+	/**
 	 * Gets the slug for the post ID.
 	 *
 	 * @since 0.0.1
@@ -479,12 +573,25 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 						'comment_status' => 'open',
 					)
 				);
+				// wp_insert_post() drops tax_input when the current user may not assign terms,
+				// which left a shadow post nothing could find. The link comes from the id, not
+				// from the request, so set it directly in that case.
+				if ( $post_id && ! self::get_original_from_post_id( $post_id ) ) {
+					$linked = wp_set_object_terms( $post_id, array( strval( $original_id ) ), self::LINK_TAXONOMY );
+					if ( is_wp_error( $linked ) || empty( $linked ) ) {
+						wp_delete_post( $post_id, true );
+						$post_id = 0;
+					}
+				}
 			} else {
 				$post_id = self::POST_TYPE . strval( $original_id );
 			}
 		}
 
-		wp_cache_set( $cache_key, $post_id );
+		// A failed creation is not the discussion for this original, so it is not remembered.
+		if ( $post_id ) {
+			wp_cache_set( $cache_key, $post_id );
+		}
 		return $post_id;
 	}
 
@@ -769,8 +876,16 @@ class Helper_Translation_Discussion extends GP_Translation_Helper {
 	public function ajax_create_shadow_post() {
 		check_ajax_referer( 'wp_rest', 'nonce' );
 
-		$original_id = self::get_original_id_from_temporary_post_id( $_POST['data']['post'] );
-		$post_id     = self::get_or_create_shadow_post_id( $original_id );
+		$original_id = self::get_original_id_from_temporary_post_id( $_POST['data']['post'] ?? '' );
+		$original    = $original_id ? GP::$original->get( $original_id ) : false;
+		if ( ! $original || ! GP_Route_Translation_Helpers::can_view_original( $original ) ) {
+			wp_send_json_error( 'Invalid original ID', 404 );
+		}
+
+		$post_id = self::get_or_create_shadow_post_id( $original->id );
+		if ( ! $post_id ) {
+			wp_send_json_error( 'The discussion could not be created', 500 );
+		}
 		wp_send_json_success( $post_id );
 	}
 
