@@ -980,11 +980,12 @@ function gth_print_translation( $comment_translation_id, $args, $prefix = '' ) {
 	if ( ! isset( $cache[ $comment_translation_id ] ) ) {
 		$cache[ $comment_translation_id ] = GP::$translation->get( $comment_translation_id );
 	}
-	$translation           = $cache[ $comment_translation_id ];
-	// The translation referenced by the comment may have been deleted since.
+
+	$translation = $cache[ $comment_translation_id ];
 	if ( ! $translation ) {
 		return;
 	}
+
 	$translation_permalink = GP_Route_Translation_Helpers::get_translation_permalink(
 		$args['project'],
 		$args['locale_slug'],
