@@ -51,10 +51,10 @@ class GP_Route_Translation_Helpers extends GP_Route {
 		$not_participating_post_ids = array_diff( $all_comments_post_ids, $participating_post_ids );
 
 		$comments_per_page   = 12;
-		$page_num_from_query = (int) get_query_var( 'page' );
+		$page_num_from_query = (int) gp_get( 'page' );
 		$offset              = $page_num_from_query > 0 ? ( $page_num_from_query - 1 ) * $comments_per_page : 0;
 		$filter              = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
-		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
+		$page_number         = max( 1, $page_num_from_query );
 		$gp_locale           = GP_Locales::by_slug( $locale_slug );
 		if ( 'participating' == $filter ) {
 			$comment_post_ids = $participating_post_ids;

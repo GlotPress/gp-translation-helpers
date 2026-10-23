@@ -252,13 +252,12 @@ $args = array(
 </table>
 <?php endif; ?>
 	<?php
-	$current_page = max( 1, get_query_var( 'page' ) );
 	echo wp_kses(
 		paginate_links(
 			array(
 				'base'      => add_query_arg( 'page', '%#%' ),
 				'format'    => '?page=%#%',
-				'current'   => $current_page,
+				'current'   => $page_number,
 				'total'     => $total_pages,
 				'prev_text' => __( '« prev' ),
 				'next_text' => __( 'next »' ),

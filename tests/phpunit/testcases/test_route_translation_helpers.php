@@ -57,8 +57,9 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		}
 	}
 
-	private function dashboard_output( $locale_slug, $filter = '' ) {
+	private function dashboard_output( $locale_slug, $filter = '', $page = '' ) {
 		$_GET['filter']         = $filter;
+		$_GET['page']           = $page;
 		$_SERVER['REQUEST_URI'] = '/locale/' . $locale_slug . '/default/discussions/';
 
 		$this->request_route( 'discussions_dashboard', $locale_slug );
@@ -156,14 +157,28 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->create_discussion( $first, $set->locale, $author );
 		$this->create_discussion( $second, $set->locale, $author );
 
-		set_query_var( 'page', 99 );
-		$output = $this->dashboard_output( $set->locale );
-		set_query_var( 'page', 0 );
+		$output = $this->dashboard_output( $set->locale, '', 99 );
 
 		$this->assertStringNotContainsString( 'First string', $output );
 		$this->assertStringNotContainsString( 'Second string', $output );
 		$this->assertStringContainsString( 'There are no discussions on this page', $output );
 		$this->assertStringContainsString( 'All&nbsp;(2)', $output );
+	}
+
+	function test_discussions_dashboard_pages_through_discussions() {
+		$author = $this->set_admin_user_as_current();
+		$set    = $this->factory->translation_set->create_with_project_and_locale();
+		$this->create_discussion( $this->create_original( $set, 0, 'Oldest string' ), $set->locale, $author, 'A discussion comment', array( 'comment_date' => '2026-01-01 00:00:00' ) );
+		for ( $i = 1; $i <= 12; $i++ ) {
+			$this->create_discussion( $this->create_original( $set, 0, 'Newer string ' . $i ), $set->locale, $author, 'A discussion comment', array( 'comment_date' => sprintf( '2026-01-02 00:00:%02d', $i ) ) );
+		}
+
+		$this->set_normal_user_as_current();
+		$output = $this->dashboard_output( $set->locale, '', 2 );
+
+		$this->assertStringContainsString( 'Oldest string', $output );
+		$this->assertStringNotContainsString( 'Newer string', $output );
+		$this->assertStringContainsString( '<span>2</span>', $output );
 	}
 
 	function test_discussions_dashboard_says_so_when_a_locale_has_no_discussions() {
