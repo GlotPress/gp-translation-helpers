@@ -57,10 +57,19 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		}
 	}
 
+	/**
+	 * Renders the discussions dashboard for a locale.
+	 *
+	 * @param string     $locale_slug The locale slug.
+	 * @param string     $filter      The participation filter, if any.
+	 * @param int|string $page        The requested page, if any.
+	 *
+	 * @return string The rendered dashboard.
+	 */
 	private function dashboard_output( $locale_slug, $filter = '', $page = '' ) {
 		$_GET['filter']         = $filter;
 		$_GET['page']           = $page;
-		$_SERVER['REQUEST_URI'] = '/locale/' . $locale_slug . '/default/discussions/';
+		$_SERVER['REQUEST_URI'] = add_query_arg( array_filter( compact( 'page', 'filter' ) ), '/locale/' . $locale_slug . '/default/discussions/' );
 
 		$this->request_route( 'discussions_dashboard', $locale_slug );
 
@@ -157,7 +166,7 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->create_discussion( $first, $set->locale, $author );
 		$this->create_discussion( $second, $set->locale, $author );
 
-		$output = $this->dashboard_output( $set->locale, '', 99 );
+		$output = $this->dashboard_output( $set->locale, '', '99999999999999999999' );
 
 		$this->assertStringNotContainsString( 'First string', $output );
 		$this->assertStringNotContainsString( 'Second string', $output );
@@ -165,6 +174,9 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->assertStringContainsString( 'All&nbsp;(2)', $output );
 	}
 
+	/**
+	 * Regression for #245: the page came from a query var translate.wordpress.org drops.
+	 */
 	function test_discussions_dashboard_pages_through_discussions() {
 		$author = $this->set_admin_user_as_current();
 		$set    = $this->factory->translation_set->create_with_project_and_locale();
@@ -178,7 +190,8 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 
 		$this->assertStringContainsString( 'Oldest string', $output );
 		$this->assertStringNotContainsString( 'Newer string', $output );
-		$this->assertStringContainsString( '<span>2</span>', $output );
+		$this->assertMatchesRegularExpression( '#<span[^>]*>2</span>#', $output );
+		$this->assertStringContainsString( 'href="/locale/' . $set->locale . '/default/discussions/?filter=participating"', $output );
 	}
 
 	function test_discussions_dashboard_says_so_when_a_locale_has_no_discussions() {

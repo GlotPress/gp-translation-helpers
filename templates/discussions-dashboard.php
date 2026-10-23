@@ -103,8 +103,8 @@ $args = array(
 
 <div class="filter-toolbar">
 	<a class="<?php echo ( ! $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( remove_query_arg( array( 'filter', 'page' ) ) ); ?>">All&nbsp;(<?php echo esc_html( count( $all_comments_post_ids ) ); ?>)</a> <span class="separator">•</span>
-	<a class="<?php echo ( 'participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'participating', $_SERVER['REQUEST_URI'] ) ); ?>">Participating&nbsp;(<?php echo esc_html( count( $participating_post_ids ) ); ?>)</a> <span class="separator">•</span>
-	<a class="<?php echo ( 'not_participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', $_SERVER['REQUEST_URI'] ) ); ?>">Not participating&nbsp;(<?php echo esc_html( count( $not_participating_post_ids ) ); ?>)</a>
+	<a class="<?php echo ( 'participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'participating', remove_query_arg( 'page' ) ) ); ?>">Participating&nbsp;(<?php echo esc_html( count( $participating_post_ids ) ); ?>)</a> <span class="separator">•</span>
+	<a class="<?php echo ( 'not_participating' === $filter ) ? 'filter-current' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'filter', 'not_participating', remove_query_arg( 'page' ) ) ); ?>">Not participating&nbsp;(<?php echo esc_html( count( $not_participating_post_ids ) ); ?>)</a>
 </div>
 <?php if ( ! $comments_by_post_id ) : ?>
 	<p><?php echo $all_comments_post_ids ? 'There are no discussions on this page' : 'There are no discussions in this locale'; ?></p>
