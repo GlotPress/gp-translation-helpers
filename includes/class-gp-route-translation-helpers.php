@@ -50,12 +50,9 @@ class GP_Route_Translation_Helpers extends GP_Route {
 
 		$not_participating_post_ids = array_diff( $all_comments_post_ids, $participating_post_ids );
 
-		$comments_per_page   = 12;
-		$page_num_from_query = (int) get_query_var( 'page' );
-		$offset              = $page_num_from_query > 0 ? ( $page_num_from_query - 1 ) * $comments_per_page : 0;
-		$filter              = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
-		$page_number         = ( ! empty( $page_num_from_query ) && is_int( $page_num_from_query ) ) ? $page_num_from_query : 1;
-		$gp_locale           = GP_Locales::by_slug( $locale_slug );
+		$comments_per_page = 12;
+		$filter            = isset( $_GET['filter'] ) ? esc_html( $_GET['filter'] ) : '';
+		$gp_locale         = GP_Locales::by_slug( $locale_slug );
 		if ( 'participating' == $filter ) {
 			$comment_post_ids = $participating_post_ids;
 			$comments_count   = count( $participating_post_ids );
@@ -65,6 +62,9 @@ class GP_Route_Translation_Helpers extends GP_Route {
 			$comments_count   = count( $not_participating_post_ids );
 		}
 		$total_pages = (int) ceil( $comments_count / $comments_per_page );
+		// Any page past the last renders the same empty state; capping it keeps a huge page from overflowing the offset.
+		$page_number = min( max( 1, (int) gp_get( 'page' ) ), $total_pages + 1 );
+		$offset      = ( $page_number - 1 ) * $comments_per_page;
 
 		$post_ids = $this->filter_viewable_post_ids( array_splice( $comment_post_ids, $offset, $comments_per_page ) );
 		$comments = array();
