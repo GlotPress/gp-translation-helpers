@@ -204,16 +204,14 @@ $args = array(
 						
 							<?php
 							$comment_reason       = get_comment_meta( $first_comment->comment_ID, 'reject_reason', true );
-							$number_of_items      = count( $comment_reason );
-							$counter              = 0;
-							$all_comment_reasons  = Helper_Translation_Discussion::get_comment_reasons();
-							$comment_reasons_text = '';
-							foreach ( $comment_reason as $reason ) {
-								$comment_reasons_text .= $all_comment_reasons[ $reason ]['name'];
-								if ( ++$counter < $number_of_items ) {
-									$comment_reasons_text .= ', ';
+							$all_comment_reasons  = Helper_Translation_Discussion::get_comment_reasons( $locale_slug );
+							$comment_reason_names = array();
+							foreach ( (array) $comment_reason as $reason ) {
+								if ( isset( $all_comment_reasons[ $reason ] ) ) {
+									$comment_reason_names[] = $all_comment_reasons[ $reason ]['name'];
 								}
 							}
+							$comment_reasons_text = implode( ', ', $comment_reason_names );
 							?>
 							<a href="<?php echo esc_url( $comment_link ); ?>"><?php echo esc_html( $comment_reasons_text ); ?></a>
 						
