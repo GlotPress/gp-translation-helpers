@@ -458,7 +458,7 @@ class WPorg_GlotPress_Notifications {
 		}
 		if ( isset( $comment_meta['reject_reason'][0] ) && ! empty( maybe_unserialize( $comment_meta['reject_reason'][0] ) ) ) {
 			$reasons         = array();
-			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons();
+			$comment_reasons = Helper_Translation_Discussion::get_comment_reasons( $comment_meta['locale'][0] ?? null );
 			$reasons         = array_map(
 				function ( $reason ) use ( $comment_reasons ) {
 					if ( array_key_exists( $reason, $comment_reasons ) ) {
