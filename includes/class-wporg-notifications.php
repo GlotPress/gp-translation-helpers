@@ -88,11 +88,11 @@ class WPorg_GlotPress_Notifications {
 			);
 			add_filter(
 				'gp_get_optin_message_for_each_discussion',
-				function ( $message, $original_id ) {
-					return self::optin_message_for_each_discussion( $original_id );
+				function ( $message, $original_id, $locale_slug = null ) {
+					return self::optin_message_for_each_discussion( $original_id, $locale_slug );
 				},
 				10,
-				2
+				3
 			);
 			add_filter(
 				'gp_mentions_list',
@@ -219,7 +219,7 @@ class WPorg_GlotPress_Notifications {
 		$ptes_email_and_role = array_map(
 			function ( $pte_email ) {
 				return array(
-					'role'  => 'GTE',
+					'role'  => 'PTE',
 					'email' => $pte_email,
 				);
 			},
@@ -229,7 +229,7 @@ class WPorg_GlotPress_Notifications {
 		$clptes_email_and_role = array_map(
 			function ( $clpte_email ) {
 				return array(
-					'role'  => 'GTE',
+					'role'  => 'CLPTE',
 					'email' => $clpte_email,
 				);
 			},
@@ -616,12 +616,13 @@ class WPorg_GlotPress_Notifications {
 	 *
 	 * @todo Cache the GTE email addresses, because getting it made a lot of queries, slowing down the load time.
 	 *
-	 * @param WP_User $user A user object.
+	 * @param WP_User     $user        A user object.
+	 * @param string|null $locale_slug Optional. The locale to check. Default null, any locale.
 	 *
-	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
+	 * @return bool Whether the user is GTE for the given locale, or for any locale if none is given.
 	 */
-	public static function is_user_an_wporg_gte( WP_User $user ): bool {
-		$locales             = GP_Locales::locales();
+	public static function is_user_an_wporg_gte( WP_User $user, ?string $locale_slug = null ): bool {
+		$locales             = $locale_slug ? array_filter( array( GP_Locales::by_slug( $locale_slug ) ) ) : GP_Locales::locales();
 		$gte_email_addresses = array();
 		foreach ( $locales as $locale ) {
 			$gte_email_addresses = array_merge( $gte_email_addresses, self::get_gte_email_addresses( $locale->slug ) );
@@ -633,19 +634,20 @@ class WPorg_GlotPress_Notifications {
 	}
 
 	/**
-	 * Indicates if the given user is PTE for the project and for any of the languages to which the comments in the post belong.
+	 * Indicates if the given user is PTE for the project, in the given locale or in any locale.
 	 *
 	 * @since 0.0.2
 	 *
 	 * @todo Cache the PTE email addresses for each project, because getting it made a lot of queries, slowing down the load time.
 	 *
-	 * @param int     $original_id The id of the original string used for the discussion.
-	 * @param WP_User $user        A user object.
+	 * @param int         $original_id The id of the original string used for the discussion.
+	 * @param WP_User     $user        A user object.
+	 * @param string|null $locale_slug Optional. The locale to check. Default null, any locale.
 	 *
-	 * @return bool Whether the user is PTE for the project and for any of the languages to which the comments in the post belong.
+	 * @return bool Whether the user is PTE for the project in the given locale, or in any locale if none is given.
 	 */
-	public static function is_user_an_wporg_pte_for_the_project( int $original_id, WP_User $user ): bool {
-		$locales             = GP_Locales::locales();
+	public static function is_user_an_wporg_pte_for_the_project( int $original_id, WP_User $user, ?string $locale_slug = null ): bool {
+		$locales             = $locale_slug ? array_filter( array( GP_Locales::by_slug( $locale_slug ) ) ) : GP_Locales::locales();
 		$pte_email_addresses = array();
 		foreach ( $locales as $locale ) {
 			$pte_email_addresses = array_merge( $pte_email_addresses, self::get_pte_email_addresses_by_project_and_locale( $original_id, $locale->slug ) );
@@ -748,11 +750,12 @@ class WPorg_GlotPress_Notifications {
 	/**
 	 * Gets the opt-in/oup-out message to show at the bottom of the discussions at translate.wordpress.org.
 	 *
-	 * @param int $original_id The id of the original string used for the discussion.
+	 * @param int         $original_id The id of the original string used for the discussion.
+	 * @param string|null $locale_slug Optional. The locale of the discussion. Default null, no locale.
 	 *
 	 * @return string The message to show at the bottom of the discussions at translate.wordpress.org.
 	 */
-	public static function optin_message_for_each_discussion( int $original_id ): string {
+	public static function optin_message_for_each_discussion( int $original_id, ?string $locale_slug = null ): string {
 		$user = wp_get_current_user();
 
 		if ( ! $user->user_email ) {
@@ -769,14 +772,14 @@ class WPorg_GlotPress_Notifications {
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_wporg_gte( $user ) ) {
+		if ( self::is_user_an_wporg_gte( $user, $locale_slug ) ) {
 			$output  = __( 'You are going to receive notifications for the questions in your language because you are a GTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
 			$output .= ' <a href="https://translate.wordpress.org/settings/">' . __( 'Stop receiving notifications.' ) . '</a>';
 			return $output;
 		}
-		if ( self::is_user_an_wporg_pte_for_the_project( $original_id, $user ) ) {
+		if ( self::is_user_an_wporg_pte_for_the_project( $original_id, $user, $locale_slug ) ) {
 			$output  = __( 'You are going to receive notifications for the questions in your language because you are a PTE. ' );
 			$output .= __( 'You will not receive notifications if another GTE or PTE for your language or CLPTE participates in a thread where you do not take part. ' );
 			$output .= ' <a href="#" class="opt-out-discussion" data-original-id="' . $original_id . '" data-opt-type="optout">' . __( 'Stop receiving notifications for this discussion.' ) . '</a>';
