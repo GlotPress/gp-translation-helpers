@@ -723,21 +723,23 @@ class GP_Notifications {
 	 *
 	 * @since 0.0.2
 	 *
-	 * @param int $original_id The id of the original string used for the discussion.
+	 * @param int         $original_id The id of the original string used for the discussion.
+	 * @param string|null $locale_slug Optional. The locale of the discussion. Default null, no locale.
 	 *
 	 * @return string The opt-in/oup-out message to show at the bottom of the discussions.
 	 */
-	public static function optin_message_for_each_discussion( int $original_id ): string {
+	public static function optin_message_for_each_discussion( int $original_id, ?string $locale_slug = null ): string {
 		$post_id = self::get_post_id( $original_id );
 		/**
 		 * Filters the optin message that will be showed in each discussion.
 		 *
 		 * @since 0.0.2
 		 *
-		 * @param string $message     The opt-in/oup-out message to show at the bottom of the discussions.
-		 * @param int    $original_id The id of the original string used for the discussion.
+		 * @param string      $message     The opt-in/oup-out message to show at the bottom of the discussions.
+		 * @param int         $original_id The id of the original string used for the discussion.
+		 * @param string|null $locale_slug The locale of the discussion, or null if it has none.
 		 */
-		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '', $original_id );
+		$message = apply_filters( 'gp_get_optin_message_for_each_discussion', '', $original_id, $locale_slug );
 		if ( $message ) {
 			return $message;
 		}

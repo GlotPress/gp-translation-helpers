@@ -160,7 +160,7 @@
 		);
 		echo '<div class="optin-message-for-each-discussion">';
 		echo wp_kses(
-			GP_Notifications::optin_message_for_each_discussion( $original_id ),
+			GP_Notifications::optin_message_for_each_discussion( $original_id, $locale_slug ),
 			array(
 				'a' => array(
 					'href'             => array(),
