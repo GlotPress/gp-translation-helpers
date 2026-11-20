@@ -4,13 +4,6 @@
  *
  * The role lookups in WPorg_GlotPress_Notifications need a multisite with a
  * site per locale, so most tests here only run with WP_MULTISITE=1.
- *
- * Each test runs in its own process, because the WPORG_* constants that
- * setUp() defines would otherwise switch on translate.wordpress.org
- * behavior for every test that runs after this class.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 class GP_Test_WPorg_Notifications extends GP_UnitTestCase {
 
@@ -37,14 +30,6 @@ class GP_Test_WPorg_Notifications extends GP_UnitTestCase {
 
 	public function setUp(): void {
 		parent::setUp();
-
-		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) {
-			define( 'WPORG_TRANSLATE_BLOGID', get_current_blog_id() );
-		}
-		if ( ! defined( 'WPORG_GLOBAL_NETWORK_ID' ) ) {
-			define( 'WPORG_GLOBAL_NETWORK_ID', get_current_network_id() );
-		}
-		WPorg_GlotPress_Notifications::init();
 
 		foreach ( array( 'nl' => 'nl_NL', 'nl-be' => 'nl_BE', 'de' => 'de_DE' ) as $slug => $wp_locale ) {
 			$this->factory->locale->create(
@@ -78,12 +63,21 @@ class GP_Test_WPorg_Notifications extends GP_UnitTestCase {
 	}
 
 	/**
-	 * Skips the test unless it runs on a multisite.
+	 * Skips the test unless it runs on a multisite, then sets up translate.wordpress.org.
 	 */
 	private function require_multisite() {
 		if ( ! is_multisite() ) {
 			$this->markTestSkipped( 'The translate.wordpress.org roles need a site per locale (WP_MULTISITE=1).' );
 		}
+
+		// Defined only here, past the skip, so single-site runs never turn on the wporg behavior they gate.
+		if ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) {
+			define( 'WPORG_TRANSLATE_BLOGID', get_current_blog_id() );
+		}
+		if ( ! defined( 'WPORG_GLOBAL_NETWORK_ID' ) ) {
+			define( 'WPORG_GLOBAL_NETWORK_ID', get_current_network_id() );
+		}
+		WPorg_GlotPress_Notifications::init();
 
 		// Stands in for the wporg site query locale support: a 'locale' query var
 		// returns the site of that WordPress locale.
