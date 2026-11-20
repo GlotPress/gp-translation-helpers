@@ -4,6 +4,13 @@
  *
  * The role lookups in WPorg_GlotPress_Notifications need a multisite with a
  * site per locale, so most tests here only run with WP_MULTISITE=1.
+ *
+ * Each test runs in its own process, because the WPORG_* constants that
+ * setUp() defines would otherwise switch on translate.wordpress.org
+ * behavior for every test that runs after this class.
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class GP_Test_WPorg_Notifications extends GP_UnitTestCase {
 
