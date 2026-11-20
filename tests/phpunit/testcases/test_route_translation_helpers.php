@@ -105,6 +105,48 @@ class GP_Test_Route_Translation_Helpers extends GP_UnitTestCase_Route {
 		$this->assertEquals( 'original-permalink', $this->route->loaded_template );
 	}
 
+	function test_original_permalink_passes_the_locale_to_the_optin_message() {
+		wp_set_current_user( $this->factory->user->create() );
+
+		$set      = $this->factory->translation_set->create_with_project_and_locale();
+		$original = $this->create_original( $set );
+		$received = null;
+		add_filter(
+			'gp_get_optin_message_for_each_discussion',
+			function ( $message, $original_id, $locale_slug = null ) use ( &$received ) {
+				$received = $locale_slug;
+				return $message;
+			},
+			10,
+			3
+		);
+
+		$this->request_route( 'original_permalink', $set->project->path, $original->id, $set->locale, $set->slug );
+
+		$this->assertSame( $set->locale, $received );
+	}
+
+	function test_original_permalink_without_a_locale_passes_no_locale_to_the_optin_message() {
+		wp_set_current_user( $this->factory->user->create() );
+
+		$set      = $this->factory->translation_set->create_with_project_and_locale();
+		$original = $this->create_original( $set );
+		$received = 'not called';
+		add_filter(
+			'gp_get_optin_message_for_each_discussion',
+			function ( $message, $original_id, $locale_slug = 'not passed' ) use ( &$received ) {
+				$received = $locale_slug;
+				return $message;
+			},
+			10,
+			3
+		);
+
+		$this->request_route( 'original_permalink', $set->project->path, $original->id );
+
+		$this->assertNull( $received );
+	}
+
 	function test_original_permalink_does_not_disclose_a_hidden_original_through_another_project() {
 		$set_a  = $this->factory->translation_set->create_with_project_and_locale();
 		$hidden = $this->create_original( $set_a, -2, 'Hidden string' );
